@@ -64,5 +64,15 @@
     "submitButton": "Book Your Demo",
     "submitting": "Submitting...",
     "privacyText": "We respect your privacy. No spam, ever."
+  },
+  "footer": {
+    "logo": "TwinO",
+    "tagline": "AI-powered lead qualification for real estate",
+    "termsAndConditions": "Terms & Conditions",
+    "privacyPolicy": "Privacy Policy",
+    "phone": "+1 (555) 123-4567",
+    "email": "twinoyc@gmail.com",
+    "copyright": "© {year} TwinO.",
+    "allRightsReserved": "All rights reserved."
   }
 }

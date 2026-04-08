@@ -64,5 +64,15 @@
     "submitButton": "დაჯავშნე დემო",
     "submitting": "იგზავნება...",
     "privacyText": "ჩვენ ვაფასებთ თქვენი კონფიდენციალურობა. არ იქნება სპამი."
+  },
+  "footer": {
+    "logo": "TwinO",
+    "tagline": "AI-ს მიერ დამხმარე ლიდის კვალიფიკაცია უძრავი ქონებისთვის",
+    "termsAndConditions": "პირობები და წესები",
+    "privacyPolicy": "პირადი ინფორმაციის დაცვის პოლიტიკა",
+    "phone": "+1 (555) 123-4567",
+    "email": "twinoyc@gmail.com",
+    "copyright": "© {year} TwinO.",
+    "allRightsReserved": "ყველა უფლება დაცულია."
   }
 }

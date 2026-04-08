@@ -97,13 +97,13 @@ export default function BookDemo() {
             </div>
 
             {/* Waitlist Counter */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/20">
                   <CheckCircle2 className="h-6 w-6 text-accent" />
                 </div>
                 <div>
-                  <p className="font-Helvetica-Neue font-bold text-white text-lg">
+                  <p className="font-Helvetica-Neue font-bold text-lg text-white">
                     {waitlistCount}+
                   </p>
                   <p className="font-Helvetica text-sm text-white/60">
@@ -115,12 +115,12 @@ export default function BookDemo() {
           </div>
 
           {/* Right Column - Form */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Row 1: First & Last Name */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-Helvetica font-medium text-white/70 text-sm mb-2">
+                  <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                     {t("firstName")} *
                   </label>
                   <input
@@ -135,7 +135,7 @@ export default function BookDemo() {
                   />
                 </div>
                 <div>
-                  <label className="block font-Helvetica font-medium text-white/70 text-sm mb-2">
+                  <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                     {t("lastName")} *
                   </label>
                   <input
@@ -153,7 +153,7 @@ export default function BookDemo() {
 
               {/* Email */}
               <div>
-                <label className="block font-Helvetica font-medium text-white/70 text-sm mb-2">
+                <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                   {t("email")} *
                 </label>
                 <input
@@ -170,7 +170,7 @@ export default function BookDemo() {
 
               {/* Company Name */}
               <div>
-                <label className="block font-Helvetica font-medium text-white/70 text-sm mb-2">
+                <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                   {t("companyName")}
                 </label>
                 <input
@@ -186,7 +186,7 @@ export default function BookDemo() {
 
               {/* Social Media URL */}
               <div>
-                <label className="block font-Helvetica font-medium text-white/70 text-sm mb-2">
+                <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                   {t("socialMediaUrl")}
                 </label>
                 <input
@@ -205,16 +205,16 @@ export default function BookDemo() {
 
               {/* Status Messages */}
               {status.type === "error" && (
-                <div className="rounded-lg bg-red-500/10 border border-red-500/30 p-3">
-                  <p className="font-Helvetica text-sm text-red-300">
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+                  <p className="font-Helvetica text-red-300 text-sm">
                     {status.message}
                   </p>
                 </div>
               )}
 
               {status.type === "success" && (
-                <div className="rounded-lg bg-green-500/10 border border-green-500/30 p-3">
-                  <p className="font-Helvetica text-sm text-green-300">
+                <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3">
+                  <p className="font-Helvetica text-green-300 text-sm">
                     {status.message}
                   </p>
                 </div>
@@ -224,7 +224,7 @@ export default function BookDemo() {
               <button
                 type="submit"
                 disabled={status.type === "loading"}
-                className="group hover:-translate-y-0.5 w-full inline-flex items-center justify-center gap-2 rounded-full bg-accent px-8 py-3.5 font-semibold text-base text-white transition-all duration-250 ease-in-out hover:shadow-[0_8px_24px_rgba(0,114,255,0.3)] active:translate-y-0 active:shadow-[0_4px_12px_rgba(0,114,255,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group hover:-translate-y-0.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-8 py-3.5 font-semibold text-base text-white transition-all duration-250 ease-in-out hover:shadow-[0_8px_24px_rgba(0,114,255,0.3)] active:translate-y-0 active:shadow-[0_4px_12px_rgba(0,114,255,0.2)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status.type === "loading"
                   ? t("submitting")
@@ -232,7 +232,7 @@ export default function BookDemo() {
                 <ArrowRight className="size-4 transition-transform duration-250 ease-out group-hover:translate-x-0.5" />
               </button>
 
-              <p className="font-Helvetica text-center text-xs text-white/50">
+              <p className="text-center font-Helvetica text-white/50 text-xs">
                 {t("privacyText")}
               </p>
             </form>
