@@ -1,3 +1,4 @@
+import BookDemo from "@/components/common/home/BookDemo";
 import FeaturesSection from "@/components/common/home/Features";
 import HeroSection from "@/components/common/home/Hero";
 import HowItWorks from "@/components/common/home/HowItWorks";
@@ -8,6 +9,7 @@ export default function Home() {
       <HeroSection />
       <FeaturesSection />
       <HowItWorks />
+      <BookDemo />
     </main>
   );
 }

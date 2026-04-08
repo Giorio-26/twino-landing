@@ -46,5 +46,23 @@
     "msg2": "Hello! Yes, it is 🏠 Are you looking for an investment property or for living? And what is your target budget?",
     "msg3": "Investment. Around $60k.",
     "msg4": "Perfect. We have 2 units in Orbi yielding 11% ROI. Shall I send the PDF breakdown or book a call with our senior agent?"
+  },
+  "bookDemo": {
+    "title": "Ready to Stop Wasting Your Ad Budget?",
+    "description": "Join the exclusive Beta. We handle the setup. Book a 15-minute call and see TwinO working on your own leads.",
+    "waitlistText": "Real Estate Agents on Waitlist",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "John",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Doe",
+    "email": "Email",
+    "emailPlaceholder": "john@example.com",
+    "companyName": "Company Name",
+    "companyNamePlaceholder": "Your Agency Name",
+    "socialMediaUrl": "Social Media URL",
+    "socialMediaUrlPlaceholder": "https://instagram.com/yourprofile",
+    "submitButton": "Book Your Demo",
+    "submitting": "Submitting...",
+    "privacyText": "We respect your privacy. No spam, ever."
   }
 }
