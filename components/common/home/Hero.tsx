@@ -2,6 +2,7 @@
 
 import {
   ArrowRight,
+  Building2,
   CalendarCheck,
   Play,
   ShieldCheck,
@@ -59,8 +60,8 @@ export default function HeroSection() {
           </div>
 
           {/* Card 2 */}
-          <div className="hover:-translate-y-1 relative z-20 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-8">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <div className="hover:-translate-y-1 relative z-20 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
               <CalendarCheck className="size-6" />
             </div>
             <div>
@@ -74,7 +75,7 @@ export default function HeroSection() {
           </div>
 
           {/* Card 3 */}
-          <div className="hover:-translate-y-1 relative z-10 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-16">
+          <div className="hover:-translate-y-1 relative z-10 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-8">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-600">
               <ShieldCheck className="size-6" />
             </div>
@@ -84,6 +85,20 @@ export default function HeroSection() {
               </div>
               <div className="font-Helvetica text-primary/70 text-sm">
                 {t("card3Label")}
+              </div>
+            </div>
+          </div>
+
+          <div className="hover:-translate-y-1 relative z-10 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-12">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600">
+              <Building2 className="size-6" />
+            </div>
+            <div>
+              <div className="mb-1 font-Helvetica-Neue font-bold text-lg text-primary sm:text-2xl">
+                {t("card4Value")}
+              </div>
+              <div className="font-Helvetica text-primary/70 text-sm">
+                {t("card4Label")}
               </div>
             </div>
           </div>
