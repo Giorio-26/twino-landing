@@ -19,5 +19,16 @@
     "card3Label": "Your leads. Your data. Fully isolated.",
     "card4Value": "Already active",
     "card4Label": "120+ real estate agencies"
+  },
+  "features": {
+    "title": "Not a Chatbot.",
+    "subtitle": "An Operating System.",
+    "description": "Three specialized AI agents that handle your entire sales pipeline from first message to a confirmed property visit.",
+    "card1Title": "Sales Twin",
+    "card1Description": "Extracts budget, location, and intent directly from WhatsApp/Meta chats. Qualifies leads in seconds, not hours.",
+    "card2Title": "Management Dashboard",
+    "card2Description": "Automatically syncs qualified leads to your CRM and schedules visits in Google Calendar. Zero manual data entry.",
+    "card3Title": "100% Data Privacy",
+    "card3Description": "Your property database and client data are strictly isolated. No one else sees your leads. Full GDPR compliance."
   }
 }
