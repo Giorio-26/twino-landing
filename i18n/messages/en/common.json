@@ -30,5 +30,21 @@
     "card2Description": "Automatically syncs qualified leads to your CRM and schedules visits in Google Calendar. Zero manual data entry.",
     "card3Title": "100% Data Privacy",
     "card3Description": "Your property database and client data are strictly isolated. No one else sees your leads. Full GDPR compliance."
+  },
+  "howItWorks": {
+    "titlePre": "Experience the power of ",
+    "titleHighlight": "intelligent lead qualification",
+    "titlePost": " in real-time",
+    "subtitle": "Watch how TwinO instantly engages prospects, qualifies their needs, and schedules property tours — all without you lifting a finger.",
+    "channelLabel": "Try it on",
+    "twinTitle": "Sales Twin is Active",
+    "twinDescription": "Automatically responding to all incoming inquiries. Watch as it qualifies leads in real-time.",
+    "online": "Online",
+    "inputPlaceholder": "Type a message...",
+    "ctaText": "Book a Live Demo",
+    "msg1": "Hi, saw the Batumi ad. Is it still available?",
+    "msg2": "Hello! Yes, it is 🏠 Are you looking for an investment property or for living? And what is your target budget?",
+    "msg3": "Investment. Around $60k.",
+    "msg4": "Perfect. We have 2 units in Orbi yielding 11% ROI. Shall I send the PDF breakdown or book a call with our senior agent?"
   }
 }

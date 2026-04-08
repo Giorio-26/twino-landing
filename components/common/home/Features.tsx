@@ -35,12 +35,12 @@ export default function FeaturesSection() {
       <div className="container">
         {/* Header */}
         <div className="mb-16 flex flex-col items-center text-center">
-          <h2 className="mb-3 font-Helvetica-Neue font-bold text-primary text-3xl leading-tight sm:text-4xl lg:text-5xl">
+          <h2 className="mb-3 font-Helvetica-Neue font-bold text-3xl text-primary leading-tight sm:text-4xl lg:text-5xl">
             {t("title")}
             <br />
             {t("subtitle")}
           </h2>
-          <p className="mx-auto max-w-2xl font-Helvetica text-primary/70 text-base leading-relaxed sm:text-lg">
+          <p className="mx-auto max-w-2xl font-Helvetica text-base text-primary/70 leading-relaxed sm:text-lg">
             {t("description")}
           </p>
         </div>
