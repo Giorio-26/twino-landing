@@ -32,6 +32,9 @@
   --color-accent-secondary-light: var(--color-accent-secondary-light);
   --color-white: var(--color-white);
   --color-black: var(--color-black);
+
+  --font-Helvetica: var(--font-helvetica);
+  --font-Helvetica-Neue: var(--font-helvetica-neue);
 }
 
 @utility container {
@@ -51,13 +54,15 @@
   box-shadow: 0 0 6px 4px rgba(51, 100, 163, 0.25);
 }
 
-body {
-  background-color: var(--color-background);
-  color: var(--color-primary);
-  font-family: var(--font-helvetica), sans-serif;
-  font-feature-settings: "kern";
-  font-kerning: normal;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1;
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    font-family: var(--font-helvetica), sans-serif;
+    font-feature-settings: "kern";
+    font-kerning: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1;
+  }
 }

@@ -1,3 +1,9 @@
 {
-  "name": "TwinO"
+  "name": "TwinO",
+  "header": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "contact": "Contact",
+    "bookDemo": "Book a Demo"
+  }
 }
