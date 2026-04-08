@@ -1,0 +1,46 @@
+{
+  "name": "TwinO",
+  "short_name": "TwinO",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "browser"],
+  "scope": "/",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0072ff",
+  "protocol_handlers": [
+    {
+      "protocol": "web+twino",
+      "url": "/?url=%s"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/favicons/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicons/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicons/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicons/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
