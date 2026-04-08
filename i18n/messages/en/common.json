@@ -5,5 +5,17 @@
     "howItWorks": "How It Works",
     "contact": "Contact",
     "bookDemo": "Book a Demo"
+  },
+  "hero": {
+    "title": "Don't lose a lead in real estate. Integrate TwinO with your Meta/WhatsApp",
+    "description": "It independently filters interested parties in seconds, 24/7, and books your visits.",
+    "ctaPilot": "Start 14-Day Free Pilot",
+    "ctaDemo": "Watch 1-Min Demo",
+    "card1Value": "<10 seconds",
+    "card1Label": "Average lead response time",
+    "card2Value": "3x more meetings",
+    "card2Label": "Booked automatically from the same leads",
+    "card3Value": "100% data privacy",
+    "card3Label": "Your leads. Your data. Fully isolated."
   }
 }

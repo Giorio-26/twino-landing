@@ -1,7 +1,9 @@
-import { useTranslations } from "next-intl";
+import HeroSection from "@/components/common/hero-section";
 
 export default function Home() {
-  const t = useTranslations("common");
-
-  return <div>{t("name")}</div>;
+  return (
+    <main>
+      <HeroSection />
+    </main>
+  );
 }

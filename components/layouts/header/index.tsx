@@ -48,7 +48,7 @@ export default function Header() {
           "fixed top-0 right-0 left-0 z-50 transition-all duration-350 ease-out",
           scrolled
             ? "bg-white/75 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_0_12px_rgba(51,100,163,0.1)] backdrop-blur-xl backdrop-saturate-180"
-            : "bg-transparent",
+            : "bg-white",
         )}
       >
         <div className="container">
