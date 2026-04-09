@@ -1,5 +1,5 @@
 services:
-  vm-next-v2:
+  twino-landing:
     image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG:-latest}
     ports:
       - "5000:3000"
