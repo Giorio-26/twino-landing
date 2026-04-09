@@ -83,21 +83,21 @@ export default function BookDemo() {
   return (
     <section className="bg-primary py-24 md:py-32 lg:py-40" id="book-demo">
       <div className="container">
-        {/* Main Content Grid */}
-        <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Left Column - Text */}
           <div className="space-y-8">
-            <div>
-              <h2 className="mb-4 max-w-3xl font-Helvetica-Neue font-bold text-3xl text-white leading-tight sm:text-4xl lg:text-5xl">
+            <div className="flex flex-col justify-center items-center">
+              <h2 className="mb-4 max-w-4xl font-Helvetica-Neue font-bold text-3xl text-white text-center leading-tight sm:text-4xl lg:text-5xl">
                 {t("title")}
               </h2>
-              <p className="max-w-2xl font-Helvetica text-base text-white/70 leading-relaxed sm:text-lg">
+              <p className="max-w-3xl font-Helvetica text-base text-white/70 text-center leading-relaxed sm:text-lg">
                 {t("description")}
               </p>
             </div>
+        {/* Main Content Grid */}
+        {/* <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16"> */}
+          {/* Left Column - Text */}
 
             {/* Waitlist Counter */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+            {/* <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/20">
                   <CheckCircle2 className="h-6 w-6 text-accent" />
@@ -111,11 +111,11 @@ export default function BookDemo() {
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
 
           {/* Right Column - Form */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+          <div className="rounded-2xl max-w-xl mx-auto border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Row 1: First & Last Name */}
               <div className="grid grid-cols-2 gap-3">

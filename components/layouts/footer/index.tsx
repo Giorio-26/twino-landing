@@ -1,6 +1,7 @@
 "use client";
 
 import { Mail, Phone } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
@@ -36,14 +37,30 @@ export default function Footer() {
         {/* Main Footer Content */}
         <div className="mb-12 grid grid-cols-1 gap-12 border-white/10 border-b pb-12 md:grid-cols-2">
           {/* Left - Logo */}
-          <div className="flex flex-col items-start">
+          {/* <div className="flex flex-col items-start">
             <h1 className="font-Helvetica-Neue font-bold text-2xl text-white">
               {t("logo")}
             </h1>
             <p className="mt-2 font-Helvetica text-sm text-white/60">
               {t("tagline")}
             </p>
-          </div>
+          </div> */}
+          <Link
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="relative z-10 transition-opacity duration-200 ease-out hover:opacity-80"
+          >
+            <Image
+              src="/images/twino-w.svg"
+              alt={t("name")}
+              width={120}
+              height={32}
+              priority
+            />
+          </Link>
 
           {/* Right - Contact & Social */}
           <div className="flex flex-col items-start gap-4 md:items-end">
@@ -67,24 +84,24 @@ export default function Footer() {
 
             {/* Social Media Icons */}
             <div className="mt-2 flex items-center gap-4">
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all duration-200 hover:border-white/50 hover:text-white"
-                aria-label="LinkedIn"
-              >
-                <LinkedInIcon />
-              </a>
-              <a
-                href="https://facebook.com"
+              <Link
+                href="https://www.facebook.com/profile.php?id=61583962652529"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all duration-200 hover:border-white/50 hover:text-white"
                 aria-label="Facebook"
               >
                 <FacebookIcon />
-              </a>
+              </Link>
+              <Link
+                href="https://www.linkedin.com/company/110122713"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all duration-200 hover:border-white/50 hover:text-white"
+                aria-label="LinkedIn"
+              >
+                <LinkedInIcon />
+              </Link>
             </div>
           </div>
         </div>

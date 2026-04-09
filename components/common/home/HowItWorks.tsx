@@ -144,7 +144,7 @@ export default function HowItWorks() {
             </div>
 
             {/* Info Box */}
-            <div className="rounded-2xl border border-primary/10 bg-accent-light p-6">
+            {/* <div className="rounded-2xl border border-primary/10 bg-accent-light p-6">
               <div className="mb-3 flex items-center gap-3">
                 <span
                   className="h-2 w-2 animate-pulse rounded-full"
@@ -157,7 +157,7 @@ export default function HowItWorks() {
               <p className="font-Helvetica text-primary/70 text-sm leading-relaxed">
                 {t("twinDescription")}
               </p>
-            </div>
+            </div> */}
 
             {/* CTA Button */}
             <Link

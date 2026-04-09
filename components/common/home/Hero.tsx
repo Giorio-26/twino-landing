@@ -46,7 +46,7 @@ export default function HeroSection() {
         <div className="perspective-1000 relative flex flex-col gap-8 transition-transform duration-700 ease-out lg:pl-12">
           {/* Card 1 */}
           <div className="hover:-translate-y-1 relative z-30 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-0">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-light text-accent">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
               <Zap className="size-6" />
             </div>
             <div>
@@ -61,8 +61,8 @@ export default function HeroSection() {
 
           {/* Card 2 */}
           <div className="hover:-translate-y-1 relative z-20 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-              <CalendarCheck className="size-6" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-light text-accent">
+              <Building2 className="size-6" />
             </div>
             <div>
               <div className="mb-1 font-Helvetica-Neue font-bold text-lg text-primary sm:text-2xl">
@@ -77,7 +77,7 @@ export default function HeroSection() {
           {/* Card 3 */}
           <div className="hover:-translate-y-1 relative z-10 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-8">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-600">
-              <ShieldCheck className="size-6" />
+              <CalendarCheck className="size-6" />
             </div>
             <div>
               <div className="mb-1 font-Helvetica-Neue font-bold text-lg text-primary sm:text-2xl">
@@ -91,7 +91,7 @@ export default function HeroSection() {
 
           <div className="hover:-translate-y-1 relative z-10 flex flex-col items-start gap-5 rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:bg-white/80 hover:shadow-2xl sm:flex-row lg:translate-x-12">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600">
-              <Building2 className="size-6" />
+              <ShieldCheck className="size-6" />
             </div>
             <div>
               <div className="mb-1 font-Helvetica-Neue font-bold text-lg text-primary sm:text-2xl">
