@@ -28,7 +28,7 @@ export default function IntegrationPage() {
 	return (
 		<div className="mx-auto max-w-4xl space-y-6">
 			<div className="dash-animate-in">
-				<h2 className="text-2xl font-bold text-dash-text">Integration</h2>
+				<h2 className="font-Helvetica-Neue text-2xl font-bold text-dash-text">Integration</h2>
 				<p className="mt-1 text-sm text-dash-text-secondary">Connect your communication channels to TwinO.</p>
 			</div>
 
@@ -40,7 +40,7 @@ export default function IntegrationPage() {
 							<MessageSquare className="h-6 w-6 text-green-500" />
 						</div>
 						<div>
-							<h3 className="text-base font-semibold text-dash-text">WhatsApp Business</h3>
+							<h3 className="font-Helvetica-Neue text-base font-semibold text-dash-text">WhatsApp Business</h3>
 							<div className="mt-0.5 flex items-center gap-2 text-xs">
 								<Circle className="h-2.5 w-2.5 fill-dash-text-muted text-dash-text-muted" />
 								<span className="text-dash-text-muted">Not Connected</span>
@@ -54,7 +54,7 @@ export default function IntegrationPage() {
 			{/* WhatsApp Setup Steps */}
 			<div className="dash-card overflow-hidden dash-animate-in" style={{ animationDelay: "0.1s" }}>
 				<div className="border-b border-dash-border p-6">
-					<h3 className="text-base font-semibold text-dash-text">WhatsApp Setup Guide</h3>
+					<h3 className="font-Helvetica-Neue text-base font-semibold text-dash-text">WhatsApp Setup Guide</h3>
 					<p className="mt-1 text-xs text-dash-text-muted">Follow these steps to connect your WhatsApp Business number.</p>
 				</div>
 				<div className="p-6 space-y-6">
@@ -62,7 +62,7 @@ export default function IntegrationPage() {
 						<div key={step.num} className="flex gap-4">
 							<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-dash-border bg-dash-surface-secondary text-sm font-bold text-dash-text-secondary">{step.num}</div>
 							<div className="min-w-0 flex-1">
-								<h4 className="text-sm font-semibold text-dash-text">{step.title}</h4>
+								<h4 className="font-Helvetica-Neue text-sm font-semibold text-dash-text">{step.title}</h4>
 								<p className="mt-1 text-xs text-dash-text-muted leading-relaxed">{step.desc}</p>
 								{step.link && (
 									<a href={step.link} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-dash-accent no-underline hover:text-dash-accent-hover">
@@ -95,7 +95,7 @@ export default function IntegrationPage() {
 					<div className="flex items-center gap-3">
 						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-accent-muted"><Bell className="h-5 w-5 text-dash-accent" /></div>
 						<div>
-							<h3 className="text-base font-semibold text-dash-text">Telegram Notifications</h3>
+							<h3 className="font-Helvetica-Neue text-base font-semibold text-dash-text">Telegram Notifications</h3>
 							<p className="text-xs text-dash-text-muted">Get notified when agent takeover is needed.</p>
 						</div>
 					</div>
@@ -122,7 +122,7 @@ export default function IntegrationPage() {
 					<div className="flex items-center gap-4">
 						<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-dash-surface-secondary"><Zap className="h-6 w-6 text-dash-text-muted" /></div>
 						<div>
-							<h3 className="text-base font-semibold text-dash-text">Google Sheets / CRM</h3>
+							<h3 className="font-Helvetica-Neue text-base font-semibold text-dash-text">Google Sheets / CRM</h3>
 							<p className="text-xs text-dash-text-muted">Auto-export leads to your spreadsheet.</p>
 						</div>
 					</div>

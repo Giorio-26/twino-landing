@@ -126,7 +126,7 @@ export default function ConversationsPage() {
 			{/* Right: Lead Sidebar */}
 			<div className="hidden w-64 shrink-0 flex-col border-l border-dash-border xl:flex">
 				<div className="border-b border-dash-border p-4">
-					<h4 className="text-xs font-semibold uppercase tracking-wider text-dash-text-muted">Lead Qualification</h4>
+					<h4 className="font-Helvetica-Neue text-xs font-semibold uppercase tracking-wider text-dash-text-muted">Lead Qualification</h4>
 				</div>
 				<div className="flex-1 space-y-3 p-4">
 					<QualBadge label="Budget" value={selected.budget} />

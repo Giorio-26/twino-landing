@@ -18,31 +18,31 @@
   --color-black: #18181c;
 }
 
-/* Dashboard Dark Theme */
+/* Dashboard Light Theme — matches landing page */
 .dashboard-theme {
-  --dash-bg: #09090B;
-  --dash-bg-subtle: #0F0F12;
-  --dash-surface: #141419;
-  --dash-surface-secondary: #1A1A22;
-  --dash-surface-hover: #1F1F2A;
-  --dash-surface-active: #252532;
-  --dash-border: rgba(255, 255, 255, 0.06);
-  --dash-border-strong: rgba(255, 255, 255, 0.10);
-  --dash-text: #FAFAFA;
-  --dash-text-secondary: #A1A1AA;
-  --dash-text-muted: #52525B;
+  --dash-bg: #FFFFFF;
+  --dash-bg-subtle: #F8FAFB;
+  --dash-surface: #FFFFFF;
+  --dash-surface-secondary: #F1F5F9;
+  --dash-surface-hover: #F1F5F9;
+  --dash-surface-active: #E2E8F0;
+  --dash-border: rgba(0, 0, 0, 0.06);
+  --dash-border-strong: rgba(0, 0, 0, 0.10);
+  --dash-text: #000000;
+  --dash-text-secondary: #363C44;
+  --dash-text-muted: #94A3B8;
   --dash-accent: #0072FF;
-  --dash-accent-hover: #0065E6;
-  --dash-accent-muted: rgba(0, 114, 255, 0.12);
-  --dash-accent-glow: rgba(0, 114, 255, 0.20);
-  --dash-success: #22C55E;
-  --dash-success-muted: rgba(34, 197, 94, 0.12);
-  --dash-warning: #F59E0B;
-  --dash-warning-muted: rgba(245, 158, 11, 0.12);
-  --dash-danger: #EF4444;
-  --dash-danger-muted: rgba(239, 68, 68, 0.12);
-  --dash-purple: #8B5CF6;
-  --dash-purple-muted: rgba(139, 92, 246, 0.12);
+  --dash-accent-hover: #0060D6;
+  --dash-accent-muted: rgba(0, 114, 255, 0.08);
+  --dash-accent-glow: rgba(0, 114, 255, 0.12);
+  --dash-success: #16A34A;
+  --dash-success-muted: rgba(22, 163, 74, 0.08);
+  --dash-warning: #D97706;
+  --dash-warning-muted: rgba(217, 119, 6, 0.08);
+  --dash-danger: #DC2626;
+  --dash-danger-muted: rgba(220, 38, 38, 0.08);
+  --dash-purple: #7C3AED;
+  --dash-purple-muted: rgba(124, 58, 237, 0.08);
 }
 
 @theme inline {
@@ -125,13 +125,13 @@
 }
 
 @utility glass {
-  background: rgba(20, 20, 25, 0.8);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
 @utility glass-strong {
-  background: rgba(20, 20, 25, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
 }
@@ -154,18 +154,16 @@
   width: 6px;
   height: 6px;
 }
-
 .dashboard-theme ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--dash-bg-subtle);
+  border-radius: 4px;
 }
-
 .dashboard-theme ::-webkit-scrollbar-thumb {
-  background: var(--dash-border-strong);
-  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
 }
-
 .dashboard-theme ::-webkit-scrollbar-thumb:hover {
-  background: var(--dash-text-muted);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 /* Dashboard animations */

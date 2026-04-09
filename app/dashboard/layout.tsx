@@ -16,7 +16,7 @@ export default function DashboardRootLayout({
 			lang="en"
 			className={`${helvetica.variable} ${helveticaNeue.variable} h-full antialiased`}
 		>
-			<body className="min-h-full bg-[#09090B]">{children}</body>
+			<body className="min-h-full bg-white">{children}</body>
 		</html>
 	);
 }

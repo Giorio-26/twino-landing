@@ -12,7 +12,7 @@ export default function SettingsPage() {
 	return (
 		<div className="mx-auto max-w-3xl space-y-6">
 			<div className="dash-animate-in">
-				<h2 className="text-2xl font-bold text-dash-text">Settings</h2>
+				<h2 className="font-Helvetica-Neue text-2xl font-bold text-dash-text">Settings</h2>
 				<p className="mt-1 text-sm text-dash-text-secondary">Manage your account and preferences.</p>
 			</div>
 
@@ -20,7 +20,7 @@ export default function SettingsPage() {
 			<div className="dash-card overflow-hidden dash-animate-in" style={{ animationDelay: "0.05s" }}>
 				<div className="flex items-center gap-4 border-b border-dash-border p-6">
 					<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-accent-muted"><Building2 className="h-5 w-5 text-dash-accent" /></div>
-					<div><h3 className="text-sm font-semibold text-dash-text">Agency Profile</h3><p className="text-xs text-dash-text-muted">Your agency&apos;s basic information</p></div>
+					<div><h3 className="font-Helvetica-Neue text-sm font-semibold text-dash-text">Agency Profile</h3><p className="text-xs text-dash-text-muted">Your agency&apos;s basic information</p></div>
 				</div>
 				<div className="grid gap-5 p-6 sm:grid-cols-2">
 					<div className="space-y-2"><label className="block text-sm font-medium text-dash-text-secondary">Agency Name</label><input type="text" value={agency.name} onChange={(e) => setAgency({ ...agency, name: e.target.value })} placeholder="Sakura Properties" className={inputCls} /></div>
@@ -37,7 +37,7 @@ export default function SettingsPage() {
 			<div className="dash-card overflow-hidden dash-animate-in" style={{ animationDelay: "0.1s" }}>
 				<div className="flex items-center gap-4 border-b border-dash-border p-6">
 					<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-warning-muted"><Bell className="h-5 w-5 text-dash-warning" /></div>
-					<div><h3 className="text-sm font-semibold text-dash-text">Notifications</h3><p className="text-xs text-dash-text-muted">Choose what you want to be notified about</p></div>
+					<div><h3 className="font-Helvetica-Neue text-sm font-semibold text-dash-text">Notifications</h3><p className="text-xs text-dash-text-muted">Choose what you want to be notified about</p></div>
 				</div>
 				<div className="p-6 space-y-4">
 					{[
@@ -60,7 +60,7 @@ export default function SettingsPage() {
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-4">
 						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-purple-muted"><Users className="h-5 w-5 text-dash-purple" /></div>
-						<div><h3 className="text-sm font-semibold text-dash-text">Team Members</h3><p className="text-xs text-dash-text-muted">Invite agents to your TwinO workspace.</p></div>
+						<div><h3 className="font-Helvetica-Neue text-sm font-semibold text-dash-text">Team Members</h3><p className="text-xs text-dash-text-muted">Invite agents to your TwinO workspace.</p></div>
 					</div>
 					<span className="rounded-full bg-dash-purple-muted px-3 py-1 text-xs font-semibold text-dash-purple">Coming Soon</span>
 				</div>
@@ -70,7 +70,7 @@ export default function SettingsPage() {
 			<div className="rounded-2xl border border-dash-danger/20 overflow-hidden dash-animate-in" style={{ animationDelay: "0.2s" }}>
 				<div className="flex items-center gap-4 border-b border-dash-danger/10 bg-dash-danger-muted/30 p-6">
 					<AlertTriangle className="h-5 w-5 text-dash-danger" />
-					<h3 className="text-sm font-semibold text-dash-danger">Danger Zone</h3>
+					<h3 className="font-Helvetica-Neue text-sm font-semibold text-dash-danger">Danger Zone</h3>
 				</div>
 				<div className="p-6 bg-dash-surface">
 					<div className="flex items-center justify-between">

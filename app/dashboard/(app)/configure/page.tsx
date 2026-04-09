@@ -46,7 +46,7 @@ export default function ConfigureTwinPage() {
 			<button type="button" onClick={() => toggle(k)} className="flex w-full items-center gap-4 p-6 text-left transition-colors hover:bg-dash-surface-hover/50">
 				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-dash-accent-muted"><Icon className="h-5 w-5 text-dash-accent" /></div>
 				<div className="min-w-0 flex-1">
-					<div className="flex items-center gap-2"><h3 className="text-sm font-semibold text-dash-text">{title}</h3>{badge && <span className="rounded-full bg-dash-accent-muted px-2 py-0.5 text-[11px] font-medium text-dash-accent">{badge}</span>}</div>
+					<div className="flex items-center gap-2"><h3 className="font-Helvetica-Neue text-sm font-semibold text-dash-text">{title}</h3>{badge && <span className="rounded-full bg-dash-accent-muted px-2 py-0.5 text-[11px] font-medium text-dash-accent">{badge}</span>}</div>
 					<p className="mt-0.5 text-xs text-dash-text-muted">{sub}</p>
 				</div>
 				{open[k] ? <ChevronUp className="h-4 w-4 text-dash-text-muted" /> : <ChevronDown className="h-4 w-4 text-dash-text-muted" />}
@@ -59,7 +59,7 @@ export default function ConfigureTwinPage() {
 		<div className="mx-auto max-w-4xl space-y-6">
 			<div className="flex items-center justify-between dash-animate-in">
 				<div>
-					<h2 className="text-2xl font-bold text-dash-text">Configure Your Twin</h2>
+					<h2 className="font-Helvetica-Neue text-2xl font-bold text-dash-text">Configure Your Twin</h2>
 					<p className="mt-1 text-sm text-dash-text-secondary">Customize your AI sales assistant&apos;s personality and knowledge.</p>
 				</div>
 				<button type="button" className="flex items-center gap-2 rounded-xl bg-dash-accent px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-dash-accent-hover hover:shadow-lg hover:shadow-dash-accent/20">
@@ -145,7 +145,7 @@ export default function ConfigureTwinPage() {
 				)}
 				{showAddProp ? (
 					<div className="rounded-xl border border-dash-accent/20 bg-dash-accent-muted/30 p-5 dash-animate-scale">
-						<h4 className="mb-4 text-sm font-semibold text-dash-text">Add Property</h4>
+						<h4 className="font-Helvetica-Neue mb-4 text-sm font-semibold text-dash-text">Add Property</h4>
 						<div className="grid gap-4 sm:grid-cols-2">
 							<div><label className="text-xs font-medium text-dash-text-muted">Name</label><input type="text" value={newProp.name} onChange={(e) => setNewProp({ ...newProp, name: e.target.value })} placeholder="Orbi #412" className={inputCls} /></div>
 							<div><label className="text-xs font-medium text-dash-text-muted">Price (USD)</label><input type="number" value={newProp.price || ""} onChange={(e) => setNewProp({ ...newProp, price: +e.target.value })} placeholder="80000" className={inputCls} /></div>

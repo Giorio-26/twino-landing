@@ -37,7 +37,7 @@ export default function LeadsPage() {
 	return (
 		<div className="mx-auto max-w-7xl space-y-6">
 			<div className="flex items-center justify-between dash-animate-in">
-				<div><h2 className="text-2xl font-bold text-dash-text">Leads</h2><p className="mt-1 text-sm text-dash-text-secondary">Qualified prospects from your Sales Twin conversations.</p></div>
+				<div><h2 className="font-Helvetica-Neue text-2xl font-bold text-dash-text">Leads</h2><p className="mt-1 text-sm text-dash-text-secondary">Qualified prospects from your Sales Twin conversations.</p></div>
 				<button type="button" className="flex items-center gap-2 rounded-xl border border-dash-border px-4 py-2.5 text-sm font-medium text-dash-text-secondary transition-colors hover:bg-dash-surface-hover hover:text-dash-text"><Download className="h-4 w-4" />Export CSV</button>
 			</div>
 
@@ -93,7 +93,7 @@ export default function LeadsPage() {
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setSelectedLead(null)}>
 					<div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-2xl border border-dash-border bg-dash-surface p-6 shadow-2xl dash-animate-scale">
 						<div className="flex items-center justify-between mb-5">
-							<h3 className="text-lg font-bold text-dash-text">{selectedLead.name}</h3>
+							<h3 className="font-Helvetica-Neue text-lg font-bold text-dash-text">{selectedLead.name}</h3>
 							<button type="button" onClick={() => setSelectedLead(null)} className="text-dash-text-muted hover:text-dash-text"><X className="h-5 w-5" /></button>
 						</div>
 						<div className="grid grid-cols-2 gap-4">

@@ -118,7 +118,7 @@ export default function DashboardOverview() {
 		<div className="mx-auto max-w-7xl space-y-8">
 			{/* Header */}
 			<div className="dash-animate-in">
-				<h2 className="text-2xl font-bold text-dash-text">
+				<h2 className="font-Helvetica-Neue text-2xl font-bold text-dash-text">
 					Good morning! 👋
 				</h2>
 				<p className="mt-1 text-sm text-dash-text-secondary">
@@ -161,7 +161,7 @@ export default function DashboardOverview() {
 				{/* Recent Activity */}
 				<div className="dash-card p-6 lg:col-span-3 dash-animate-in" style={{ animationDelay: "0.2s" }}>
 					<div className="mb-5 flex items-center justify-between">
-						<h3 className="text-base font-semibold text-dash-text">
+						<h3 className="font-Helvetica-Neue text-base font-semibold text-dash-text">
 							Recent Activity
 						</h3>
 						<Link
@@ -199,7 +199,7 @@ export default function DashboardOverview() {
 
 				{/* Quick Actions */}
 				<div className="space-y-4 lg:col-span-2 dash-animate-in" style={{ animationDelay: "0.3s" }}>
-					<h3 className="text-base font-semibold text-dash-text">
+					<h3 className="font-Helvetica-Neue text-base font-semibold text-dash-text">
 						Quick Actions
 					</h3>
 					<div className="space-y-3">

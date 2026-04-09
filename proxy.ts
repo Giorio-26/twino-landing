@@ -1,16 +1,16 @@
-import type { NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
-import { updateSession } from "./lib/supabase/middleware";
+// import { updateSession } from "./lib/supabase/middleware";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
 export default async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	// Dashboard routes: handle Supabase auth only (no i18n)
+	// Dashboard routes: temporarily bypass auth (TODO: enable Supabase)
 	if (pathname.startsWith("/dashboard")) {
-		return updateSession(request);
+		return NextResponse.next();
 	}
 
 	// All other routes: handle i18n
