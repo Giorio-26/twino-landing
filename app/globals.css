@@ -20,28 +20,28 @@
 
 /* Dashboard Light Theme — matches landing page */
 .dashboard-theme {
-  --dash-bg: #FFFFFF;
-  --dash-bg-subtle: #F8FAFB;
-  --dash-surface: #FFFFFF;
-  --dash-surface-secondary: #F1F5F9;
-  --dash-surface-hover: #F1F5F9;
-  --dash-surface-active: #E2E8F0;
+  --dash-bg: #ffffff;
+  --dash-bg-subtle: #f8fafb;
+  --dash-surface: #ffffff;
+  --dash-surface-secondary: #f1f5f9;
+  --dash-surface-hover: #f1f5f9;
+  --dash-surface-active: #e2e8f0;
   --dash-border: rgba(0, 0, 0, 0.06);
-  --dash-border-strong: rgba(0, 0, 0, 0.10);
+  --dash-border-strong: rgba(0, 0, 0, 0.1);
   --dash-text: #000000;
-  --dash-text-secondary: #363C44;
-  --dash-text-muted: #94A3B8;
-  --dash-accent: #0072FF;
-  --dash-accent-hover: #0060D6;
+  --dash-text-secondary: #363c44;
+  --dash-text-muted: #94a3b8;
+  --dash-accent: #0072ff;
+  --dash-accent-hover: #0060d6;
   --dash-accent-muted: rgba(0, 114, 255, 0.08);
   --dash-accent-glow: rgba(0, 114, 255, 0.12);
-  --dash-success: #16A34A;
+  --dash-success: #16a34a;
   --dash-success-muted: rgba(22, 163, 74, 0.08);
-  --dash-warning: #D97706;
+  --dash-warning: #d97706;
   --dash-warning-muted: rgba(217, 119, 6, 0.08);
-  --dash-danger: #DC2626;
+  --dash-danger: #dc2626;
   --dash-danger-muted: rgba(220, 38, 38, 0.08);
-  --dash-purple: #7C3AED;
+  --dash-purple: #7c3aed;
   --dash-purple-muted: rgba(124, 58, 237, 0.08);
 }
 
@@ -107,7 +107,9 @@
 }
 
 @utility dash-glow {
-  box-shadow: 0 0 20px var(--dash-accent-glow), 0 0 60px rgba(0, 114, 255, 0.05);
+  box-shadow:
+    0 0 20px var(--dash-accent-glow),
+    0 0 60px rgba(0, 114, 255, 0.05);
 }
 
 @utility dash-card {
@@ -168,28 +170,57 @@
 
 /* Dashboard animations */
 @keyframes dash-fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes dash-slide-in-right {
-  from { opacity: 0; transform: translateX(12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes dash-scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes dash-pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px var(--dash-accent-glow); }
-  50% { box-shadow: 0 0 20px var(--dash-accent-glow), 0 0 40px rgba(0, 114, 255, 0.08); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px var(--dash-accent-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 20px var(--dash-accent-glow),
+      0 0 40px rgba(0, 114, 255, 0.08);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .dash-animate-in {
@@ -209,9 +240,21 @@
   animation: dash-fade-in 0.4s ease-out forwards;
 }
 
-.dash-stagger > *:nth-child(1) { animation-delay: 0.05s; }
-.dash-stagger > *:nth-child(2) { animation-delay: 0.1s; }
-.dash-stagger > *:nth-child(3) { animation-delay: 0.15s; }
-.dash-stagger > *:nth-child(4) { animation-delay: 0.2s; }
-.dash-stagger > *:nth-child(5) { animation-delay: 0.25s; }
-.dash-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.dash-stagger > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.dash-stagger > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.dash-stagger > *:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.dash-stagger > *:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.dash-stagger > *:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.dash-stagger > *:nth-child(6) {
+  animation-delay: 0.3s;
+}

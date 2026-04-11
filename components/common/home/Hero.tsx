@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  Building2,
-  CalendarCheck,
-  Play,
-  ShieldCheck,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, Building2, Play, ShieldCheck, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
@@ -25,7 +18,7 @@ export default function HeroSection() {
             {t("description")}
           </p>
 
-          <div className="flex w-full flex-col items-start xl:items-center gap-4 sm:w-auto xl:flex-row">
+          <div className="flex w-full flex-col items-start gap-4 sm:w-auto xl:flex-row xl:items-center">
             <Link
               href="#pilot"
               className="group hover:-translate-y-0.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-8 py-3.5 font-semibold text-base text-white no-underline transition-all duration-250 ease-in-out hover:shadow-[0_8px_24px_rgba(0,114,255,0.3)] active:translate-y-0 active:shadow-[0_4px_12px_rgba(0,114,255,0.2)] sm:w-auto"
@@ -97,10 +90,10 @@ export default function HeroSection() {
               <div className="mb-1 font-Helvetica-Neue font-bold text-lg text-primary xl:text-xl 2xl:text-2xl">
                 {t("card4Value")}
               </div> */}
-              {/* <div className="font-Helvetica text-primary/70 text-sm">
+          {/* <div className="font-Helvetica text-primary/70 text-sm">
                 {t("card4Label")}
               </div> */}
-            {/* </div>
+          {/* </div>
           </div> */}
 
           {/* Background decorative blob */}

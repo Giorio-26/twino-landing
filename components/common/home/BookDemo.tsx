@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, useState } from "react";
 
@@ -27,7 +27,7 @@ export default function BookDemo() {
     socialMediaUrl: "",
   });
   const [status, setStatus] = useState<FormStatus>({ type: "idle" });
-  const [waitlistCount] = useState(520);
+  const [_waitlistCount] = useState(520);
 
   const validateForm = () => {
     if (!formData.firstName.trim()) return false;
@@ -60,7 +60,7 @@ export default function BookDemo() {
 
       setStatus({
         type: "success",
-        message: "Thanks! Check your email for the next steps.",
+        message: "Thanks!",
       });
       setFormData({
         firstName: "",
@@ -83,21 +83,21 @@ export default function BookDemo() {
   return (
     <section className="bg-primary py-24 md:py-32 lg:py-40" id="book-demo">
       <div className="container">
-          <div className="space-y-8">
-            <div className="flex flex-col justify-center items-center">
-              <h2 className="mb-4 max-w-4xl font-Helvetica-Neue font-bold text-3xl text-white text-center leading-tight sm:text-4xl lg:text-5xl">
-                {t("title")}
-              </h2>
-              <p className="max-w-3xl font-Helvetica text-base text-white/70 text-center leading-relaxed sm:text-lg">
-                {t("description")}
-              </p>
-            </div>
-        {/* Main Content Grid */}
-        {/* <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16"> */}
+        <div className="space-y-8">
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="mb-4 max-w-4xl text-center font-Helvetica-Neue font-bold text-3xl text-white leading-tight sm:text-4xl lg:text-5xl">
+              {t("title")}
+            </h2>
+            <p className="max-w-3xl text-center font-Helvetica text-base text-white/70 leading-relaxed sm:text-lg">
+              {t("description")}
+            </p>
+          </div>
+          {/* Main Content Grid */}
+          {/* <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16"> */}
           {/* Left Column - Text */}
 
-            {/* Waitlist Counter */}
-            {/* <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+          {/* Waitlist Counter */}
+          {/* <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/20">
                   <CheckCircle2 className="h-6 w-6 text-accent" />
@@ -115,39 +115,39 @@ export default function BookDemo() {
           {/* </div> */}
 
           {/* Right Column - Form */}
-          <div className="rounded-2xl max-w-xl mx-auto border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+          <div className="mx-auto max-w-xl rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Row 1: First & Last Name */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                     {t("firstName")} *
+                    <input
+                      type="text"
+                      value={formData.firstName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, firstName: e.target.value })
+                      }
+                      placeholder={t("firstNamePlaceholder")}
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
+                      required
+                    />
                   </label>
-                  <input
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstName: e.target.value })
-                    }
-                    placeholder={t("firstNamePlaceholder")}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
-                    required
-                  />
                 </div>
                 <div>
                   <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                     {t("lastName")} *
+                    <input
+                      type="text"
+                      value={formData.lastName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
+                      placeholder={t("lastNamePlaceholder")}
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
+                      required
+                    />
                   </label>
-                  <input
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastName: e.target.value })
-                    }
-                    placeholder={t("lastNamePlaceholder")}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
-                    required
-                  />
                 </div>
               </div>
 
@@ -155,52 +155,52 @@ export default function BookDemo() {
               <div>
                 <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                   {t("email")} *
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    placeholder={t("emailPlaceholder")}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
+                    required
+                  />
                 </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  placeholder={t("emailPlaceholder")}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
-                  required
-                />
               </div>
 
               {/* Company Name */}
               <div>
                 <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                   {t("companyName")}
+                  <input
+                    type="text"
+                    value={formData.companyName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, companyName: e.target.value })
+                    }
+                    placeholder={t("companyNamePlaceholder")}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
+                  />
                 </label>
-                <input
-                  type="text"
-                  value={formData.companyName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, companyName: e.target.value })
-                  }
-                  placeholder={t("companyNamePlaceholder")}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
-                />
               </div>
 
               {/* Social Media URL */}
               <div>
                 <label className="mb-2 block font-Helvetica font-medium text-sm text-white/70">
                   {t("socialMediaUrl")}
+                  <input
+                    type="url"
+                    value={formData.socialMediaUrl}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        socialMediaUrl: e.target.value,
+                      })
+                    }
+                    placeholder={t("socialMediaUrlPlaceholder")}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
+                  />
                 </label>
-                <input
-                  type="url"
-                  value={formData.socialMediaUrl}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      socialMediaUrl: e.target.value,
-                    })
-                  }
-                  placeholder={t("socialMediaUrlPlaceholder")}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-Helvetica text-sm text-white placeholder-white/40 transition-all duration-200 focus:border-accent focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-accent"
-                />
               </div>
 
               {/* Status Messages */}

@@ -3,7 +3,6 @@ import "../globals.css";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import Layout from "@/components/layouts";
 import { isValidLocale } from "@/lib/config";
 import { helvetica, helveticaNeue } from "@/lib/fonts";
 import { baseMetadata, buildAlternates, buildOpenGraph } from "@/lib/metadata";
@@ -38,9 +37,7 @@ export default async function RootLayout({
       className={`${helvetica.variable} ${helveticaNeue.variable} h-full antialiased`}
     >
       <NextIntlClientProvider messages={messages}>
-        <body className="flex min-h-full flex-col">
-          <Layout>{children}</Layout>
-        </body>
+        <body className="flex min-h-full flex-col">{children}</body>
       </NextIntlClientProvider>
     </html>
   );
