@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 
@@ -7,14 +7,7 @@ import { routing } from "./i18n/routing";
 const intlMiddleware = createIntlMiddleware(routing);
 
 export default async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Dashboard routes: temporarily bypass auth (TODO: enable Supabase)
-  if (pathname.startsWith("/dashboard")) {
-    return NextResponse.next();
-  }
-
-  // All other routes: handle i18n
+  // All routes are handled by i18n
   return intlMiddleware(request);
 }
 
