@@ -75,8 +75,8 @@ export default function RegisterPage() {
   return (
     <div className="dashboard-theme relative flex min-h-screen items-center justify-center overflow-hidden bg-white py-12">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-0 right-0 h-[500px] w-[700px] rounded-full bg-accent/5 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[500px] rounded-full bg-purple-500/5 blur-[100px]" />
+        <div className="absolute top-0 right-0 h-125 w-175 rounded-full bg-accent/5 blur-[120px]" />
+        <div className="absolute bottom-0 left-0 h-100 w-125 rounded-full bg-purple-500/5 blur-[100px]" />
       </div>
 
       <div className="dash-animate-in relative z-10 w-full max-w-lg px-6">

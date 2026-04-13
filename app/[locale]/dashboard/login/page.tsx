@@ -12,24 +12,62 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [credentialError, setCredentialError] = useState(false);
   const router = useRouter();
+
+  function friendlyError(message: string): string {
+    if (
+      message.toLowerCase().includes("invalid login credentials") ||
+      message.toLowerCase().includes("invalid credentials")
+    ) {
+      return "Incorrect email or password. Please try again.";
+    }
+    if (message.toLowerCase().includes("email not confirmed")) {
+      return "Please verify your email address before signing in.";
+    }
+    if (message.toLowerCase().includes("too many requests")) {
+      return "Too many attempts. Please wait a moment and try again.";
+    }
+    if (message.toLowerCase().includes("user not found")) {
+      return "No account found with this email address.";
+    }
+    return "Something went wrong. Please try again.";
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setCredentialError(false);
     const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     if (authError) {
-      setError(authError.message);
+      setError(friendlyError(authError.message));
+      setCredentialError(true);
       setLoading(false);
       return;
     }
     router.push("/dashboard");
     router.refresh();
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (credentialError) {
+      setError(null);
+      setCredentialError(false);
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (credentialError) {
+      setError(null);
+      setCredentialError(false);
+    }
   };
 
   return (
@@ -82,10 +120,10 @@ export default function LoginPage() {
                   id="login-email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   placeholder="you@agency.com"
                   required
-                  className="w-full rounded-xl border border-black/10 bg-white py-3.5 pr-4 pl-11 text-primary text-sm placeholder-primary/30 transition-all duration-200 focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/10"
+                  className={`w-full rounded-xl border bg-white py-3.5 pr-4 pl-11 text-primary text-sm placeholder-primary/30 transition-all duration-200 focus:outline-none focus:ring-2 ${credentialError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-black/10 focus:border-accent/40 focus:ring-accent/10"}`}
                 />
               </div>
             </div>
@@ -102,10 +140,10 @@ export default function LoginPage() {
                   id="login-password"
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   placeholder="••••••••"
                   required
-                  className="w-full rounded-xl border border-black/10 bg-white py-3.5 pr-12 pl-4 text-primary text-sm placeholder-primary/30 transition-all duration-200 focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/10"
+                  className={`w-full rounded-xl border bg-white py-3.5 pr-12 pl-4 text-primary text-sm placeholder-primary/30 transition-all duration-200 focus:outline-none focus:ring-2 ${credentialError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-black/10 focus:border-accent/40 focus:ring-accent/10"}`}
                 />
                 <button
                   type="button"

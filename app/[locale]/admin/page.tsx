@@ -2,44 +2,51 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const supabase = createClient();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      username === process.env.NEXT_PUBLIC_ADMIN_USERNAME &&
-      password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD
-    ) {
-      localStorage.setItem("isAdminAuthenticated", "true");
-      router.push("/en/admin/bookings");
+    setError("");
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      setError(signInError.message);
     } else {
-      setError("Invalid username or password");
+      router.push("/en/admin/bookings");
+      router.refresh(); // Refresh the page to update the session state in the layout
     }
   };
 
   return (
     <div className="flex items-center justify-center h-screen">
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleLogin}
         className="p-8 bg-white rounded shadow-md w-96"
       >
         <h1 className="text-2xl font-bold mb-4">Admin Login</h1>
         {error && <p className="text-red-500">{error}</p>}
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="username">
-            Username
+          <label className="block mb-2" htmlFor="email">
+            Email
           </label>
           <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full p-2 border rounded"
+            required
           />
         </div>
         <div className="mb-4">
@@ -52,12 +59,10 @@ export default function AdminLoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full p-2 border rounded"
+            required
           />
         </div>
-        <button
-          type="submit"
-          className="w-full p-2 bg-blue-500 text-white rounded"
-        >
+        <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
           Login
         </button>
       </form>

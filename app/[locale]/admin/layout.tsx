@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLayout({
   children,
@@ -10,31 +11,44 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const supabase = createClient();
+  const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
-    const isLoginPage = pathname === "/en/admin" || pathname === "/ka/admin";
-
-    if (!isAuthenticated && !isLoginPage) {
-      router.push("/en/admin");
-    } else {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        setUser(data.session.user);
+      }
       setIsLoading(false);
-    }
-  }, [pathname, router]);
+    };
+    getSession();
+  }, [supabase.auth]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("isAdminAuthenticated");
+  useEffect(() => {
+    if (
+      !isLoading &&
+      !user &&
+      pathname !== "/en/admin" &&
+      pathname !== "/ka/admin"
+    ) {
+      router.push("/en/admin");
+    }
+  }, [isLoading, user, pathname, router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
     router.push("/en/admin");
+    router.refresh();
   };
 
-  const isLoginPage = pathname === "/en/admin" || pathname === "/ka/admin";
-
-  if (isLoading && !isLoginPage) {
+  if (isLoading) {
     return null; // Or a loading spinner
   }
 
-  if (isLoginPage) {
+  if (pathname === "/en/admin" || pathname === "/ka/admin") {
     return <>{children}</>;
   }
 
