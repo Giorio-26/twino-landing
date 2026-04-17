@@ -14,7 +14,7 @@ export default async function BookingsPage() {
       .select("booking_id, key, expires_at"),
   ]);
 
-  console.log("[bookings page] accessKeys:", accessKeys, "keysError:", keysError);
+  console.log("keysError:", keysError);
 
   if (error) {
     console.error("Error fetching bookings:", error);

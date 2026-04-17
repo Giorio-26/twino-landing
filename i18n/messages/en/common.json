@@ -70,7 +70,8 @@
     "privacyText": "We respect your privacy. No spam, ever.",
     "validationError": "Please fill in all required fields and pick a date & time",
     "slotTaken": "That slot was just taken — please pick another time",
-    "successMessage": "Thanks! We'll see you then."
+    "successTitle": "You're all booked!",
+    "successMessage": "We'll send a calendar invite to your email. See you then!"
   },
   "footer": {
     "name": "TwinO",

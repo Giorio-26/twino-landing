@@ -1,7 +1,9 @@
 "use client";
 
-import { ArrowRight, Clock } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { ArrowRight, CalendarCheck, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { enUS, ka } from "date-fns/locale";
+import { useLocale, useTranslations } from "next-intl";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -60,6 +62,7 @@ interface FormStatus {
 
 export default function BookDemo() {
   const t = useTranslations("common.bookDemo");
+  const locale = useLocale();
 
   const [formData, setFormData] = useState<FormState>({
     firstName: "",
@@ -75,6 +78,7 @@ export default function BookDemo() {
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   const [status, setStatus] = useState<FormStatus>({ type: "idle" });
+  const [bookedSlot, setBookedSlot] = useState<{ date: Date; hour: number } | null>(null);
 
   // ── Fetch booked slots whenever the date changes ──────────────────────────
   const fetchAvailability = useCallback(async (date: Date) => {
@@ -143,13 +147,13 @@ export default function BookDemo() {
 
       if (!response.ok) throw new Error("Failed to submit form");
 
-      setStatus({ type: "success", message: t("successMessage") });
+      // biome-ignore lint/style/noNonNullAssertion: guarded by validateForm
+      setBookedSlot({ date: selectedDate!, hour: selectedHour! });
+      setStatus({ type: "success" });
       setFormData({ firstName: "", lastName: "", email: "", companyName: "", socialMediaUrl: "" });
       setSelectedDate(null);
       setSelectedHour(null);
       setBookedHours([]);
-
-      setTimeout(() => setStatus({ type: "idle" }), 5000);
     } catch (error) {
       setStatus({
         type: "error",
@@ -187,6 +191,31 @@ export default function BookDemo() {
           </div>
 
           <div className="mx-auto max-w-xl rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+            {status.type === "success" && bookedSlot ? (
+              <div className="flex flex-col items-center gap-6 py-8 text-center">
+                <div className="flex size-20 items-center justify-center rounded-full border border-accent/30 bg-accent/10">
+                  <CalendarCheck className="size-10 text-accent" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-Helvetica-Neue font-bold text-2xl text-white">
+                    {t("successTitle")}
+                  </h3>
+                  <p className="font-Helvetica text-base text-white/60">
+                    {t("successMessage")}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/5 px-6 py-4">
+                  <p className="font-Helvetica text-sm text-white/50">{t("selectDate")}</p>
+                  <p className="mt-1 font-Helvetica font-semibold text-white">
+                    {format(bookedSlot.date, "EEEE, d MMMM yyyy", { locale: locale === "ka" ? ka : enUS })}
+                    {" · "}
+                    {formatSlotLabel(bookedSlot.hour)}
+                    {" "}
+                    <span className="text-white/40 text-xs">({t("tbilisiTime")})</span>
+                  </p>
+                </div>
+              </div>
+            ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Row 1: First & Last Name */}
               <div className="grid grid-cols-2 gap-3">
@@ -274,6 +303,7 @@ export default function BookDemo() {
                     dateFormat="MMMM d, yyyy"
                     placeholderText={t("datePlaceholder")}
                     inline
+                    locale={locale === "ka" ? ka : enUS}
                     calendarClassName="book-demo-calendar"
                   />
                 </div>
@@ -348,6 +378,7 @@ export default function BookDemo() {
                 {t("privacyText")}
               </p>
             </form>
+            )}
           </div>
         </div>
       </div>
