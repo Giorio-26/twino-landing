@@ -1,6 +1,7 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
-import { createClient } from "@/lib/supabase/server";
+import { SESSION_COOKIE, verifySession } from "@/lib/session";
 
 export default async function DashboardAppLayout({
   children,
@@ -10,13 +11,12 @@ export default async function DashboardAppLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const session = token ? verifySession(token) : null;
 
-  if (!user) {
-    redirect(`/${locale}/dashboard/login`);
+  if (!session) {
+    redirect(`/${locale}/dashboard/access`);
   }
 
   return <DashboardShell>{children}</DashboardShell>;

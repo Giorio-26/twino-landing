@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: BarChart3 },
@@ -35,9 +34,8 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/dashboard/login");
+    await fetch("/api/dashboard/sign-out", { method: "POST" });
+    router.push("/dashboard/access");
     router.refresh();
   };
 

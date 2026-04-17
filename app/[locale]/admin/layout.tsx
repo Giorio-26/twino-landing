@@ -12,18 +12,18 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        setUser(data.session.user);
-      }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
       setIsLoading(false);
-    };
-    getSession();
+    });
+
+    return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
   useEffect(() => {
@@ -54,11 +54,12 @@ export default function AdminLayout({
 
   return (
     <div>
-      <header className="bg-gray-800 text-white p-4 flex justify-between items-center">
+      <header className="flex items-center justify-between bg-gray-800 p-4 text-white">
         <h1 className="text-xl">Admin Panel</h1>
         <button
+          type="button"
           onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          className="rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700"
         >
           Logout
         </button>

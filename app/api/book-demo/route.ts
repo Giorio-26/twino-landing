@@ -7,6 +7,7 @@ interface FormData {
   email: string;
   companyName: string;
   socialMediaUrl: string;
+  scheduledAt: string; // ISO UTC timestamp for the chosen slot
 }
 
 export async function POST(request: NextRequest) {
@@ -15,10 +16,32 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Validate required fields
-    if (!body.firstName || !body.lastName || !body.email) {
+    if (!body.firstName || !body.lastName || !body.email || !body.scheduledAt) {
       return Response.json(
         { error: "Missing required fields" },
         { status: 400 },
+      );
+    }
+
+    // Validate scheduledAt is a valid ISO timestamp in the future
+    const scheduledDate = new Date(body.scheduledAt);
+    if (Number.isNaN(scheduledDate.getTime()) || scheduledDate <= new Date()) {
+      return Response.json(
+        { error: "Invalid or past scheduled time" },
+        { status: 400 },
+      );
+    }
+
+    // Check the slot is not already taken
+    const supabaseCheck = await createClient();
+    const { count } = await supabaseCheck
+      .from("booking_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("scheduled_at", body.scheduledAt);
+    if (count && count > 0) {
+      return Response.json(
+        { error: "This slot is no longer available" },
+        { status: 409 },
       );
     }
 
@@ -38,6 +61,7 @@ export async function POST(request: NextRequest) {
           email: body.email,
           company_name: body.companyName,
           social_media_url: body.socialMediaUrl,
+          scheduled_at: body.scheduledAt,
         },
       ]);
 

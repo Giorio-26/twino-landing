@@ -29,15 +29,15 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex h-screen items-center justify-center">
       <form
         onSubmit={handleLogin}
-        className="p-8 bg-white rounded shadow-md w-96"
+        className="w-96 rounded bg-white p-8 shadow-md"
       >
-        <h1 className="text-2xl font-bold mb-4">Admin Login</h1>
+        <h1 className="mb-4 font-bold text-2xl">Admin Login</h1>
         {error && <p className="text-red-500">{error}</p>}
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="email">
+          <label className="mb-2 block" htmlFor="email">
             Email
           </label>
           <input
@@ -45,12 +45,12 @@ export default function AdminLoginPage() {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full rounded border p-2"
             required
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="password">
+          <label className="mb-2 block" htmlFor="password">
             Password
           </label>
           <input
@@ -58,11 +58,14 @@ export default function AdminLoginPage() {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full rounded border p-2"
             required
           />
         </div>
-        <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
+        <button
+          type="submit"
+          className="w-full rounded bg-blue-500 p-2 text-white"
+        >
           Login
         </button>
       </form>

@@ -61,9 +61,16 @@
     "companyNamePlaceholder": "Your Agency Name",
     "socialMediaUrl": "Social Media URL",
     "socialMediaUrlPlaceholder": "https://instagram.com/yourprofile",
+    "selectDate": "Pick a Date",
+    "datePlaceholder": "Select a date",
+    "selectTime": "Pick a Time",
+    "tbilisiTime": "Tbilisi GMT+4",
     "submitButton": "Book Your Demo",
     "submitting": "Submitting...",
-    "privacyText": "We respect your privacy. No spam, ever."
+    "privacyText": "We respect your privacy. No spam, ever.",
+    "validationError": "Please fill in all required fields and pick a date & time",
+    "slotTaken": "That slot was just taken — please pick another time",
+    "successMessage": "Thanks! We'll see you then."
   },
   "footer": {
     "name": "TwinO",
