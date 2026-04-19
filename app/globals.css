@@ -18,6 +18,33 @@
   --color-black: #18181c;
 }
 
+/* Dashboard Light Theme — matches landing page */
+.dashboard-theme {
+  --dash-bg: #ffffff;
+  --dash-bg-subtle: #f8fafb;
+  --dash-surface: #ffffff;
+  --dash-surface-secondary: #f1f5f9;
+  --dash-surface-hover: #f1f5f9;
+  --dash-surface-active: #e2e8f0;
+  --dash-border: rgba(0, 0, 0, 0.06);
+  --dash-border-strong: rgba(0, 0, 0, 0.1);
+  --dash-text: #000000;
+  --dash-text-secondary: #363c44;
+  --dash-text-muted: #94a3b8;
+  --dash-accent: #0072ff;
+  --dash-accent-hover: #0060d6;
+  --dash-accent-muted: rgba(0, 114, 255, 0.08);
+  --dash-accent-glow: rgba(0, 114, 255, 0.12);
+  --dash-success: #16a34a;
+  --dash-success-muted: rgba(22, 163, 74, 0.08);
+  --dash-warning: #d97706;
+  --dash-warning-muted: rgba(217, 119, 6, 0.08);
+  --dash-danger: #dc2626;
+  --dash-danger-muted: rgba(220, 38, 38, 0.08);
+  --dash-purple: #7c3aed;
+  --dash-purple-muted: rgba(124, 58, 237, 0.08);
+}
+
 @theme inline {
   --color-primary: var(--color-primary);
   --color-secondary: var(--color-secondary);
@@ -35,6 +62,31 @@
 
   --font-Helvetica: var(--font-helvetica);
   --font-Helvetica-Neue: var(--font-helvetica-neue);
+
+  /* Dashboard tokens */
+  --color-dash-bg: var(--dash-bg);
+  --color-dash-bg-subtle: var(--dash-bg-subtle);
+  --color-dash-surface: var(--dash-surface);
+  --color-dash-surface-secondary: var(--dash-surface-secondary);
+  --color-dash-surface-hover: var(--dash-surface-hover);
+  --color-dash-surface-active: var(--dash-surface-active);
+  --color-dash-border: var(--dash-border);
+  --color-dash-border-strong: var(--dash-border-strong);
+  --color-dash-text: var(--dash-text);
+  --color-dash-text-secondary: var(--dash-text-secondary);
+  --color-dash-text-muted: var(--dash-text-muted);
+  --color-dash-accent: var(--dash-accent);
+  --color-dash-accent-hover: var(--dash-accent-hover);
+  --color-dash-accent-muted: var(--dash-accent-muted);
+  --color-dash-accent-glow: var(--dash-accent-glow);
+  --color-dash-success: var(--dash-success);
+  --color-dash-success-muted: var(--dash-success-muted);
+  --color-dash-warning: var(--dash-warning);
+  --color-dash-warning-muted: var(--dash-warning-muted);
+  --color-dash-danger: var(--dash-danger);
+  --color-dash-danger-muted: var(--dash-danger-muted);
+  --color-dash-purple: var(--dash-purple);
+  --color-dash-purple-muted: var(--dash-purple-muted);
 }
 
 @utility container {
@@ -54,6 +106,38 @@
   box-shadow: 0 0 6px 4px rgba(51, 100, 163, 0.25);
 }
 
+@utility dash-glow {
+  box-shadow:
+    0 0 20px var(--dash-accent-glow),
+    0 0 60px rgba(0, 114, 255, 0.05);
+}
+
+@utility dash-card {
+  background: var(--dash-surface);
+  border: 1px solid var(--dash-border);
+  border-radius: 1rem;
+}
+
+@utility dash-card-hover {
+  transition: all 0.2s ease;
+  &:hover {
+    background: var(--dash-surface-hover);
+    border-color: var(--dash-border-strong);
+  }
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+@utility glass-strong {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+
 @layer base {
   body {
     background-color: var(--color-background);
@@ -65,4 +149,213 @@
     -moz-osx-font-smoothing: grayscale;
     line-height: 1;
   }
+}
+
+/* Dashboard scrollbar */
+.dashboard-theme ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.dashboard-theme ::-webkit-scrollbar-track {
+  background: var(--dash-bg-subtle);
+  border-radius: 4px;
+}
+.dashboard-theme ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+.dashboard-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Dashboard animations */
+@keyframes dash-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dash-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes dash-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dash-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px var(--dash-accent-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 20px var(--dash-accent-glow),
+      0 0 40px rgba(0, 114, 255, 0.08);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.dash-animate-in {
+  animation: dash-fade-in 0.4s ease-out forwards;
+}
+
+.dash-animate-slide {
+  animation: dash-slide-in-right 0.3s ease-out forwards;
+}
+
+.dash-animate-scale {
+  animation: dash-scale-in 0.25s ease-out forwards;
+}
+
+.dash-stagger > * {
+  opacity: 0;
+  animation: dash-fade-in 0.4s ease-out forwards;
+}
+
+.dash-stagger > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.dash-stagger > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.dash-stagger > *:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.dash-stagger > *:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.dash-stagger > *:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.dash-stagger > *:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+/* ─── Book Demo: react-datepicker dark override ────────────────────────────── */
+.book-demo-datepicker .react-datepicker {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+.book-demo-datepicker .react-datepicker__month-container {
+  width: 100%;
+}
+
+.book-demo-datepicker .react-datepicker__header {
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem 0.75rem 0 0;
+  padding: 0.75rem 0;
+}
+
+.book-demo-datepicker .react-datepicker__current-month {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.book-demo-datepicker .react-datepicker__navigation-icon::before {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.book-demo-datepicker .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.book-demo-datepicker .react-datepicker__day-names {
+  margin-top: 0.25rem;
+}
+
+.book-demo-datepicker .react-datepicker__day-name {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  width: 2.2rem;
+  line-height: 2rem;
+}
+
+.book-demo-datepicker .react-datepicker__month {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0 0 0.75rem 0.75rem;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.book-demo-datepicker .react-datepicker__week {
+  display: flex;
+  justify-content: space-around;
+}
+
+.book-demo-datepicker .react-datepicker__day {
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.8rem;
+  line-height: 2rem;
+  width: 2.2rem;
+  transition: all 0.15s ease;
+}
+
+.book-demo-datepicker .react-datepicker__day:hover:not(.react-datepicker__day--disabled) {
+  background: rgba(0, 114, 255, 0.2);
+  color: #fff;
+}
+
+.book-demo-datepicker .react-datepicker__day--selected,
+.book-demo-datepicker .react-datepicker__day--selected:hover,
+.book-demo-datepicker .react-datepicker__day--keyboard-selected,
+.book-demo-datepicker .react-datepicker__day--keyboard-selected:hover {
+  background: #0072ff;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(0, 114, 255, 0.4);
+}
+
+.book-demo-datepicker .react-datepicker__day--today:not(.react-datepicker__day--selected) {
+  border: 1px solid rgba(0, 114, 255, 0.4);
+  color: #0072ff;
+  font-weight: 600;
+  background: transparent;
+}
+
+.book-demo-datepicker .react-datepicker__day--disabled,
+.book-demo-datepicker .react-datepicker__day--disabled:hover {
+  color: rgba(255, 255, 255, 0.15);
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.book-demo-datepicker .react-datepicker__day--outside-month {
+  color: rgba(255, 255, 255, 0.15);
 }

@@ -1,0 +1,115 @@
+{
+  "configure": {
+    "pageTitle": "Configure Your Twin",
+    "pageSubtitle": "Customize your AI sales assistant's personality and knowledge.",
+    "save": "Save",
+    "saving": "Saving\u2026",
+    "tabs": {
+      "personality": "Personality",
+      "guardians": "Guardians",
+      "knowledge": "Knowledge",
+      "properties": "Properties"
+    },
+    "personality": {
+      "identity": {
+        "title": "Twin Identity",
+        "subtitle": "Name and welcome message",
+        "twinNameLabel": "Twin Name",
+        "twinNamePlaceholder": "e.g. Ana",
+        "welcomeMessageLabel": "Welcome Message",
+        "welcomeMessageHint": "Use '{name}' to insert the twin's name.",
+        "saveButton": "Save Identity"
+      },
+      "tone": {
+        "title": "Tone of Voice",
+        "subtitle": "How your twin communicates",
+        "preview": "Sample Preview",
+        "saveButton": "Save Tone",
+        "options": {
+          "corporate": {
+            "label": "Corporate",
+            "desc": "Professional and formal",
+            "sample": "Thank you for your inquiry. We have several properties matching your criteria. May I schedule a consultation?"
+          },
+          "friendly": {
+            "label": "Friendly",
+            "desc": "Warm and energetic",
+            "sample": "Hey! Great to hear from you! \uD83C\uDFE0 We've got some amazing places. What's your budget looking like?"
+          },
+          "direct": {
+            "label": "Direct",
+            "desc": "Facts only",
+            "sample": "Available: 3 units in Batumi, $55K-$80K. 2BR, sea view. Want details?"
+          },
+          "luxury": {
+            "label": "Luxury",
+            "desc": "Premium & exclusive",
+            "sample": "Welcome to our exclusive portfolio. Allow me to present our premium selection for discerning clients."
+          },
+          "consultative": {
+            "label": "Consultative",
+            "desc": "Empathetic advisor",
+            "sample": "Finding the right property is a big decision. Let me learn about your needs to guide you perfectly."
+          }
+        }
+      }
+    },
+    "guardians": {
+      "title": "The Guardians",
+      "subtitle": "Iron rules your twin will never break",
+      "rulesCount": "{count} rules",
+      "inputPlaceholder": "Add a new rule\u2026",
+      "addButton": "Add",
+      "wordCounter": "{words}/{limit} words",
+      "examplesLabel": "Examples \u2014 click to use:",
+      "examples": [
+        "Never discuss competitor agencies or their pricing.",
+        "Always recommend scheduling a viewing before making any purchase decisions.",
+        "Do not share exact owner contact details \u2014 direct all inquiries through the agency.",
+        "Never guarantee rental yields or investment returns.",
+        "Always clarify that prices are subject to change and require written confirmation."
+      ]
+    },
+    "knowledge": {
+      "title": "Knowledge Base",
+      "subtitle": "Agency info used in conversations",
+      "agencyName": "Agency Name",
+      "agencyNamePlaceholder": "Sakura Properties",
+      "phone": "Phone",
+      "phonePlaceholder": "+995 555 123 456",
+      "address": "Address",
+      "addressPlaceholder": "Tbilisi, Rustaveli Ave 24",
+      "workingHours": "Working Hours",
+      "website": "Website",
+      "websitePlaceholder": "https://sakura.ge",
+      "saveButton": "Save Knowledge Base"
+    },
+    "properties": {
+      "title": "Property Database",
+      "subtitle": "Properties your twin can recommend",
+      "countBadge": "{count}/15",
+      "roomsBR": "{count}BR",
+      "areaM2": " \u00B7 {area}m\u00B2",
+      "statusAvailable": "Available",
+      "statusReserved": "Reserved",
+      "statusSold": "Sold",
+      "addButton": "Add Property ({count}/15)",
+      "form": {
+        "title": "Add Property",
+        "name": "Name",
+        "namePlaceholder": "Orbi #412",
+        "price": "Price (USD)",
+        "pricePlaceholder": "80000",
+        "location": "Location",
+        "locationPlaceholder": "Batumi",
+        "rooms": "Rooms",
+        "area": "Area m\u00B2",
+        "status": "Status",
+        "url": "URL",
+        "submitButton": "Add",
+        "submitting": "Adding\u2026",
+        "cancel": "Cancel"
+      }
+    }
+  }
+}
