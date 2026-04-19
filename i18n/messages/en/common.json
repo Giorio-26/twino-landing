@@ -1,4 +1,8 @@
 {
+  "metadata": {
+    "title": "TwinO - Autonomous AI Agents for Real Estate",
+    "description": "TwinO is an AI Agentic Operating System designed specifically for the real estate industry."
+  },
   "name": "TwinO",
   "header": {
     "features": "Features",
@@ -67,7 +71,7 @@
     "tbilisiTime": "Tbilisi GMT+4",
     "submitButton": "Book Your Demo",
     "submitting": "Submitting...",
-    "privacyText": "We respect your privacy. No spam, ever.",
+    "privacyText": "We respect your privacy.",
     "validationError": "Please fill in all required fields and pick a date & time",
     "slotTaken": "That slot was just taken — please pick another time",
     "successTitle": "You're all booked!",
@@ -79,8 +83,8 @@
     "tagline": "AI-powered lead qualification for real estate",
     "termsAndConditions": "Terms & Conditions",
     "privacyPolicy": "Privacy Policy",
-    "phone": "+1 (555) 123-4567",
-    "email": "twinoyc@gmail.com",
+    "phone": "+995 574 043 308",
+    "email": "team@twino.estate",
     "copyright": "© {year} TwinO.",
     "allRightsReserved": "All rights reserved."
   }

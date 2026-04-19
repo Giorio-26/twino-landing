@@ -4,17 +4,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 export const baseMetadata: Metadata = {
   metadataBase: new URL(BASE_URL),
-  title: "TwinO",
-  description: "meta",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     title: "TwinO",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "TwinO",
-    description: "meta",
-    images: [{ url: "/assets/twino-og.png", alt: "TwinO" }],
   },
   icons: {
     icon: [
@@ -38,10 +30,14 @@ export function buildAlternates(locale: string): Metadata["alternates"] {
   };
 }
 
-export function buildOpenGraph(locale: string): Metadata["openGraph"] {
+export function buildOpenGraph(
+  locale: string,
+  title: string,
+  description: string,
+): Metadata["openGraph"] {
   return {
-    title: "TwinO",
-    description: "meta",
+    title,
+    description,
     url: "https://twino.estate",
     siteName: "TwinO",
     images: [{ url: "/assets/twino-og.png", alt: "TwinO" }],

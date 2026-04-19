@@ -1,4 +1,8 @@
 {
+  "metadata": {
+    "title": "TwinO - ავტონომიური AI აგენტები უძრავი ქონებისთვის",
+    "description": "TwinO არის AI Agentic ოპერაციული სისტემა, რომელიც სპეციალურად შექმნილია უძრავი ქონების ინდუსტრიისთვის."
+  },
   "name": "თვინო",
   "header": {
     "features": "ფუნქციები",
@@ -65,7 +69,7 @@
     "tbilisiTime": "თბილისი GMT+4",
     "submitButton": "დაჯავშნე დემო",
     "submitting": "იგზავნება...",
-    "privacyText": "ჩვენ ვაფასებთ თქვენი კონფიდენციალურობა. არ იქნება სპამი.",
+    "privacyText": "თქვენი კონფიდენციალურობა დაცულია.",
     "validationError": "გთხოვთ შეავსოთ ყველა სავალდებულო ველი და აირჩიოთ თარიღი და დრო",
     "slotTaken": "ეს დრო უკვე დაჯავშნულია — გთხოვთ აირჩიოთ სხვა დრო",
     "successTitle": "წარმატებით დაჯავშნეთ!",
@@ -78,7 +82,7 @@
     "termsAndConditions": "წესები და პირობები",
     "privacyPolicy": "პირადი ინფორმაციის დაცვის პოლიტიკა",
     "phone": "+995 574 043 308",
-    "email": "twinoyc@gmail.com",
+    "email": "team@twino.estate",
     "copyright": "© {year} TwinO.",
     "allRightsReserved": "ყველა უფლება დაცულია."
   }

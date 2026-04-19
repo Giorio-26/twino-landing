@@ -12,6 +12,7 @@ const LinkedInIcon = () => (
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <title>LinkedIn</title>
     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" />
   </svg>
 );
@@ -23,6 +24,7 @@ const FacebookIcon = () => (
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <title>Facebook</title>
     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
   </svg>
 );
@@ -67,14 +69,14 @@ export default function Footer() {
             {/* Contact Info */}
             <div className="flex flex-col items-end gap-3">
               <a
-                href="tel:+1234567890"
+                href="tel:+995574043308"
                 className="flex items-center gap-2 font-Helvetica text-sm text-white/70 no-underline transition-colors hover:text-white"
               >
                 <Phone className="h-4 w-4" />
                 {t("phone")}
               </a>
               <a
-                href="mailto:twinoyc@gmail.com"
+                href="mailto:team@twino.estate"
                 className="flex items-center gap-2 font-Helvetica text-sm text-white/70 no-underline transition-colors hover:text-white"
               >
                 <Mail className="h-4 w-4" />
@@ -85,7 +87,7 @@ export default function Footer() {
             {/* Social Media Icons */}
             <div className="mt-2 flex items-center gap-4">
               <Link
-                href="https://www.facebook.com/profile.php?id=61583962652529"
+                href="https://www.facebook.com/twinoteam"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all duration-200 hover:border-white/50 hover:text-white"
@@ -94,7 +96,7 @@ export default function Footer() {
                 <FacebookIcon />
               </Link>
               <Link
-                href="https://www.linkedin.com/company/110122713"
+                href="https://www.linkedin.com/company/twinoestate"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all duration-200 hover:border-white/50 hover:text-white"
