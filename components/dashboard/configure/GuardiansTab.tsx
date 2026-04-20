@@ -32,6 +32,12 @@ export default function GuardiansTab() {
     });
   }, []);
 
+  const syncRules = (updated: Rule[]) =>
+    apiFetch("/api/dashboard/configure/rules", {
+      method: "POST",
+      body: JSON.stringify({ rules: updated.map((r) => r.rule_text) }),
+    });
+
   const addRule = async () => {
     if (!newRule.trim() || addingRule || overLimit) return;
     setAddingRule(true);
@@ -40,8 +46,10 @@ export default function GuardiansTab() {
       body: JSON.stringify({ rule_text: newRule.trim() }),
     });
     if (res.data) {
-      setRules((prev) => [...prev, res.data as Rule]);
+      const updated = [...rules, res.data as Rule];
+      setRules(updated);
       setNewRule("");
+      syncRules(updated);
     }
     setAddingRule(false);
   };
@@ -49,7 +57,9 @@ export default function GuardiansTab() {
   const deleteRule = async (id: string) => {
     setDeletingRuleId(id);
     await apiFetch(`/api/twin-config/rules/${id}`, { method: "DELETE" });
-    setRules((prev) => prev.filter((r) => r.id !== id));
+    const updated = rules.filter((r) => r.id !== id);
+    setRules(updated);
+    syncRules(updated);
     setDeletingRuleId(null);
   };
 

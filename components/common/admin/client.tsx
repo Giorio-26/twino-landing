@@ -13,6 +13,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import {
+  AlertTriangle,
   Building2,
   CalendarDays,
   Check,
@@ -20,12 +21,15 @@ import {
   Copy,
   ExternalLink,
   GripVertical,
+  Hash,
   Inbox,
   Key,
   Loader2,
   Mail,
   PhoneCall,
+  Trash2,
   Trophy,
+  X,
 } from "lucide-react";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
@@ -40,6 +44,7 @@ type Booking = {
   last_name: string;
   email: string;
   company_name: string | null;
+  company_id: number | null;
   social_media_url: string | null;
   status: BookingStatus;
   scheduled_at: string | null;
@@ -120,6 +125,23 @@ export default function BookingsClient({
   const [bookings, setBookings] = useState(initialBookings);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [_isPending, startTransition] = useTransition();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function handleDeleteConfirm() {
+    if (!deleteConfirmId) return;
+    setIsDeleting(true);
+    const res = await fetch(`/api/admin/booking-requests/${deleteConfirmId}`, {
+      method: "DELETE",
+    });
+    setIsDeleting(false);
+    if (res.ok) {
+      setBookings((prev) => prev.filter((b) => b.id !== deleteConfirmId));
+    } else {
+      console.error("Error deleting booking:", await res.text());
+    }
+    setDeleteConfirmId(null);
+  }
 
   const [optimisticBookings, setOptimisticBookings] = useOptimistic(
     bookings,
@@ -177,6 +199,10 @@ export default function BookingsClient({
     : null;
   const total = optimisticBookings.length;
 
+  const bookingToDelete = deleteConfirmId
+    ? bookings.find((b) => b.id === deleteConfirmId)
+    : null;
+
   return (
     <div className="min-h-screen bg-gray-50/70 p-6 lg:p-8">
       {/* Page header */}
@@ -201,6 +227,7 @@ export default function BookingsClient({
               key={status}
               status={status}
               bookings={optimisticBookings.filter((b) => b.status === status)}
+              onDeleteRequest={setDeleteConfirmId}
             />
           ))}
         </div>
@@ -211,6 +238,53 @@ export default function BookingsClient({
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {/* Delete confirmation dialog */}
+      {deleteConfirmId && bookingToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-red-100">
+                <AlertTriangle className="size-4 text-red-600" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-sm">Delete booking?</h3>
+                <p className="mt-1 text-gray-500 text-xs">
+                  This will permanently delete{" "}
+                  <span className="font-medium text-gray-700">
+                    {bookingToDelete.first_name} {bookingToDelete.last_name}
+                  </span>
+                  {bookingToDelete.company_id && " and their linked company record"}
+                  , including any access keys. This cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                disabled={isDeleting}
+                className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 font-medium text-gray-700 text-sm transition-colors hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 font-medium text-sm text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <Loader2 className="size-3.5 animate-spin" strokeWidth={2} />
+                ) : (
+                  <Trash2 className="size-3.5" strokeWidth={2} />
+                )}
+                {isDeleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -220,9 +294,11 @@ export default function BookingsClient({
 function KanbanColumn({
   status,
   bookings,
+  onDeleteRequest,
 }: {
   status: BookingStatus;
   bookings: Booking[];
+  onDeleteRequest: (id: number) => void;
 }) {
   const cfg = STATUS_CONFIG[status];
   const { Icon } = cfg;
@@ -256,7 +332,11 @@ function KanbanColumn({
       >
         <div className="space-y-3">
           {bookings.map((booking) => (
-            <DraggableCard key={booking.id} booking={booking} />
+            <DraggableCard
+              key={booking.id}
+              booking={booking}
+              onDeleteRequest={onDeleteRequest}
+            />
           ))}
           {bookings.length === 0 && (
             <div className="flex h-28 flex-col items-center justify-center gap-1.5 rounded-xl border border-gray-200 border-dashed">
@@ -272,7 +352,13 @@ function KanbanColumn({
 
 // ─── Draggable wrapper ────────────────────────────────────────────────────────
 
-function DraggableCard({ booking }: { booking: Booking }) {
+function DraggableCard({
+  booking,
+  onDeleteRequest,
+}: {
+  booking: Booking;
+  onDeleteRequest: (id: number) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id: booking.id });
 
@@ -288,7 +374,7 @@ function DraggableCard({ booking }: { booking: Booking }) {
       {...listeners}
       {...attributes}
     >
-      <BookingCard booking={booking} />
+      <BookingCard booking={booking} onDeleteRequest={onDeleteRequest} />
     </div>
   );
 }
@@ -298,9 +384,11 @@ function DraggableCard({ booking }: { booking: Booking }) {
 function BookingCard({
   booking,
   isOverlay = false,
+  onDeleteRequest,
 }: {
   booking: Booking;
   isOverlay?: boolean;
+  onDeleteRequest?: (id: number) => void;
 }) {
   const cfg = STATUS_CONFIG[booking.status];
 
@@ -375,11 +463,24 @@ function BookingCard({
             </div>
           </div>
 
-          {/* Drag handle hint */}
-          <GripVertical
-            className="size-4 shrink-0 text-gray-300 transition-colors group-hover:text-gray-400"
-            strokeWidth={2}
-          />
+          {/* Drag handle + delete */}
+          <div className="flex shrink-0 items-center gap-1">
+            {!isOverlay && onDeleteRequest && (
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onDeleteRequest(booking.id); }}
+                className="rounded p-0.5 text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                title="Delete booking"
+              >
+                <X className="size-3.5" strokeWidth={2} />
+              </button>
+            )}
+            <GripVertical
+              className="size-4 text-gray-300 transition-colors group-hover:text-gray-400"
+              strokeWidth={2}
+            />
+          </div>
         </div>
 
         {/* Divider */}
@@ -401,6 +502,14 @@ function BookingCard({
                 strokeWidth={2}
               />
               <span className="truncate">{booking.company_name}</span>
+            </div>
+          )}
+
+          {/* Company ID — deal only */}
+          {booking.status === "deal" && booking.company_id && (
+            <div className="flex items-center gap-2 text-gray-500 text-xs">
+              <Hash className="size-3.5 shrink-0 text-gray-400" strokeWidth={2} />
+              <span className="font-mono text-gray-400">company {booking.company_id}</span>
             </div>
           )}
 

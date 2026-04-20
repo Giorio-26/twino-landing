@@ -26,8 +26,8 @@
         "preview": "Sample Preview",
         "saveButton": "Save Tone",
         "options": {
-          "corporate": {
-            "label": "Corporate",
+          "professional": {
+            "label": "Professional",
             "desc": "Professional and formal",
             "sample": "Thank you for your inquiry. We have several properties matching your criteria. May I schedule a consultation?"
           },

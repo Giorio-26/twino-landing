@@ -7,7 +7,7 @@ export default async function BookingsPage() {
   const [{ data: bookings, error }, { data: accessKeys, error: keysError }] = await Promise.all([
     supabase
       .from("booking_requests")
-      .select("*")
+      .select("id, created_at, first_name, last_name, email, company_name, company_id, social_media_url, status, scheduled_at")
       .order("created_at", { ascending: false }),
     supabase
       .from("access_keys")
