@@ -31,7 +31,7 @@ export interface Property {
 }
 
 export const TONE_IDS = [
-  { id: "corporate", emoji: "🏢" },
+  { id: "professional", emoji: "🏢" },
   { id: "friendly", emoji: "😊" },
   { id: "direct", emoji: "📋" },
   { id: "luxury", emoji: "💎" },

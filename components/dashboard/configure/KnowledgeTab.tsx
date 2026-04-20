@@ -29,16 +29,28 @@ export default function KnowledgeTab({ initialConfig }: Props) {
 
   const save = async () => {
     setSaving(true);
-    await apiFetch("/api/twin-config", {
-      method: "PUT",
-      body: JSON.stringify({
-        agency_name: agencyInfo.name,
-        agency_address: agencyInfo.address,
-        agency_working_hours: agencyInfo.workingHours,
-        agency_phone: agencyInfo.phone,
-        agency_website: agencyInfo.website,
+    await Promise.all([
+      apiFetch("/api/twin-config", {
+        method: "PUT",
+        body: JSON.stringify({
+          agency_name: agencyInfo.name,
+          agency_address: agencyInfo.address,
+          agency_working_hours: agencyInfo.workingHours,
+          agency_phone: agencyInfo.phone,
+          agency_website: agencyInfo.website,
+        }),
       }),
-    });
+      apiFetch("/api/dashboard/configure/base", {
+        method: "POST",
+        body: JSON.stringify({
+          agency_name: agencyInfo.name,
+          phone: agencyInfo.phone,
+          address: agencyInfo.address,
+          working_hours: agencyInfo.workingHours,
+          website: agencyInfo.website,
+        }),
+      }),
+    ]);
     setSaving(false);
   };
 

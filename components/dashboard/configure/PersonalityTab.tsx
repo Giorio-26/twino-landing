@@ -31,22 +31,37 @@ export default function PersonalityTab({ initialConfig }: Props) {
 
   const saveIdentity = async () => {
     setSavingIdentity(true);
-    await apiFetch("/api/twin-config", {
-      method: "PUT",
-      body: JSON.stringify({
-        twin_name: twinName,
-        welcome_message: welcomeMessage,
+    await Promise.all([
+      apiFetch("/api/twin-config", {
+        method: "PUT",
+        body: JSON.stringify({
+          twin_name: twinName,
+          welcome_message: welcomeMessage,
+        }),
       }),
-    });
+      apiFetch("/api/dashboard/configure/personality", {
+        method: "POST",
+        body: JSON.stringify({
+          agent_name: twinName,
+          greeting_message: welcomeMessage,
+        }),
+      }),
+    ]);
     setSavingIdentity(false);
   };
 
   const saveTone = async () => {
     setSavingTone(true);
-    await apiFetch("/api/twin-config", {
-      method: "PUT",
-      body: JSON.stringify({ tone: selectedTone }),
-    });
+    await Promise.all([
+      apiFetch("/api/twin-config", {
+        method: "PUT",
+        body: JSON.stringify({ tone: selectedTone }),
+      }),
+      apiFetch("/api/dashboard/configure/tone", {
+        method: "POST",
+        body: JSON.stringify({ tone: selectedTone }),
+      }),
+    ]);
     setSavingTone(false);
   };
 
