@@ -51,11 +51,14 @@ export const createAdminClient = () => {
 };
 
 export function createServiceRoleClient() {
-  return createServerClient(
+  return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!,
     {
-      cookies: {},
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
     },
   );
 }
