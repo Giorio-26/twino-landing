@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 
-export async function getCompanyId(bookingId: string): Promise<string | null> {
+export async function getCompanyId(bookingId: string | number): Promise<string | null> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("booking_requests")
