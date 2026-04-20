@@ -2,9 +2,9 @@ name: Next.js CI/CD Pipeline
 
 on:
   push:
-    branches: [prod]
+    branches: [ prod ]
   pull_request:
-    branches: [prod]
+    branches: [ prod ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -109,7 +109,16 @@ jobs:
             fi
 
             export NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
-           
+            export NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            export NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            export NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY }}
+            export SMTP_HOST=${{ secrets.SMTP_HOST }}
+            export SMTP_PORT=${{ secrets.SMTP_PORT }}
+            export SMTP_SECURE=${{ secrets.SMTP_SECURE }}
+            export SMTP_USER=${{ secrets.SMTP_USER }}
+            export SMTP_PASS=${{ secrets.SMTP_PASS }}
+            export SMTP_FROM=${{ secrets.SMTP_FROM }}
+
             envsubst < .env.example > .env
 
             echo "${{ secrets.GITHUB_TOKEN}}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
