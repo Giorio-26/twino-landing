@@ -298,7 +298,7 @@ export default function BookDemo() {
                 <div className="book-demo-datepicker">
                   <DatePicker
                     selected={selectedDate}
-                    onChange={(date) => setSelectedDate(date)}
+                    onChange={(date: Date | null) => setSelectedDate(date)}
                     minDate={todayMidnight()}
                     dateFormat="MMMM d, yyyy"
                     placeholderText={t("datePlaceholder")}
