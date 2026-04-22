@@ -74,14 +74,14 @@
       "title": "Knowledge Base",
       "subtitle": "Agency info used in conversations",
       "agencyName": "Agency Name",
-      "agencyNamePlaceholder": "Sakura Properties",
+      "agencyNamePlaceholder": "TwinO",
       "phone": "Phone",
       "phonePlaceholder": "+995 555 123 456",
       "address": "Address",
       "addressPlaceholder": "Tbilisi, Rustaveli Ave 24",
       "workingHours": "Working Hours",
       "website": "Website",
-      "websitePlaceholder": "https://sakura.ge",
+      "websitePlaceholder": "https://twino.estate",
       "saveButton": "Save Knowledge Base"
     },
     "properties": {
@@ -111,5 +111,27 @@
         "cancel": "Cancel"
       }
     }
+  },
+  "sidebar": {
+    "name": "TwinO",
+    "nav": {
+      "overview": "Overview",
+      "configureTwin": "Configure Twin",
+      "conversations": "Conversations",
+      "leads": "Leads",
+      "integration": "Integration",
+      "settings": "Settings"
+    },
+    "collapse": "Collapse",
+    "signOut": "Sign Out"
+  },
+  "access": {
+    "subtitle": "Enter your access key to get started",
+    "keyLabel": "Access Key",
+    "keyHint": "You received this key via email after your demo.",
+    "keyError": "Please enter the full 16-character access key.",
+    "submitButton": "Access Dashboard",
+    "verifying": "Verifying...",
+    "genericError": "Something went wrong. Please try again."
   }
 }

@@ -120,7 +120,7 @@ export default function RegisterPage() {
                   type="text"
                   value={formData.agencyName}
                   onChange={(e) => updateField("agencyName", e.target.value)}
-                  placeholder="Sakura Properties"
+                  placeholder="TwinO"
                   required
                   className={inputIconCls}
                 />
@@ -181,7 +181,7 @@ export default function RegisterPage() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateField("email", e.target.value)}
-                  placeholder="john@sakuraproperties.ge"
+                  placeholder="john@twino.estate"
                   required
                   className={inputIconCls}
                 />

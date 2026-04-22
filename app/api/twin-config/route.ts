@@ -14,7 +14,7 @@ const ALLOWED_FIELDS = [
 
 type AllowedField = (typeof ALLOWED_FIELDS)[number];
 
-/** GET /api/twin-config — fetch the authenticated user's twin configuration */
+/** GET /api/twin-config — fetch the company's twin configuration */
 export async function GET() {
   const supabase = await createClient();
   const {
@@ -52,7 +52,6 @@ export async function PUT(request: NextRequest) {
 
   const body = await request.json();
 
-  // Whitelist fields to prevent over-posting
   const updates: Partial<Record<AllowedField, string>> = {};
   for (const field of ALLOWED_FIELDS) {
     if (field in body) {

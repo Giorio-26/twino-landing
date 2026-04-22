@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-/** DELETE /api/twin-config/rules/[id] — remove a guardian rule owned by the current user */
+/** DELETE /api/twin-config/rules/[id] — remove a guardian rule owned by the current company */
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -21,7 +21,7 @@ export async function DELETE(
     .from("guardian_rules")
     .delete()
     .eq("id", id)
-    .eq("user_id", user.id); // ensures ownership
+    .eq("user_id", user.id);
 
   if (error) {
     console.error("[rules DELETE]", error);

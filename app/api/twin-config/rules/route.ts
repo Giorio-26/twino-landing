@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-/** GET /api/twin-config/rules — list all guardian rules for the current user */
+/** GET /api/twin-config/rules — list all guardian rules for the current company */
 export async function GET() {
   const supabase = await createClient();
   const {
@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "rule_text is required" }, { status: 400 });
   }
 
-  // Compute next sort_order
   const { data: last } = await supabase
     .from("guardian_rules")
     .select("sort_order")

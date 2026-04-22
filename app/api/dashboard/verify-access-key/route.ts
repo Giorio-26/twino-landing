@@ -1,7 +1,19 @@
+import { createHmac } from "node:crypto";
+import { SESSION_COOKIE, signSession } from "@/lib/session";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
-import { SESSION_COOKIE, signSession } from "@/lib/session";
+
+function companyEmail(companyId: number | string): string {
+  return `company-${companyId}@system.twino.app`;
+}
+
+function companyPassword(companyId: number | string): string {
+  const secret = process.env.ACCESS_SESSION_SECRET ?? "dev-secret-change-me";
+  return createHmac("sha256", secret)
+    .update(`company-auth:${companyId}`)
+    .digest("hex");
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,9 +24,9 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "Access key is required" }, { status: 400 });
     }
 
-    const supabase = createAdminClient();
+    const adminSupabase = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("access_keys")
       .select("booking_id, expires_at")
       .eq("key", raw)
@@ -28,6 +40,43 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "This access key has expired" }, { status: 401 });
     }
 
+    // Resolve company_id for this booking
+    const { data: booking } = await adminSupabase
+      .from("booking_requests")
+      .select("company_id")
+      .eq("id", data.booking_id)
+      .single();
+
+    const companyId = booking?.company_id;
+    if (!companyId) {
+      return Response.json({ error: "No company linked to this key" }, { status: 400 });
+    }
+
+    const email = companyEmail(companyId);
+    const password = companyPassword(companyId);
+
+    // Ensure a Supabase auth user exists for this company (one per company).
+    // Try sign-in first; create the user only if it doesn't exist yet.
+    const userSupabase = await createClient();
+    let signInResult = await userSupabase.auth.signInWithPassword({ email, password });
+
+    if (signInResult.error) {
+      // User doesn't exist yet — create it, then sign in
+      await adminSupabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { company_id: companyId },
+      });
+      signInResult = await userSupabase.auth.signInWithPassword({ email, password });
+    }
+
+    if (signInResult.error) {
+      console.error("[verify-access-key] supabase sign-in failed:", signInResult.error);
+      return Response.json({ error: "Authentication failed" }, { status: 500 });
+    }
+
+    // Set the Twino session cookie (used by Twino API routes)
     const token = signSession({
       booking_id: data.booking_id,
       expires_at: data.expires_at,
@@ -39,7 +88,6 @@ export async function POST(request: NextRequest) {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      // No maxAge — browser session cookie; key expiry enforced server-side via verifySession
     });
 
     return Response.json({ ok: true });

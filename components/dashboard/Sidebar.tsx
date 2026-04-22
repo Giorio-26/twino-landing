@@ -11,27 +11,30 @@ import {
   Settings,
   Users,
 } from "lucide-react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-
-const navItems = [
-  { label: "Overview", href: "/dashboard", icon: BarChart3 },
-  { label: "Configure Twin", href: "/dashboard/configure", icon: Cog },
-  {
-    label: "Conversations",
-    href: "/dashboard/conversations",
-    icon: MessageSquare,
-    badge: 3,
-  },
-  { label: "Leads", href: "/dashboard/leads", icon: Users },
-  { label: "Integration", href: "/dashboard/integration", icon: Plug },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
-];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("dashboard.sidebar");
   const [collapsed, setCollapsed] = useState(false);
+
+  const navItems = [
+    { label: t("nav.overview"), href: "/dashboard", icon: BarChart3 },
+    { label: t("nav.configureTwin"), href: "/dashboard/configure", icon: Cog },
+    {
+      label: t("nav.conversations"),
+      href: "/dashboard/conversations",
+      icon: MessageSquare,
+      badge: 3,
+    },
+    { label: t("nav.leads"), href: "/dashboard/leads", icon: Users },
+    { label: t("nav.integration"), href: "/dashboard/integration", icon: Plug },
+    { label: t("nav.settings"), href: "/dashboard/settings", icon: Settings },
+  ];
 
   const handleLogout = async () => {
     await fetch("/api/dashboard/sign-out", { method: "POST" });
@@ -50,13 +53,18 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center gap-3 border-black/5 border-b px-5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent font-bold text-sm text-white shadow-accent/20 shadow-md">
-          T
-        </div>
-        {!collapsed && (
-          <span className="whitespace-nowrap font-Helvetica-Neue font-bold text-lg text-primary">
-            Twin<span className="text-accent">O</span>
-          </span>
+        {collapsed ? (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent font-bold text-sm text-white shadow-accent/20 shadow-md">
+            T
+          </div>
+        ) : (
+          <Image
+            src="/images/twino.svg"
+            alt={t("name")}
+            width={120}
+            height={32}
+            priority
+          />
         )}
       </div>
 
@@ -114,7 +122,7 @@ export default function Sidebar() {
             <>
               <ChevronLeft className="h-4 w-4" />
               <span className="flex-1 whitespace-nowrap text-left">
-                Collapse
+                {t("collapse")}
               </span>
             </>
           )}
@@ -125,7 +133,9 @@ export default function Sidebar() {
           className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-primary/40 text-sm transition-all hover:bg-red-50 hover:text-red-500"
         >
           <LogOut className="h-4.5 w-4.5 shrink-0" />
-          {!collapsed && <span className="whitespace-nowrap">Sign Out</span>}
+          {!collapsed && (
+            <span className="whitespace-nowrap">{t("signOut")}</span>
+          )}
         </button>
       </div>
     </aside>

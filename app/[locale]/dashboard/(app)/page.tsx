@@ -114,7 +114,7 @@ const quickActions = [
 
 export default function DashboardOverview() {
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto w-full space-y-8">
       {/* Header */}
       <div className="dash-animate-in">
         <h2 className="font-Helvetica-Neue font-bold text-2xl text-dash-text">

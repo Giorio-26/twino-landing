@@ -1,6 +1,6 @@
 {
   "configure": {
-    "pageTitle": "ტვინის კონფიგურაცია",
+    "pageTitle": "აგენტის კონფიგურაცია",
     "pageSubtitle": "მოარგე შენი AI გაყიდვების ასისტენტის პერსონალობა და ცოდნა.",
     "save": "შენახვა",
     "saving": "ინახება\u2026",
@@ -12,12 +12,12 @@
     },
     "personality": {
       "identity": {
-        "title": "ტვინის პიროვნება",
+        "title": "აგენტის პიროვნება",
         "subtitle": "სახელი და მისასალმებელი შეტყობინება",
-        "twinNameLabel": "ტვინის სახელი",
+        "twinNameLabel": "აგენტის სახელი",
         "twinNamePlaceholder": "მაგ. ანა",
         "welcomeMessageLabel": "მისასალმებელი შეტყობინება",
-        "welcomeMessageHint": "გამოიყენე '{name}' ტვინის სახელის ჩასასმელად.",
+        "welcomeMessageHint": "გამოიყენე '{name}' აგენტის სახელის ჩასასმელად.",
         "saveButton": "პიროვნების შენახვა"
       },
       "tone": {
@@ -74,14 +74,14 @@
       "title": "ცოდნის ბაზა",
       "subtitle": "სააგენტოს ინფო, გამოყენებული საუბრებში",
       "agencyName": "სააგენტოს სახელი",
-      "agencyNamePlaceholder": "Sakura Properties",
+      "agencyNamePlaceholder": "TwinO",
       "phone": "ტელეფონი",
       "phonePlaceholder": "+995 555 123 456",
       "address": "მისამართი",
       "addressPlaceholder": "თბილისი, რუსთაველის გამზ. 24",
       "workingHours": "სამუშაო საათები",
       "website": "ვებ-საიტი",
-      "websitePlaceholder": "https://sakura.ge",
+      "websitePlaceholder": "https://twino.estate",
       "saveButton": "ბაზის შენახვა"
     },
     "properties": {
@@ -111,5 +111,27 @@
         "cancel": "გაუქმება"
       }
     }
+  },
+  "sidebar": {
+    "name": "TwinO",
+    "nav": {
+      "overview": "მიმოხილვა",
+      "configureTwin": "აგენტის კონფიგ.",
+      "conversations": "საუბრები",
+      "leads": "ლიდები",
+      "integration": "ინტეგრაცია",
+      "settings": "პარამეტრები"
+    },
+    "collapse": "დაკეცვა",
+    "signOut": "გასვლა"
+  },
+  "access": {
+    "subtitle": "შეიყვანეთ წვდომის გასაღები დასაწყებად",
+    "keyLabel": "წვდომის გასაღები",
+    "keyHint": "ამ გასაღებს მიიღეთ ელ-ფოსტაზე დემოს შემდეგ.",
+    "keyError": "გთხოვთ შეიყვანოთ სრული 16-სიმბოლოიანი წვდომის გასაღები.",
+    "submitButton": "პანელზე შესვლა",
+    "verifying": "მოწმდება...",
+    "genericError": "დაფიქსირდა შეცდომა. გთხოვთ სცადოთ თავიდან."
   }
 }

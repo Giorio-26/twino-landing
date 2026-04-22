@@ -66,7 +66,7 @@ export default function IntegrationClient({ hasPhone }: { hasPhone: boolean }) {
   const isConnected = wa.phase === "connected" || wa.phase === "qr";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto w-full space-y-6">
       <div className="dash-animate-in">
         <h2 className="font-Helvetica-Neue font-bold text-2xl text-dash-text">
           Integration
@@ -266,7 +266,7 @@ export default function IntegrationClient({ hasPhone }: { hasPhone: boolean }) {
       </div>
 
       {/* Telegram Notifications */}
-      <div
+      {/* <div
         className="dash-card dash-animate-in overflow-hidden"
         style={{ animationDelay: "0.15s" }}
       >
@@ -327,7 +327,7 @@ export default function IntegrationClient({ hasPhone }: { hasPhone: boolean }) {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Google Sheets / CRM Placeholder */}
       <div

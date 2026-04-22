@@ -1,6 +1,8 @@
 "use client";
 
 import { ArrowRight, KeyRound, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
@@ -13,6 +15,8 @@ function formatKey(raw: string): string {
 }
 
 export default function AccessPage() {
+  const tc = useTranslations("common");
+  const t = useTranslations("dashboard.access");
   const [key, setKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +33,7 @@ export default function AccessPage() {
 
     const stripped = key.replace(/-/g, "");
     if (stripped.length !== 16) {
-      setError("Please enter the full 16-character access key.");
+      setError(t("keyError"));
       return;
     }
 
@@ -46,14 +50,14 @@ export default function AccessPage() {
       const json = await res.json();
 
       if (!res.ok) {
-        setError(json.error ?? "Something went wrong. Please try again.");
+        setError(json.error ?? t("genericError"));
         return;
       }
 
       router.push(`/${params.locale}/dashboard`);
       router.refresh();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("genericError"));
     } finally {
       setLoading(false);
     }
@@ -70,19 +74,17 @@ export default function AccessPage() {
       <div className="dash-animate-in relative z-10 w-full max-w-md px-6">
         {/* Logo */}
         <div className="mb-10 text-center">
-          <Link
-            href="/"
-            className="group inline-flex items-center gap-2.5 no-underline"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent font-bold text-lg text-white shadow-accent/20 shadow-lg">
-              T
-            </div>
-            <span className="font-Helvetica-Neue font-bold text-2xl text-primary">
-              Twin<span className="text-accent">O</span>
-            </span>
+          <Link href="/" className="inline-flex no-underline">
+            <Image
+              src="/images/twino.svg"
+              alt={tc("name")}
+              width={120}
+              height={32}
+              priority
+            />
           </Link>
           <p className="mt-3 text-primary/50 text-sm">
-            Enter your access key to get started
+            {t("subtitle")}
           </p>
         </div>
 
@@ -101,7 +103,7 @@ export default function AccessPage() {
                 htmlFor="access-key"
                 className="block font-medium text-primary/70 text-sm"
               >
-                Access Key
+                {t("keyLabel")}
               </label>
               <div className="relative">
                 <KeyRound className="-translate-y-1/2 absolute top-1/2 left-4 h-4 w-4 text-primary/30" />
@@ -118,7 +120,7 @@ export default function AccessPage() {
                 />
               </div>
               <p className="text-primary/40 text-xs">
-                You received this key via email after your demo.
+                {t("keyHint")}
               </p>
             </div>
 
@@ -130,11 +132,11 @@ export default function AccessPage() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Verifying...
+                  {t("verifying")}
                 </>
               ) : (
                 <>
-                  Access Dashboard
+                  {t("submitButton")}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </>
               )}

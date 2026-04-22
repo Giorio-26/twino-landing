@@ -60,7 +60,7 @@ export default function SettingsClient({
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto w-full space-y-6">
       <div className="dash-animate-in">
         <h2 className="font-Helvetica-Neue font-bold text-2xl text-dash-text">
           Settings
@@ -96,7 +96,7 @@ export default function SettingsClient({
                 type="text"
                 value={agency.name}
                 onChange={(e) => setAgency({ ...agency, name: e.target.value })}
-                placeholder="Sakura Properties"
+                placeholder="TwinO"
                 className={inputCls}
               />
             </label>
@@ -110,7 +110,7 @@ export default function SettingsClient({
                 onChange={(e) =>
                   setAgency({ ...agency, email: e.target.value })
                 }
-                placeholder="info@sakura.ge"
+                placeholder="info@twino.estate"
                 className={inputCls}
               />
             </label>
@@ -138,7 +138,7 @@ export default function SettingsClient({
                 onChange={(e) =>
                   setAgency({ ...agency, website: e.target.value })
                 }
-                placeholder="https://sakura.ge"
+                placeholder="https://twino.estate"
                 className={inputCls}
               />
             </label>
@@ -199,11 +199,11 @@ export default function SettingsClient({
               label: "Email notifications",
               desc: "Receive daily lead summaries via email",
             },
-            {
-              key: "telegram",
-              label: "Telegram alerts",
-              desc: "Get instant alerts for urgent events",
-            },
+            // {
+            //   key: "telegram",
+            //   label: "Telegram alerts",
+            //   desc: "Get instant alerts for urgent events",
+            // },
             {
               key: "takeover",
               label: "Agent takeover alerts",

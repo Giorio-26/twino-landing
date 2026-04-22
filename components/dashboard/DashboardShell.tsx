@@ -3,7 +3,6 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 import Sidebar from "./Sidebar";
-import Topbar from "./Topbar";
 
 export default function DashboardShell({
   children,
@@ -41,12 +40,9 @@ export default function DashboardShell({
       )}
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar onMenuToggle={() => setMobileMenuOpen(true)} />
-        <main className="flex-1 overflow-y-auto bg-accent-secondary-light/50 p-6">
-          {children}
-        </main>
-      </div>
+      <main className="flex flex-1 flex-col items-center overflow-y-auto bg-accent-secondary-light/50 p-6">
+        {children}
+      </main>
     </div>
   );
 }
