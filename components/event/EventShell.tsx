@@ -54,7 +54,7 @@ export default function EventShell({ children, role, locale }: EventShellProps) 
       </header>
 
       <main className="flex-1 bg-accent-secondary-light/50 p-6">
-        <div className="mx-auto w-full max-w-6xl">
+        <div className="mx-auto w-full max-w-350">
           {children}
         </div>
       </main>

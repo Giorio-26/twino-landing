@@ -19,6 +19,7 @@ interface Lead {
   phone: string;
   country: string;
   readiness: "HOT" | "EXPLORING" | "QUALIFIED";
+  offer: string;
   summary: string;
 }
 
@@ -218,6 +219,7 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Contact</th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Country</th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Readiness</th>
+                  <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Offer</th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Summary</th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Time</th>
                 </tr>
@@ -249,6 +251,7 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
                           {cfg.label}
                         </span>
                       </td>
+                      <td className="px-5 py-4 text-dash-text-secondary text-sm">{lead.offer || "—"}</td>
                       <td className="max-w-xs px-5 py-4 text-dash-text-secondary text-sm">
                         <span className="line-clamp-2">{lead.summary || "—"}</span>
                       </td>
@@ -319,6 +322,13 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
                 <div className="mt-0.5 font-bold text-dash-text text-sm">{timeAgo(selectedLead.timestamp)}</div>
               </div>
             </div>
+
+            {selectedLead.offer && (
+              <div className="mt-3 rounded-xl bg-dash-bg p-3">
+                <div className="mb-1.5 font-medium text-[10px] text-dash-text-muted uppercase">Offer</div>
+                <p className="text-dash-text-secondary text-sm leading-relaxed">{selectedLead.offer}</p>
+              </div>
+            )}
 
             {selectedLead.summary && (
               <div className="mt-3 rounded-xl bg-dash-bg p-3">
