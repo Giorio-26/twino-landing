@@ -67,6 +67,7 @@ export default function CompanyAccessPage() {
       <div className="dash-animate-in relative z-10 w-full max-w-md px-6">
         <div className="mb-10 text-center">
           <Image
+            className="mx-auto"
             src="/images/twino.svg"
             alt="Twino"
             width={120}
