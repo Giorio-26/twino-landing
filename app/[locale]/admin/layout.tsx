@@ -48,14 +48,31 @@ export default function AdminLayout({
     return null; // Or a loading spinner
   }
 
-  if (pathname === "/en/admin" || pathname === "/ka/admin") {
+  const isLoginPage = pathname === "/en/admin" || pathname === "/ka/admin";
+  if (isLoginPage) {
     return <>{children}</>;
   }
 
   return (
     <div>
       <header className="flex items-center justify-between bg-gray-800 p-4 text-white">
-        <h1 className="text-xl">Admin Panel</h1>
+        <div className="flex items-center gap-6">
+          <h1 className="text-xl">Admin Panel</h1>
+          <nav className="flex gap-4 text-sm">
+            <a
+              href="/en/admin/bookings"
+              className="text-gray-300 hover:text-white"
+            >
+              Bookings
+            </a>
+            <a
+              href="/en/admin/event-keys"
+              className="text-gray-300 hover:text-white"
+            >
+              Event Keys
+            </a>
+          </nav>
+        </div>
         <button
           type="button"
           onClick={handleLogout}
