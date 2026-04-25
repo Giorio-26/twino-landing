@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, Copy, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Check, Copy, Plus, Trash2, X } from "lucide-react";
+import { useMemo, useState } from "react";
 
 interface EventCompany {
   id: number;
@@ -17,12 +17,22 @@ interface EventKey {
   created_at: string;
 }
 
+interface EventKeyAuditLog {
+  key: string;
+  role: "organizer" | "company";
+  company_id: number | null;
+  ip_address: string | null;
+  terms_accepted: boolean;
+  first_used_at: string;
+}
+
 interface EventKeysClientProps {
   companies: EventCompany[];
   initialKeys: EventKey[];
+  auditLogs: EventKeyAuditLog[];
 }
 
-export default function EventKeysClient({ companies, initialKeys }: EventKeysClientProps) {
+export default function EventKeysClient({ companies, initialKeys, auditLogs }: EventKeysClientProps) {
   const [keys, setKeys] = useState<EventKey[]>(initialKeys);
 
   const [role, setRole] = useState<"organizer" | "company">("company");
@@ -32,7 +42,12 @@ export default function EventKeysClient({ companies, initialKeys }: EventKeysCli
   const [keyError, setKeyError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
-  async function handleGenerateKey(e: React.FormEvent) {
+  const auditMap = useMemo(
+    () => new Map(auditLogs.map((log) => [log.key, log])),
+    [auditLogs],
+  );
+
+  async function handleGenerateKey(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setKeyError(null);
 
@@ -171,66 +186,101 @@ export default function EventKeysClient({ companies, initialKeys }: EventKeysCli
       {/* Keys table */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <h3 className="border-gray-200 border-b px-6 py-4 font-semibold text-lg">Generated Keys</h3>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-gray-200 border-b text-left">
-              <th className="px-4 py-3 font-semibold text-gray-600">Key</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Role</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Company</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Expires</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {keys.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
-                  No event keys generated yet.
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-gray-200 border-b text-left">
+                <th className="px-4 py-3 font-semibold text-gray-600">Key</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Role</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Company</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Expires</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">First Used</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">IP</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">T&amp;C</th>
+                <th className="px-4 py-3" />
               </tr>
-            ) : (
-              keys.map((k) => (
-                <tr key={k.id} className="border-gray-100 border-b last:border-0">
-                  <td className="px-4 py-3">
-                    <span className="font-mono font-semibold tracking-widest">{k.key}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 font-medium text-xs capitalize ${k.role === "organizer" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
-                      {k.role}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{companyName(k.company_id)}</td>
-                  <td className="px-4 py-3 text-gray-500">
-                    {new Date(k.expires_at).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => copyKey(k.id, k.key)}
-                        className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-gray-500 text-xs hover:bg-gray-50"
-                      >
-                        {copiedId === k.id ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
-                        {copiedId === k.id ? "Copied" : "Copy"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteKey(k.id)}
-                        className="flex items-center justify-center rounded-lg border border-red-200 p-1 text-red-400 hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+            </thead>
+            <tbody>
+              {keys.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
+                    No event keys generated yet.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                keys.map((k) => {
+                  const log = auditMap.get(k.key);
+                  return (
+                    <tr key={k.id} className="border-gray-100 border-b last:border-0">
+                      <td className="px-4 py-3">
+                        <span className="font-mono font-semibold tracking-widest">{k.key}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`rounded-full px-2 py-0.5 font-medium text-xs capitalize ${k.role === "organizer" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
+                          {k.role}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">{companyName(k.company_id)}</td>
+                      <td className="px-4 py-3 text-gray-500">
+                        {new Date(k.expires_at).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500">
+                        {log ? (
+                          new Date(log.first_used_at).toLocaleString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        ) : (
+                          <span className="text-gray-300 text-xs">Never</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-gray-500 text-xs">
+                        {log?.ip_address ?? <span className="text-gray-300">—</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        {log ? (
+                          log.terms_accepted ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <X className="h-4 w-4 text-red-400" />
+                          )
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => copyKey(k.id, k.key)}
+                            className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-gray-500 text-xs hover:bg-gray-50"
+                          >
+                            {copiedId === k.id ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+                            {copiedId === k.id ? "Copied" : "Copy"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteKey(k.id)}
+                            className="flex items-center justify-center rounded-lg border border-red-200 p-1 text-red-400 hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -26,10 +26,39 @@ export async function POST(request: NextRequest) {
     const days = body.expiresInDays ?? 30;
     const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 
+    let entityName: string | null =
+      body.role === "organizer" ? "Property Georgia" : null;
+
+    if (body.role === "company" && body.companyId) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_EVENT_URL;
+      const apiKey = process.env.TWINO_API_KEY;
+      if (apiUrl && apiKey) {
+        try {
+          const res = await fetch(`${apiUrl}/event/companies`, {
+            headers: { "X-API-KEY": apiKey },
+            cache: "no-store",
+          });
+          const payload = await res.json();
+          const list: { id: unknown; name: string }[] = Array.isArray(payload)
+            ? payload
+            : Array.isArray(payload?.companies)
+              ? payload.companies
+              : Array.isArray(payload?.data)
+                ? payload.data
+                : [];
+          const match = list.find((c) => Number(c.id) === body.companyId);
+          if (match) entityName = match.name;
+        } catch (err) {
+          console.error("[generate-event-key] company lookup error:", err);
+        }
+      }
+    }
+
     const { error: insertError } = await supabase.from("event_access_keys").insert({
       key,
       role: body.role,
       company_id: body.role === "company" ? body.companyId : null,
+      entity_name: entityName,
       expires_at: expiresAt,
     });
 

@@ -1,7 +1,15 @@
-import { EVENT_SESSION_COOKIE, signEventSession } from "@/lib/session";
-import { createAdminClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
+import { EVENT_SESSION_COOKIE, signEventSession } from "@/lib/session";
+import { createAdminClient } from "@/lib/supabase/server";
+
+function getClientIp(request: NextRequest): string {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown"
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from("event_access_keys")
-      .select("expires_at")
+      .select("id, entity_name, expires_at")
       .eq("key", raw)
       .eq("role", "organizer")
       .maybeSingle();
@@ -27,6 +35,24 @@ export async function POST(request: NextRequest) {
 
     if (new Date(data.expires_at) < new Date()) {
       return Response.json({ error: "This access key has expired" }, { status: 401 });
+    }
+
+    const { data: existingLog } = await supabase
+      .from("event_key_audit_logs")
+      .select("id")
+      .eq("key", raw)
+      .maybeSingle();
+
+    if (!existingLog) {
+      await supabase.from("event_key_audit_logs").insert({
+        event_key_id: data.id,
+        key: raw,
+        entity: data.entity_name ?? "Property Georgia",
+        role: "organizer",
+        company_id: null,
+        ip_address: getClientIp(request),
+        terms_accepted: false,
+      });
     }
 
     const sessionExpiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
