@@ -20,7 +20,6 @@ interface Lead {
   country: string;
   readiness: "HOT" | "EXPLORING" | "QUALIFIED";
   offer: string;
-  summary: string;
 }
 
 const READINESS = ["HOT", "EXPLORING", "QUALIFIED"] as const;
@@ -53,14 +52,18 @@ function timeAgo(raw: string): string {
 
 interface EventLeadsTableProps {
   companyId?: number;
+  projectId?: number;
+  fetchUrl?: string;
   title?: string;
 }
 
-export default function EventLeadsTable({ companyId, title = "Leads" }: EventLeadsTableProps) {
+export default function EventLeadsTable({ companyId, projectId, fetchUrl, title = "Leads" }: EventLeadsTableProps) {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [companyName, setCompanyName] = useState<string | null>(null);
+  const [projectName, setProjectName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -78,14 +81,25 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
       setError(null);
       try {
         const params = new URLSearchParams();
-        if (companyId) params.set("companyId", String(companyId));
         if (debouncedSearch) params.set("search", debouncedSearch);
         if (readinessFilter !== "all") params.set("readiness", readinessFilter);
-        const res = await fetch(`/api/event/leads?${params.toString()}`);
+
+        let url: string;
+        if (fetchUrl) {
+          url = `${fetchUrl}?${params.toString()}`;
+        } else if (projectId) {
+          url = `/api/event/company/projects/${projectId}/leads?${params.toString()}`;
+        } else {
+          if (companyId) params.set("companyId", String(companyId));
+          url = `/api/event/leads?${params.toString()}`;
+        }
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error("Failed to load leads");
         const json = await res.json();
         setLeads(json.data ?? []);
         if (json.company_name) setCompanyName(json.company_name);
+        if (json.project_name) setProjectName(json.project_name);
       } catch {
         setError("Could not load leads. Please try again.");
       } finally {
@@ -93,7 +107,7 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
       }
     }
     fetchLeads();
-  }, [companyId, debouncedSearch, readinessFilter]);
+  }, [companyId, projectId, fetchUrl, debouncedSearch, readinessFilter]);
 
   const statCounts = {
     total: leads.length,
@@ -102,7 +116,11 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
     qualified: leads.filter((l) => l.readiness === "QUALIFIED").length,
   };
 
-  const pageTitle = companyName ? `${companyName} — Leads` : title;
+  const pageTitle = projectName
+    ? `${projectName} — Leads`
+    : companyName
+      ? `${companyName} — Leads`
+      : title;
 
   return (
     <div className="mx-auto w-full space-y-6">
@@ -115,13 +133,42 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
             Qualified prospects collected at the event.
           </p>
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-xl border border-dash-border px-4 py-2.5 font-medium text-dash-text-secondary text-sm transition-colors hover:bg-dash-surface-hover hover:text-dash-text"
-        >
-          <Download className="h-4 w-4" />
-          Export CSV
-        </button>
+        {(projectId || fetchUrl) && (
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={async () => {
+              setExporting(true);
+              const exportEndpoint = fetchUrl
+                ? `${fetchUrl}/export`
+                : `/api/event/company/projects/${projectId}/leads/export`;
+              try {
+                const res = await fetch(exportEndpoint);
+                if (!res.ok) throw new Error("Export failed");
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const sanitize = (s: string) =>
+                  s.replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "_");
+                const parts = [
+                  companyName ? sanitize(companyName) : null,
+                  projectName ? sanitize(projectName) : null,
+                  "leads",
+                ].filter(Boolean);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${parts.join("-")}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              } finally {
+                setExporting(false);
+              }
+            }}
+            className="flex items-center gap-2 rounded-xl border border-dash-border px-4 py-2.5 font-medium text-dash-text-secondary text-sm transition-colors hover:bg-dash-surface-hover hover:text-dash-text disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Download className="h-4 w-4" />
+            {exporting ? "Exporting…" : "Export CSV"}
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -220,7 +267,6 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Country</th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Readiness</th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Offer</th>
-                  <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Summary</th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Time</th>
                 </tr>
               </thead>
@@ -252,9 +298,6 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
                         </span>
                       </td>
                       <td className="px-5 py-4 text-dash-text-secondary text-sm">{lead.offer || "—"}</td>
-                      <td className="max-w-xs px-5 py-4 text-dash-text-secondary text-sm">
-                        <span className="line-clamp-2">{lead.summary || "—"}</span>
-                      </td>
                       <td className="px-5 py-4 text-dash-text-muted text-xs">{timeAgo(lead.timestamp)}</td>
                     </tr>
                   );
@@ -330,12 +373,6 @@ export default function EventLeadsTable({ companyId, title = "Leads" }: EventLea
               </div>
             )}
 
-            {selectedLead.summary && (
-              <div className="mt-3 rounded-xl bg-dash-bg p-3">
-                <div className="mb-1.5 font-medium text-[10px] text-dash-text-muted uppercase">Summary</div>
-                <p className="text-dash-text-secondary text-sm leading-relaxed">{selectedLead.summary}</p>
-              </div>
-            )}
           </div>
         </div>
       )}
