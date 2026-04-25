@@ -107,6 +107,8 @@ export default function EventLeadsTable({ companyId, projectId, fetchUrl, title 
       }
     }
     fetchLeads();
+    const interval = setInterval(fetchLeads, 60_000);
+    return () => clearInterval(interval);
   }, [companyId, projectId, fetchUrl, debouncedSearch, readinessFilter]);
 
   const statCounts = {
