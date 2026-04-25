@@ -13,8 +13,9 @@ function getClientIp(request: NextRequest): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: { key?: string } = await request.json();
+    const body: { key?: string; termsAccepted?: boolean } = await request.json();
     const raw = body.key?.trim().toUpperCase();
+    const termsAccepted = body.termsAccepted === true;
 
     if (!raw) {
       return Response.json({ error: "Access key is required" }, { status: 400 });
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     const { data: existingLog } = await supabase
       .from("event_key_audit_logs")
-      .select("id")
+      .select("id, terms_accepted")
       .eq("key", raw)
       .maybeSingle();
 
@@ -51,8 +52,13 @@ export async function POST(request: NextRequest) {
         role: "organizer",
         company_id: null,
         ip_address: getClientIp(request),
-        terms_accepted: false,
+        terms_accepted: termsAccepted,
       });
+    } else if (!existingLog.terms_accepted && termsAccepted) {
+      await supabase
+        .from("event_key_audit_logs")
+        .update({ terms_accepted: true })
+        .eq("id", existingLog.id);
     }
 
     const sessionExpiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();

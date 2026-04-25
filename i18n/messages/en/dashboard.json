@@ -133,5 +133,35 @@
     "submitButton": "Access Dashboard",
     "verifying": "Verifying...",
     "genericError": "Something went wrong. Please try again."
+  },
+  "event": {
+    "company": {
+      "access": {
+        "subtitle": "Company Access",
+        "keyLabel": "Company Access Key",
+        "keyHint": "Enter the 16-character key you received from the event organizer.",
+        "keyError": "Please enter a valid 16-character access key.",
+        "submitButton": "Enter Dashboard",
+        "verifying": "Verifying…",
+        "genericError": "Something went wrong. Please try again.",
+        "termsPrefix": "I have read and agree to the",
+        "termsLink": "Terms & Conditions",
+        "termsError": "You must accept the Terms & Conditions to continue."
+      }
+    },
+    "organizer": {
+      "access": {
+        "subtitle": "Event Organizer Access",
+        "keyLabel": "Organizer Access Key",
+        "keyHint": "Enter the 16-character key you received from Twino.",
+        "keyError": "Please enter a valid 16-character access key.",
+        "submitButton": "Enter Dashboard",
+        "verifying": "Verifying…",
+        "genericError": "Something went wrong. Please try again.",
+        "termsPrefix": "I have read and agree to the",
+        "termsLink": "Terms & Conditions",
+        "termsError": "You must accept the Terms & Conditions to continue."
+      }
+    }
   }
 }
