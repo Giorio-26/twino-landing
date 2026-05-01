@@ -73,15 +73,14 @@
     "knowledge": {
       "title": "ცოდნის ბაზა",
       "subtitle": "სააგენტოს ინფო, გამოყენებული საუბრებში",
-      "agencyName": "სააგენტოს სახელი",
-      "agencyNamePlaceholder": "TwinO",
-      "phone": "ტელეფონი",
-      "phonePlaceholder": "+995 555 123 456",
       "address": "მისამართი",
       "addressPlaceholder": "თბილისი, რუსთაველის გამზ. 24",
       "workingHours": "სამუშაო საათები",
+      "closed": "დახურულია",
       "website": "ვებ-საიტი",
       "websitePlaceholder": "https://twino.estate",
+      "additionalInfo": "დამატებითი ინფო",
+      "additionalInfoPlaceholder": "მაგ. სპეციალიზდებით ბათუმის ზღვის ხედიანი ბინებზე. ნახვა ხელმისაწვდომია შაბათ-კვირას.",
       "saveButton": "ბაზის შენახვა"
     },
     "properties": {
@@ -110,6 +109,23 @@
         "submitting": "ემატება\u2026",
         "cancel": "გაუქმება"
       }
+    }
+  },
+  "overview": {
+    "greetingMorning": "დილა მშვიდობისა! 👋",
+    "greetingAfternoon": "შუადღე მშვიდობისა! 👋",
+    "greetingEvening": "საღამო მშვიდობისა! 👋",
+    "subtitle": "აი, რა ხდება დღეს შენს Sales Twin-თან.",
+    "stats": {
+      "activeConversations": "აქტიური საუბრები",
+      "qualifiedLeads": "კვალიფიციური ლიდები",
+      "avgResponseTime": "საშ. პასუხის დრო",
+      "conversionRate": "კონვერსიის მაჩვენებელი"
+    },
+    "twin": {
+      "title": "Sales Twin",
+      "avgMsgsPerDay": "საშ. შეტყობინება / დღეში",
+      "autoResolved": "ავტო-გადაჭრილი"
     }
   },
   "sidebar": {

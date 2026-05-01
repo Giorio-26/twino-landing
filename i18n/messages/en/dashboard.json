@@ -73,15 +73,14 @@
     "knowledge": {
       "title": "Knowledge Base",
       "subtitle": "Agency info used in conversations",
-      "agencyName": "Agency Name",
-      "agencyNamePlaceholder": "TwinO",
-      "phone": "Phone",
-      "phonePlaceholder": "+995 555 123 456",
       "address": "Address",
       "addressPlaceholder": "Tbilisi, Rustaveli Ave 24",
       "workingHours": "Working Hours",
+      "closed": "Closed",
       "website": "Website",
       "websitePlaceholder": "https://twino.estate",
+      "additionalInfo": "Additional Info",
+      "additionalInfoPlaceholder": "e.g. We specialize in sea-view apartments in Batumi. Viewings available on weekends.",
       "saveButton": "Save Knowledge Base"
     },
     "properties": {
@@ -110,6 +109,23 @@
         "submitting": "Adding\u2026",
         "cancel": "Cancel"
       }
+    }
+  },
+  "overview": {
+    "greetingMorning": "Good morning! 👋",
+    "greetingAfternoon": "Good afternoon! 👋",
+    "greetingEvening": "Good evening! 👋",
+    "subtitle": "Here's what's happening with your Sales Twin today.",
+    "stats": {
+      "activeConversations": "Active Conversations",
+      "qualifiedLeads": "Qualified Leads",
+      "avgResponseTime": "Avg Response Time",
+      "conversionRate": "Conversion Rate"
+    },
+    "twin": {
+      "title": "Sales Twin",
+      "avgMsgsPerDay": "Avg msgs / day",
+      "autoResolved": "Auto-resolved"
     }
   },
   "sidebar": {

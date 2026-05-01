@@ -24,7 +24,7 @@ interface Lead {
   location: string | null;
   intent: string | null;
   lead_score: number;
-  status: "new" | "contacted" | "qualified" | "deal";
+  status: "new" | "hot" | "qualified" | "call_in" | "deal";
   updated_at: string;
 }
 
@@ -45,12 +45,19 @@ type WsEvent =
   | { type: "conversation_closed"; chat_id: string }
   | { type: "profanity_blocked"; chat_id: string };
 
+const UNKNOWN_PLACEHOLDER = "უცნობია";
+
+function isKnown(value: string | null): boolean {
+  return !!value && value !== UNKNOWN_PLACEHOLDER;
+}
+
 function formatPhone(chatId: string): string {
   return `+${chatId.split("@")[0]}`;
 }
 
 function timeAgo(isoDate: string): string {
-  const utc = isoDate.endsWith("Z") || isoDate.includes("+") ? isoDate : `${isoDate}Z`;
+  const utc =
+    isoDate.endsWith("Z") || isoDate.includes("+") ? isoDate : `${isoDate}Z`;
   const diff = Date.now() - new Date(utc).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "just now";
@@ -271,13 +278,34 @@ export default function ConversationsPage() {
 
     fetch(`/api/dashboard/chat-controls/${encodeURIComponent(chatId)}`)
       .then((r) => r.json())
-      .then((json: { state?: { human_takeover: boolean; is_blocked: boolean; conversation_closed: boolean } }) => {
-        if (!json.state) return;
-        const { human_takeover, is_blocked, conversation_closed } = json.state;
-        setTakeoverChats((prev) => { const s = new Set(prev); human_takeover ? s.add(chatId) : s.delete(chatId); return s; });
-        setBlockedChats((prev) => { const s = new Set(prev); is_blocked ? s.add(chatId) : s.delete(chatId); return s; });
-        setClosedChats((prev) => { const s = new Set(prev); conversation_closed ? s.add(chatId) : s.delete(chatId); return s; });
-      })
+      .then(
+        (json: {
+          state?: {
+            human_takeover: boolean;
+            is_blocked: boolean;
+            conversation_closed: boolean;
+          };
+        }) => {
+          if (!json.state) return;
+          const { human_takeover, is_blocked, conversation_closed } =
+            json.state;
+          setTakeoverChats((prev) => {
+            const s = new Set(prev);
+            human_takeover ? s.add(chatId) : s.delete(chatId);
+            return s;
+          });
+          setBlockedChats((prev) => {
+            const s = new Set(prev);
+            is_blocked ? s.add(chatId) : s.delete(chatId);
+            return s;
+          });
+          setClosedChats((prev) => {
+            const s = new Set(prev);
+            conversation_closed ? s.add(chatId) : s.delete(chatId);
+            return s;
+          });
+        },
+      )
       .catch(() => null);
 
     fetch(`/api/dashboard/chat-history?chat_id=${encodeURIComponent(chatId)}`)
@@ -309,27 +337,30 @@ export default function ConversationsPage() {
   }: {
     label: string;
     value: string | null;
-  }) => (
-    <div
-      className={`flex items-center gap-2 rounded-lg p-2.5 ${value ? "bg-dash-success-muted" : "bg-dash-surface-secondary"}`}
-    >
-      {value ? (
-        <Check className="h-3.5 w-3.5 text-dash-success" />
-      ) : (
-        <Circle className="h-3.5 w-3.5 text-dash-text-muted" />
-      )}
-      <div>
-        <div className="font-medium text-[10px] text-dash-text-muted uppercase">
-          {label}
-        </div>
-        <div
-          className={`font-semibold text-xs ${value ? "text-dash-success" : "text-dash-text-muted"}`}
-        >
-          {value || "Pending"}
+  }) => {
+    const known = isKnown(value);
+    return (
+      <div
+        className={`flex items-center gap-2 rounded-lg p-2.5 ${known ? "bg-dash-success-muted" : "bg-dash-surface-secondary"}`}
+      >
+        {known ? (
+          <Check className="h-3.5 w-3.5 text-dash-success" />
+        ) : (
+          <Circle className="h-3.5 w-3.5 text-dash-text-muted" />
+        )}
+        <div>
+          <div className="font-medium text-[10px] text-dash-text-muted uppercase">
+            {label}
+          </div>
+          <div
+            className={`font-semibold text-xs ${known ? "text-dash-success" : "text-dash-text-muted"}`}
+          >
+            {known ? value : "Pending"}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="w-full dash-animate-in flex h-[calc(100vh-4rem)] gap-0 overflow-hidden rounded-2xl border border-dash-border bg-dash-surface">
@@ -524,7 +555,11 @@ export default function ConversationsPage() {
                   disabled={actionPending}
                   className="flex items-center gap-1.5 rounded-lg border border-dash-success/30 bg-dash-success-muted px-3 py-1.5 font-semibold text-dash-success text-xs transition-colors hover:bg-dash-success/20 disabled:opacity-50"
                 >
-                  {actionPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Zap className="h-3.5 w-3.5" />}
+                  {actionPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Zap className="h-3.5 w-3.5" />
+                  )}
                   Resume AI
                 </button>
               ) : (
@@ -534,7 +569,11 @@ export default function ConversationsPage() {
                   disabled={actionPending}
                   className="flex items-center gap-1.5 rounded-lg border border-dash-warning/30 bg-dash-warning-muted px-3 py-1.5 font-semibold text-dash-warning text-xs transition-colors hover:bg-dash-warning/20 disabled:opacity-50"
                 >
-                  {actionPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <User className="h-3.5 w-3.5" />}
+                  {actionPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <User className="h-3.5 w-3.5" />
+                  )}
                   Take Over
                 </button>
               )}
@@ -551,8 +590,16 @@ export default function ConversationsPage() {
               )}
               {!messagesLoading &&
                 messages.map((msg, i) => {
-                  const isOutbound = msg.sender === "ai" || msg.sender === "human_agent";
-                  const displayTime = msg.time ?? (msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : undefined);
+                  const isOutbound =
+                    msg.sender === "ai" || msg.sender === "human_agent";
+                  const displayTime =
+                    msg.time ??
+                    (msg.timestamp
+                      ? new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : undefined);
                   return (
                     <div
                       key={`${msg.sender}-${i}-${msg.text.slice(0, 12)}`}
@@ -563,8 +610,8 @@ export default function ConversationsPage() {
                           msg.sender === "ai"
                             ? "rounded-tr-sm bg-dash-accent text-white"
                             : msg.sender === "human_agent"
-                            ? "rounded-tr-sm bg-emerald-600 text-white"
-                            : "rounded-tl-sm border border-dash-border bg-dash-surface text-dash-text"
+                              ? "rounded-tr-sm bg-emerald-600 text-white"
+                              : "rounded-tl-sm border border-dash-border bg-dash-surface text-dash-text"
                         }`}
                       >
                         {msg.sender === "ai" && (
@@ -583,7 +630,9 @@ export default function ConversationsPage() {
                         {displayTime && (
                           <div
                             className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${
-                              isOutbound ? "text-white/60" : "text-dash-text-muted"
+                              isOutbound
+                                ? "text-white/60"
+                                : "text-dash-text-muted"
                             }`}
                           >
                             {displayTime}
@@ -716,20 +765,22 @@ export default function ConversationsPage() {
               </div>
             </div>
 
-            {selected.budget && selected.location && selected.intent && (
-              <div className="mt-4 rounded-xl border border-dash-success/20 bg-dash-success-muted p-4 text-center">
-                <Check className="mx-auto h-6 w-6 text-dash-success" />
-                <p className="mt-2 font-semibold text-dash-success text-sm">
-                  Fully Qualified
-                </p>
-                <p className="mt-1 text-dash-text-muted text-xs">
-                  Ready for agent handoff
-                </p>
-              </div>
-            )}
+            {isKnown(selected.budget) &&
+              isKnown(selected.location) &&
+              isKnown(selected.intent) && (
+                <div className="mt-4 rounded-xl border border-dash-success/20 bg-dash-success-muted p-4 text-center">
+                  <Check className="mx-auto h-6 w-6 text-dash-success" />
+                  <p className="mt-2 font-semibold text-dash-success text-sm">
+                    Fully Qualified
+                  </p>
+                  <p className="mt-1 text-dash-text-muted text-xs">
+                    Ready for agent handoff
+                  </p>
+                </div>
+              )}
 
             <div className="mt-6 space-y-2">
-              <button
+              {/* <button
                 type="button"
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-dash-accent py-2.5 font-semibold text-white text-xs hover:bg-dash-accent-hover"
               >
@@ -740,7 +791,7 @@ export default function ConversationsPage() {
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 font-semibold text-dash-text-secondary text-xs hover:bg-dash-surface-hover"
               >
                 Schedule Meeting
-              </button>
+              </button> */}
               <button
                 type="button"
                 onClick={handleBlock}
@@ -758,7 +809,9 @@ export default function ConversationsPage() {
                 ) : (
                   <ShieldOff className="h-3.5 w-3.5" />
                 )}
-                {blockedChats.has(selected.chat_id) ? "Unblock User" : "Block User"}
+                {blockedChats.has(selected.chat_id)
+                  ? "Unblock User"
+                  : "Block User"}
               </button>
             </div>
           </div>

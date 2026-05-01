@@ -28,7 +28,7 @@ export default function EventShell({ children, role, locale }: EventShellProps) 
 
   return (
     <div className="dashboard-theme flex min-h-screen flex-col bg-white">
-      <header className="flex h-16 shrink-0 items-center justify-between border-black/5 border-b bg-white/80 mx-auto w-full max-w-350 backdrop-blur-xl">
+      <header className="mx-auto flex h-16 w-full max-w-350 shrink-0 items-center justify-between border-b border-black/5 bg-white/80 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <Image
             src="/images/twino.svg"

@@ -11,6 +11,7 @@ export interface TwinConfig {
   agency_working_hours: string;
   agency_phone: string;
   agency_website: string;
+  agency_additional_info: string;
 }
 
 export interface Rule {
@@ -50,6 +51,7 @@ export const DEFAULT_CONFIG: TwinConfig = {
   agency_working_hours: "Mon-Fri 9:00-18:00, Sat 10:00-15:00",
   agency_phone: "",
   agency_website: "",
+  agency_additional_info: "",
 };
 
 export const inputCls =

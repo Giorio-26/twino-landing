@@ -22,14 +22,19 @@ export default function Sidebar() {
   const t = useTranslations("dashboard.sidebar");
   const [collapsed, setCollapsed] = useState(false);
 
-  const navItems = [
+  const navItems: Array<{
+    label: string;
+    href: string;
+    icon: typeof BarChart3;
+    badge?: number | null;
+  }> = [
     { label: t("nav.overview"), href: "/dashboard", icon: BarChart3 },
     { label: t("nav.configureTwin"), href: "/dashboard/configure", icon: Cog },
     {
       label: t("nav.conversations"),
       href: "/dashboard/conversations",
       icon: MessageSquare,
-      badge: 3,
+      badge: null,
     },
     { label: t("nav.leads"), href: "/dashboard/leads", icon: Users },
     { label: t("nav.integration"), href: "/dashboard/integration", icon: Plug },

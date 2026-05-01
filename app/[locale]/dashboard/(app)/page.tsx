@@ -2,53 +2,37 @@
 
 import {
   ArrowUpRight,
-  Cog,
+  LogOut,
   MessageSquare,
-  Plug,
+  Sparkle,
   TrendingUp,
   Users,
   Zap,
 } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { Link, useRouter } from "@/i18n/navigation";
 
-const stats = [
-  {
-    label: "Active Conversations",
-    value: "12",
-    change: "+3 today",
-    trend: "up",
-    icon: MessageSquare,
-    color: "text-dash-accent",
-    bg: "bg-dash-accent-muted",
-  },
-  {
-    label: "Qualified Leads",
-    value: "47",
-    change: "+8 this week",
-    trend: "up",
-    icon: Users,
-    color: "text-dash-success",
-    bg: "bg-dash-success-muted",
-  },
-  {
-    label: "Avg Response Time",
-    value: "8s",
-    change: "-2s vs last week",
-    trend: "up",
-    icon: Zap,
-    color: "text-dash-warning",
-    bg: "bg-dash-warning-muted",
-  },
-  {
-    label: "Conversion Rate",
-    value: "34%",
-    change: "+5% this month",
-    trend: "up",
-    icon: TrendingUp,
-    color: "text-dash-purple",
-    bg: "bg-dash-purple-muted",
-  },
-];
+interface DashboardStats {
+  active: number;
+  qualified: number;
+  conversion_rate: number;
+  avg_response_time_seconds: number;
+  avg_messages_per_day: number;
+  no_manager_needed_count: number;
+  avg_communications_per_day: number;
+}
+
+function formatResponseTime(seconds: number): string {
+  if (seconds < 60) return `${seconds.toFixed(1)}s`;
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.round(seconds % 60);
+  return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+}
+
+function formatPercent(value: number): string {
+  return `${(value * 100).toFixed(1)}%`;
+}
 
 const recentActivity = [
   {
@@ -88,100 +72,193 @@ const recentActivity = [
   },
 ];
 
-const quickActions = [
-  {
-    label: "Configure Twin",
-    description: "Set up your AI assistant's personality",
-    href: "/dashboard/configure",
-    icon: Cog,
-    gradient: "from-dash-accent/20 to-dash-accent/5",
-  },
-  {
-    label: "View Leads",
-    description: "See all qualified prospects",
-    href: "/dashboard/leads",
-    icon: Users,
-    gradient: "from-dash-success/20 to-dash-success/5",
-  },
-  {
-    label: "Setup WhatsApp",
-    description: "Connect your business number",
-    href: "/dashboard/integration",
-    icon: Plug,
-    gradient: "from-dash-purple/20 to-dash-purple/5",
-  },
-];
+
+function StatSkeleton() {
+  return (
+    <div className="dash-card animate-pulse p-5">
+      <div className="flex items-start justify-between">
+        <div className="h-10 w-10 rounded-xl bg-dash-surface-secondary" />
+        <div className="h-5 w-20 rounded-full bg-dash-surface-secondary" />
+      </div>
+      <div className="mt-4">
+        <div className="h-8 w-16 rounded bg-dash-surface-secondary" />
+        <div className="mt-2 h-4 w-28 rounded bg-dash-surface-secondary" />
+      </div>
+    </div>
+  );
+}
+
+type GreetingKey = "greetingMorning" | "greetingAfternoon" | "greetingEvening";
 
 export default function DashboardOverview() {
+  const t = useTranslations("dashboard");
+  const router = useRouter();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [greetingKey, setGreetingKey] = useState<GreetingKey>("greetingMorning");
+
+  useEffect(() => {
+    fetch("/api/dashboard/stats")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.error) setStats(data);
+      })
+      .catch(() => {});
+
+    const hour = new Date().getHours();
+    if (hour >= 12 && hour < 18) setGreetingKey("greetingAfternoon");
+    else if (hour >= 18 || hour < 5) setGreetingKey("greetingEvening");
+  }, []);
+
+  const handleSignOut = async () => {
+    await fetch("/api/dashboard/sign-out", { method: "POST" });
+    router.push("/dashboard/access");
+    router.refresh();
+  };
+
+  const statCards = stats
+    ? [
+        {
+          label: t("overview.stats.activeConversations"),
+          value: stats.active.toString(),
+          icon: MessageSquare,
+          color: "text-dash-accent",
+          bg: "bg-dash-accent-muted",
+        },
+        {
+          label: t("overview.stats.qualifiedLeads"),
+          value: stats.qualified.toString(),
+          icon: Users,
+          color: "text-dash-success",
+          bg: "bg-dash-success-muted",
+        },
+        {
+          label: t("overview.stats.avgResponseTime"),
+          value: formatResponseTime(stats.avg_response_time_seconds),
+          icon: Zap,
+          color: "text-dash-warning",
+          bg: "bg-dash-warning-muted",
+        },
+        {
+          label: t("overview.stats.conversionRate"),
+          value: formatPercent(stats.conversion_rate),
+          icon: TrendingUp,
+          color: "text-dash-purple",
+          bg: "bg-dash-purple-muted",
+        },
+      ]
+    : null;
+
   return (
     <div className="mx-auto w-full space-y-8">
       {/* Header */}
-      <div className="dash-animate-in">
-        <h2 className="font-Helvetica-Neue font-bold text-2xl text-dash-text">
-          Good morning! 👋
-        </h2>
-        <p className="mt-1 text-dash-text-secondary text-sm">
-          Here&apos;s what&apos;s happening with your Sales Twin today.
-        </p>
+      <div className="dash-animate-in flex items-start justify-between">
+        <div>
+          <h2 className="font-Helvetica-Neue font-bold text-2xl text-dash-text">
+            {t(`overview.${greetingKey}`)}
+          </h2>
+          <p className="mt-1 text-dash-text-secondary text-sm">
+            {t("overview.subtitle")}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="flex items-center gap-2 rounded-xl px-3 py-2 text-dash-text-muted text-sm transition-all hover:bg-red-50 hover:text-red-500"
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          <span>{t("sidebar.signOut")}</span>
+        </button>
       </div>
 
       {/* Stats Grid */}
       <div className="dash-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="dash-card dash-card-hover group p-5"
-            >
-              <div className="flex items-start justify-between">
+        {statCards
+          ? statCards.map((stat) => {
+              const Icon = stat.icon;
+              return (
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.bg}`}
+                  key={stat.label}
+                  className="dash-card dash-card-hover group p-5"
                 >
-                  <Icon className={`h-5 w-5 ${stat.color}`} />
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${stat.bg}`}
+                    >
+                      <Icon className={`h-5 w-5 ${stat.color}`} />
+                    </div>
+                    <span className="font-Helvetica-Neue font-semibold text-dash-text text-sm leading-tight">
+                      {stat.label}
+                    </span>
+                  </div>
+                  <div className="mt-4">
+                    <div className="font-bold text-3xl text-dash-text">
+                      {stat.value}
+                    </div>
+                  </div>
                 </div>
-                <span className="flex items-center gap-1 rounded-full bg-dash-success-muted px-2 py-0.5 font-medium text-[11px] text-dash-success">
-                  <TrendingUp className="h-3 w-3" />
-                  {stat.change}
-                </span>
-              </div>
-              <div className="mt-4">
-                <div className="font-bold text-3xl text-dash-text">
-                  {stat.value}
-                </div>
-                <div className="mt-1 text-dash-text-muted text-sm">
-                  {stat.label}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+              );
+            })
+          : (["active", "qualified", "response", "conversion"] as const).map((k) => <StatSkeleton key={k} />)}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
-        {/* Recent Activity */}
-        <div
-          className="dash-card dash-animate-in p-6 lg:col-span-3"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <div className="mb-5 flex items-center justify-between">
-            <h3 className="font-Helvetica-Neue font-semibold text-base text-dash-text">
-              Recent Activity
-            </h3>
-            <Link
-              href="/dashboard/conversations"
-              className="flex items-center gap-1 font-medium text-dash-accent text-xs no-underline transition-colors hover:text-dash-accent-hover"
-            >
-              View all
-              <ArrowUpRight className="h-3 w-3" />
-            </Link>
+      {/* Sales Twin Card */}
+      <div className="dash-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="dash-card dash-card-hover group p-5 sm:col-span-2">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-dash-accent-muted">
+              <Sparkle className="h-5 w-5 text-dash-accent" />
+            </div>
+            <span className="font-Helvetica-Neue font-semibold text-dash-text text-sm">{t("overview.twin.title")}</span>
           </div>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div>
+              {stats ? (
+                <div className="font-bold text-3xl text-dash-text">
+                  {stats.avg_messages_per_day.toFixed(0)}
+                </div>
+              ) : (
+                <div className="h-8 w-16 animate-pulse rounded bg-dash-surface-secondary" />
+              )}
+              <div className="mt-1 text-dash-text-muted text-sm">{t("overview.twin.avgMsgsPerDay")}</div>
+            </div>
+            <div>
+              {stats ? (
+                <div className="font-bold text-3xl text-dash-text">
+                  {stats.no_manager_needed_count}
+                </div>
+              ) : (
+                <div className="h-8 w-16 animate-pulse rounded bg-dash-surface-secondary" />
+              )}
+              <div className="mt-1 text-dash-text-muted text-sm">{t("overview.twin.autoResolved")}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div
+        className="dash-card dash-animate-in p-6"
+        style={{ animationDelay: "0.2s" }}
+      >
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="font-Helvetica-Neue font-semibold text-base text-dash-text">
+            Recent Activity
+          </h3>
+          <Link
+            href="/dashboard/conversations"
+            className="flex items-center gap-1 font-medium text-dash-accent text-xs no-underline transition-colors hover:text-dash-accent-hover"
+          >
+            View all
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
+        <div className="relative overflow-hidden">
           <div className="space-y-1">
-            {recentActivity.map((item, i) => {
+            {recentActivity.map((item) => {
               const Icon = item.icon;
               return (
                 <div
-                  key={i}
+                  key={item.text}
                   className="flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-dash-surface-hover"
                 >
                   <div
@@ -201,80 +278,16 @@ export default function DashboardOverview() {
               );
             })}
           </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div
-          className="dash-animate-in space-y-4 lg:col-span-2"
-          style={{ animationDelay: "0.3s" }}
-        >
-          <h3 className="font-Helvetica-Neue font-semibold text-base text-dash-text">
-            Quick Actions
-          </h3>
-          <div className="space-y-3">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className="group dash-card dash-card-hover flex items-center gap-4 p-5 no-underline"
-                >
-                  <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br ${action.gradient}`}
-                  >
-                    <Icon className="h-5 w-5 text-dash-text-secondary transition-colors group-hover:text-dash-text" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-dash-text text-sm">
-                      {action.label}
-                    </div>
-                    <div className="text-dash-text-muted text-xs">
-                      {action.description}
-                    </div>
-                  </div>
-                  <ArrowUpRight className="group-hover:-translate-y-0.5 h-4 w-4 shrink-0 text-dash-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-dash-text" />
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Twin Status Card */}
-          <div className="dash-card overflow-hidden p-5">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-dash-accent to-dash-purple font-bold text-sm text-white">
-                  T
-                </div>
-                <span className="-bottom-0.5 -right-0.5 absolute h-3.5 w-3.5 rounded-full border-2 border-dash-surface bg-dash-success" />
-              </div>
-              <div>
-                <div className="font-semibold text-dash-text text-sm">
-                  Sales Twin
-                </div>
-                <div className="flex items-center gap-1.5 text-dash-success text-xs">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-dash-success" />
-                  Active & Responding
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-dash-bg p-3 text-center">
-                <div className="font-bold text-dash-text text-lg">156</div>
-                <div className="text-[11px] text-dash-text-muted">
-                  Messages today
-                </div>
-              </div>
-              <div className="rounded-lg bg-dash-bg p-3 text-center">
-                <div className="font-bold text-dash-text text-lg">92%</div>
-                <div className="text-[11px] text-dash-text-muted">
-                  Auto-resolved
-                </div>
-              </div>
-            </div>
+          {/* Coming Soon overlay */}
+          <div className="absolute inset-0 flex items-center justify-center backdrop-blur-sm">
+            <span className="rounded-full bg-dash-surface px-4 py-1.5 font-semibold text-dash-text text-sm shadow-sm ring-1 ring-black/5">
+              Coming Soon
+            </span>
           </div>
         </div>
       </div>
+
     </div>
   );
 }

@@ -20,18 +20,27 @@ interface Lead {
   location: string | null;
   intent: string | null;
   lead_score: number | null;
-  status: "new" | "contacted" | "qualified" | "deal";
+  status: "new" | "hot" | "qualified" | "call_in" | "deal";
   updated_at: string;
 }
 
-const STATUSES = ["new", "contacted", "qualified", "deal"] as const;
+const STATUSES = ["new", "hot", "qualified", "call_in", "deal"] as const;
 type Status = (typeof STATUSES)[number];
+
+const STATUS_LABELS: Record<Status, string> = {
+  new: "New",
+  hot: "Hot",
+  qualified: "Qualified",
+  call_in: "Call In",
+  deal: "Deal",
+};
 
 const statusColors: Record<Status, { bg: string; text: string }> = {
   new: { bg: "bg-dash-accent-muted", text: "text-dash-accent" },
-  contacted: { bg: "bg-dash-warning-muted", text: "text-dash-warning" },
+  hot: { bg: "bg-dash-warning-muted", text: "text-dash-warning" },
   qualified: { bg: "bg-dash-success-muted", text: "text-dash-success" },
-  deal: { bg: "bg-dash-purple-muted", text: "text-dash-purple" },
+  call_in: { bg: "bg-dash-purple-muted", text: "text-dash-purple" },
+  deal: { bg: "bg-teal-500/10", text: "text-teal-400" },
 };
 
 function extractPhone(chatId: string): string {
@@ -199,9 +208,9 @@ export default function LeadsPage() {
               key={s}
               type="button"
               onClick={() => setStatusFilter(s)}
-              className={`rounded-lg px-3 py-1.5 font-medium text-xs capitalize transition-colors ${statusFilter === s ? "bg-dash-accent-muted text-dash-accent" : "text-dash-text-muted hover:bg-dash-surface-hover hover:text-dash-text-secondary"}`}
+              className={`rounded-lg px-3 py-1.5 font-medium text-xs transition-colors ${statusFilter === s ? "bg-dash-accent-muted text-dash-accent" : "text-dash-text-muted hover:bg-dash-surface-hover hover:text-dash-text-secondary"}`}
             >
-              {s}
+              {s === "all" ? "All" : STATUS_LABELS[s]}
             </button>
           ))}
         </div>
@@ -287,9 +296,9 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-5 py-4">
                         <span
-                          className={`rounded-full px-2.5 py-1 font-semibold text-[11px] capitalize ${colors.bg} ${colors.text}`}
+                          className={`rounded-full px-2.5 py-1 font-semibold text-[11px] ${colors.bg} ${colors.text}`}
                         >
-                          {lead.status}
+                          {STATUS_LABELS[lead.status]}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-dash-text-secondary text-sm">
@@ -369,35 +378,35 @@ export default function LeadsPage() {
               </div>
             </div>
 
-            {/* Status update */}
+            {/* Status */}
             <div className="mt-4 rounded-xl bg-dash-bg p-3">
               <div className="mb-2 font-medium text-[10px] text-dash-text-muted uppercase">
                 Status
               </div>
-              <div className="flex flex-wrap gap-2">
-                {STATUSES.map((s) => {
-                  const active = (pendingStatus ?? selectedLead.status) === s;
-                  const colors = statusColors[s];
-                  return (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setPendingStatus(s === selectedLead.status ? null : s)}
-                      className={`rounded-full px-3 py-1 font-semibold text-[11px] capitalize transition-colors ${active ? `${colors.bg} ${colors.text}` : "bg-dash-surface text-dash-text-muted hover:bg-dash-surface-hover"}`}
-                    >
-                      {s}
-                    </button>
-                  );
-                })}
+              <div className="flex items-center justify-between">
+                <span
+                  className={`rounded-full px-2.5 py-1 font-semibold text-[11px] ${statusColors[selectedLead.status].bg} ${statusColors[selectedLead.status].text}`}
+                >
+                  {STATUS_LABELS[selectedLead.status]}
+                </span>
+                {selectedLead.status === "call_in" && (
+                  <button
+                    type="button"
+                    onClick={() => setPendingStatus(pendingStatus === "deal" ? null : "deal")}
+                    className={`rounded-lg px-3 py-1.5 font-semibold text-xs transition-colors ${pendingStatus === "deal" ? "bg-teal-500/20 text-teal-400 ring-1 ring-teal-500/40" : "bg-teal-500 text-white hover:bg-teal-400"}`}
+                  >
+                    Mark as Deal
+                  </button>
+                )}
               </div>
-              {pendingStatus && pendingStatus !== selectedLead.status && (
+              {pendingStatus === "deal" && selectedLead.status === "call_in" && (
                 <button
                   type="button"
                   disabled={updatingStatus}
                   onClick={handleStatusUpdate}
                   className="mt-3 w-full rounded-xl bg-dash-accent py-2 font-semibold text-sm text-white transition-opacity hover:bg-dash-accent-hover disabled:opacity-60"
                 >
-                  {updatingStatus ? "Saving…" : `Move to "${pendingStatus}"`}
+                  {updatingStatus ? "Saving…" : "Confirm Deal"}
                 </button>
               )}
             </div>
