@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
+import { getCompanyId } from "@/app/api/dashboard/configure/_lib";
 import IntegrationClient from "@/components/dashboard/IntegrationClient";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 async function getHasPhone(): Promise<boolean> {
   const cookieStore = await cookies();
@@ -28,8 +29,84 @@ async function getHasPhone(): Promise<boolean> {
   return !!company?.phone;
 }
 
-export default async function IntegrationPage() {
-  const hasPhone = await getHasPhone();
+type ConfigReadiness = {
+  personality: boolean;
+  guardians: boolean;
+  knowledge: boolean;
+  properties: boolean;
+};
 
-  return <IntegrationClient hasPhone={hasPhone} />;
+async function getConfigReadiness(): Promise<ConfigReadiness> {
+  const fallback: ConfigReadiness = {
+    personality: false,
+    guardians: false,
+    knowledge: false,
+    properties: false,
+  };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return fallback;
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const session = token ? verifySession(token) : null;
+
+  const [configResult, rulesResult] = await Promise.all([
+    supabase
+      .from("twin_configurations")
+      .select("twin_name, agency_name")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("guardian_rules")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+  ]);
+
+  let hasProperties = false;
+  if (session) {
+    const companyId = await getCompanyId(session.booking_id);
+    if (companyId) {
+      const apiKey = process.env.TWINO_API_KEY;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (apiKey && apiUrl) {
+        const upstream = await fetch(
+          `${apiUrl}/company/${companyId}/properties`,
+          { headers: { "X-API-KEY": apiKey }, cache: "no-store" },
+        ).catch(() => null);
+        if (upstream?.ok) {
+          const raw = await upstream.json().catch(() => null);
+          const props = Array.isArray(raw) ? raw : (raw?.data ?? []);
+          hasProperties = props.length > 0;
+        }
+      }
+    }
+  }
+
+  const config = configResult.data;
+
+  return {
+    personality: !!config?.twin_name,
+    guardians: (rulesResult.count ?? 0) > 0,
+    knowledge: !!config?.agency_name,
+    properties: hasProperties,
+  };
+}
+
+export default async function IntegrationPage() {
+  const [hasPhone, readiness] = await Promise.all([
+    getHasPhone(),
+    getConfigReadiness(),
+  ]);
+
+  const missingTabs = (
+    Object.entries(readiness) as [keyof ConfigReadiness, boolean][]
+  )
+    .filter(([, done]) => !done)
+    .map(([tab]) => tab);
+
+  return <IntegrationClient hasPhone={hasPhone} missingTabs={missingTabs} />;
 }
