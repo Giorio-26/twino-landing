@@ -16,6 +16,7 @@ interface Lead {
   id: number;
   company_id: string;
   chat_id: string;
+  customer_name: string | null;
   budget: string | null;
   location: string | null;
   intent: string | null;
@@ -280,8 +281,15 @@ export default function LeadsPage() {
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-dash-surface-secondary font-semibold text-dash-text text-xs">
                             {initials}
                           </div>
-                          <div className="font-medium text-dash-text text-sm">
-                            {phone}
+                          <div>
+                            {lead.customer_name && (
+                              <div className="font-medium text-dash-text text-sm">
+                                {lead.customer_name}
+                              </div>
+                            )}
+                            <div className={`text-dash-text-secondary text-xs ${lead.customer_name ? "mt-0.5" : "font-medium text-dash-text text-sm"}`}>
+                              {phone}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -331,9 +339,16 @@ export default function LeadsPage() {
             className="dash-animate-scale relative w-full max-w-lg rounded-2xl border border-dash-border bg-dash-surface p-6 shadow-2xl"
           >
             <div className="mb-5 flex items-center justify-between">
-              <h3 className="font-Helvetica-Neue font-bold text-dash-text text-lg">
-                {extractPhone(selectedLead.chat_id)}
-              </h3>
+              <div>
+                {selectedLead.customer_name && (
+                  <h3 className="font-Helvetica-Neue font-bold text-dash-text text-lg">
+                    {selectedLead.customer_name}
+                  </h3>
+                )}
+                <p className={`text-dash-text-secondary text-sm ${!selectedLead.customer_name ? "font-Helvetica-Neue font-bold text-dash-text text-lg" : "mt-0.5"}`}>
+                  {extractPhone(selectedLead.chat_id)}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setSelectedLead(null)}
@@ -385,7 +400,7 @@ export default function LeadsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span
-                  className={`rounded-full px-2.5 py-1 font-semibold text-[11px] ${statusColors[selectedLead.status].bg} ${statusColors[selectedLead.status].text}`}
+                  className={`rounded-full px-2.5 py-1 font-semibold text-[11px] ${(statusColors[selectedLead.status] ?? statusColors.new).bg} ${(statusColors[selectedLead.status] ?? statusColors.new).text}`}
                 >
                   {STATUS_LABELS[selectedLead.status]}
                 </span>
