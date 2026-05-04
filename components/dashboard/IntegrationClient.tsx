@@ -27,7 +27,6 @@ type WaState =
 const REQUIRED_TABS: { id: string; label: string; detail: string }[] = [
   { id: "personality", label: "Personality", detail: "set a name for your twin" },
   { id: "guardians", label: "Guardians", detail: "add at least one rule" },
-  { id: "knowledge", label: "Knowledge", detail: "add your agency name" },
   { id: "properties", label: "Properties", detail: "add at least one property" },
 ];
 

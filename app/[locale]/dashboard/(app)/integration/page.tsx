@@ -32,7 +32,6 @@ async function getHasPhone(): Promise<boolean> {
 type ConfigReadiness = {
   personality: boolean;
   guardians: boolean;
-  knowledge: boolean;
   properties: boolean;
 };
 
@@ -57,7 +56,7 @@ async function getConfigReadiness(): Promise<ConfigReadiness> {
   const [configResult, rulesResult] = await Promise.all([
     supabase
       .from("twin_configurations")
-      .select("twin_name, agency_name")
+      .select("twin_name")
       .eq("user_id", user.id)
       .maybeSingle(),
     supabase
@@ -86,12 +85,9 @@ async function getConfigReadiness(): Promise<ConfigReadiness> {
     }
   }
 
-  const config = configResult.data;
-
   return {
-    personality: !!config?.twin_name,
+    personality: !!configResult.data?.twin_name,
     guardians: (rulesResult.count ?? 0) > 0,
-    knowledge: !!config?.agency_name,
     properties: hasProperties,
   };
 }
