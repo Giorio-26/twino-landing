@@ -19,6 +19,7 @@ interface Lead {
   customer_name: string | null;
   budget: string | null;
   location: string | null;
+  selected_property: string | null;
   intent: string | null;
   lead_score: number | null;
   status: "new" | "hot" | "qualified" | "call_in" | "deal";
@@ -73,6 +74,8 @@ export default function LeadsPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
+
+  const [exporting, setExporting] = useState(false);
 
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -144,10 +147,27 @@ export default function LeadsPage() {
         </div>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-xl border border-dash-border px-4 py-2.5 font-medium text-dash-text-secondary text-sm transition-colors hover:bg-dash-surface-hover hover:text-dash-text"
+          disabled={exporting}
+          onClick={async () => {
+            setExporting(true);
+            try {
+              const res = await fetch("/api/dashboard/leads/export");
+              if (!res.ok) throw new Error();
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "leads.csv";
+              a.click();
+              URL.revokeObjectURL(url);
+            } finally {
+              setExporting(false);
+            }
+          }}
+          className="flex items-center gap-2 rounded-xl border border-dash-border px-4 py-2.5 font-medium text-dash-text-secondary text-sm transition-colors hover:bg-dash-surface-hover hover:text-dash-text disabled:opacity-50"
         >
           <Download className="h-4 w-4" />
-          Export CSV
+          {exporting ? "Exporting…" : "Export CSV"}
         </button>
       </div>
 
@@ -249,6 +269,9 @@ export default function LeadsPage() {
                     Location
                   </th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
+                    Property
+                  </th>
+                  <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
                     Intent
                   </th>
                   <th className="px-5 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
@@ -298,6 +321,9 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-5 py-4 text-dash-text-secondary text-sm">
                         {lead.location ?? "—"}
+                      </td>
+                      <td className="px-5 py-4 text-dash-text-secondary text-sm">
+                        {lead.selected_property ?? "—"}
                       </td>
                       <td className="px-5 py-4 text-dash-text-secondary text-sm capitalize">
                         {lead.intent ?? "—"}
@@ -373,6 +399,14 @@ export default function LeadsPage() {
                 </div>
                 <div className="font-bold text-dash-text text-sm">
                   {selectedLead.location ?? "—"}
+                </div>
+              </div>
+              <div className="rounded-xl bg-dash-bg p-3">
+                <div className="font-medium text-[10px] text-dash-text-muted uppercase">
+                  Property
+                </div>
+                <div className="font-bold text-dash-text text-sm">
+                  {selectedLead.selected_property ?? "—"}
                 </div>
               </div>
               <div className="rounded-xl bg-dash-bg p-3">
