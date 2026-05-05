@@ -34,7 +34,16 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // Clear all Supabase auth cookies so the stale token stops causing errors.
+    for (const cookie of request.cookies.getAll()) {
+      if (cookie.name.startsWith("sb-")) {
+        response.cookies.set(cookie.name, "", { maxAge: 0 });
+      }
+    }
+  }
 
   return response;
 }

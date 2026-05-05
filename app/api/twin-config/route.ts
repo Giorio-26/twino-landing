@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/supabase/server";
 
 const ALLOWED_FIELDS = [
   "twin_name",
@@ -16,10 +16,7 @@ type AllowedField = (typeof ALLOWED_FIELDS)[number];
 
 /** GET /api/twin-config — fetch the company's twin configuration */
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthenticatedUser();
 
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,10 +38,7 @@ export async function GET() {
 
 /** PUT /api/twin-config — upsert any subset of allowed fields */
 export async function PUT(request: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthenticatedUser();
 
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });

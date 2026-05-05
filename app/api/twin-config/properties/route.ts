@@ -1,14 +1,11 @@
 import type { NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/supabase/server";
 
 const MAX_PROPERTIES = 15;
 
 /** GET /api/twin-config/properties — list all properties for the current user */
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthenticatedUser();
 
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,10 +27,7 @@ export async function GET() {
 
 /** POST /api/twin-config/properties — add a new property (max 15) */
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthenticatedUser();
 
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });

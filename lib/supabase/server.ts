@@ -35,6 +35,18 @@ export async function createClient() {
   );
 }
 
+export async function getAuthenticatedUser() {
+  const supabase = await createClient();
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return { supabase, user };
+  } catch {
+    return { supabase, user: null };
+  }
+}
+
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 export const createAdminClient = () => {

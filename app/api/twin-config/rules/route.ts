@@ -1,12 +1,9 @@
 import type { NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/supabase/server";
 
 /** GET /api/twin-config/rules — list all guardian rules for the current company */
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthenticatedUser();
 
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -29,10 +26,7 @@ export async function GET() {
 
 /** POST /api/twin-config/rules — add a new guardian rule */
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthenticatedUser();
 
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });

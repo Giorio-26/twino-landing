@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { getCompanyId } from "@/app/api/dashboard/configure/_lib";
 import IntegrationClient from "@/components/dashboard/IntegrationClient";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { createAdminClient, getAuthenticatedUser } from "@/lib/supabase/server";
 
 async function getHasPhone(): Promise<boolean> {
   const cookieStore = await cookies();
@@ -39,14 +39,10 @@ async function getConfigReadiness(): Promise<ConfigReadiness> {
   const fallback: ConfigReadiness = {
     personality: false,
     guardians: false,
-    knowledge: false,
     properties: false,
   };
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthenticatedUser();
   if (!user) return fallback;
 
   const cookieStore = await cookies();
