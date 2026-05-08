@@ -29,7 +29,7 @@ export async function GET(
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
     console.error("[chat-controls GET state] upstream error:", upstream?.status, detail);
-    return Response.json({ error: "Failed to fetch state" }, { status: upstream?.status ?? 502 });
+    return Response.json({ error: "Failed to fetch state" }, { status: upstream?.status ?? 503 });
   }
 
   const state = await upstream.json();

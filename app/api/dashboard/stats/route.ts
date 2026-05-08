@@ -23,7 +23,7 @@ export async function GET() {
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
     console.error("[stats GET] upstream error:", upstream?.status, detail);
-    return Response.json({ error: "Failed to fetch stats" }, { status: upstream?.status ?? 502 });
+    return Response.json({ error: "Failed to fetch stats" }, { status: 503 });
   }
 
   const data = await upstream.json();

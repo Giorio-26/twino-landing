@@ -34,7 +34,7 @@ export async function GET(
     console.error("[organizer/companies/projects GET] upstream error:", upstream?.status);
     return Response.json(
       { error: "Failed to fetch projects" },
-      { status: upstream?.status ?? 502 },
+      { status: upstream?.status ?? 503 },
     );
   }
 

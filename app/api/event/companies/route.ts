@@ -23,7 +23,7 @@ export async function GET() {
 
   if (!upstream?.ok) {
     console.error("[event/companies GET] upstream error:", upstream?.status);
-    return Response.json({ error: "Failed to fetch companies" }, { status: upstream?.status ?? 502 });
+    return Response.json({ error: "Failed to fetch companies" }, { status: upstream?.status ?? 503 });
   }
 
   const raw = await upstream.json();

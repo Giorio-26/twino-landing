@@ -23,7 +23,7 @@ export async function GET() {
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
     console.error("[leads export GET] upstream error:", upstream?.status, detail);
-    return Response.json({ error: "Failed to export leads" }, { status: upstream?.status ?? 502 });
+    return Response.json({ error: "Failed to export leads" }, { status: upstream?.status ?? 503 });
   }
 
   const csv = await upstream.text();

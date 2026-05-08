@@ -38,7 +38,7 @@ export async function POST(
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
     console.error(`[chat-controls POST ${action}] upstream error:`, upstream?.status, detail);
-    return Response.json({ error: `Failed to ${action}` }, { status: upstream?.status ?? 502 });
+    return Response.json({ error: `Failed to ${action}` }, { status: upstream?.status ?? 503 });
   }
 
   return Response.json({ ok: true });

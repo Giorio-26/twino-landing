@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
     console.error("[send-message POST] upstream error:", upstream?.status, detail);
-    return Response.json({ error: "Failed to send message" }, { status: upstream?.status ?? 502 });
+    return Response.json({ error: "Failed to send message" }, { status: upstream?.status ?? 503 });
   }
 
   return Response.json({ ok: true });

@@ -22,7 +22,7 @@ export async function GET() {
 
   if (!upstream?.ok) {
     console.error("[configure/properties GET] upstream error:", upstream?.status);
-    return Response.json({ error: "Failed to fetch properties" }, { status: upstream?.status ?? 502 });
+    return Response.json({ error: "Failed to fetch properties" }, { status: upstream?.status ?? 503 });
   }
 
   const raw = await upstream.json();
@@ -55,7 +55,7 @@ export async function PUT(req: Request) {
 
   if (!upstream?.ok) {
     console.error("[configure/properties PUT] upstream error:", upstream?.status);
-    return Response.json({ error: "Failed to update properties" }, { status: upstream?.status ?? 502 });
+    return Response.json({ error: "Failed to update properties" }, { status: upstream?.status ?? 503 });
   }
 
   const raw = await upstream.json();
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
     console.error("[configure/properties POST] upstream error:", upstream?.status, detail);
-    return Response.json({ error: "Upload failed" }, { status: 502 });
+    return Response.json({ error: "Upload failed" }, { status: 503 });
   }
 
   return Response.json({ ok: true });

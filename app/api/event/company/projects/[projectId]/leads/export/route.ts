@@ -39,7 +39,7 @@ export async function GET(
     console.error("[company/projects/leads/export GET] upstream error:", upstream?.status);
     return Response.json(
       { error: "Failed to export leads" },
-      { status: upstream?.status ?? 502 },
+      { status: upstream?.status ?? 503 },
     );
   }
 

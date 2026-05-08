@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     );
     return Response.json(
       { error: "Failed to fetch leads" },
-      { status: upstream?.status ?? 502 },
+      { status: upstream?.status ?? 503 },
     );
   }
 

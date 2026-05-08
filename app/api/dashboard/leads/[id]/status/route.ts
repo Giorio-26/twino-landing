@@ -41,7 +41,7 @@ export async function PATCH(
     console.error("[leads PATCH status] upstream error:", upstream?.status, detail);
     return Response.json(
       { error: upstream?.status === 404 ? "Lead not found" : "Failed to update lead" },
-      { status: upstream?.status ?? 502 },
+      { status: upstream?.status ?? 503 },
     );
   }
 

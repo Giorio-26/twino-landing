@@ -41,7 +41,7 @@ export async function GET(
     console.error("[organizer/companies/projects/leads GET] upstream error:", upstream?.status, detail);
     return Response.json(
       { error: "Failed to fetch leads" },
-      { status: upstream?.status ?? 502 },
+      { status: upstream?.status ?? 503 },
     );
   }
 

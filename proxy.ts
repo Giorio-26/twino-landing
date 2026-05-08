@@ -6,18 +6,21 @@ import { updateSession } from "./lib/supabase/middleware";
 const intlMiddleware = createIntlMiddleware(routing);
 
 export default async function middleware(request: NextRequest) {
-  // Refresh Supabase session cookies on every request so server components
-  // can reliably call getUser() without stale tokens.
-  const supabaseResponse = await updateSession(request);
-
   // i18n middleware is authoritative for routing/locale headers.
   const intlResponse = intlMiddleware(request);
 
-  // Merge any new/updated Supabase auth cookies into the intl response so
-  // both concerns are satisfied by the single response returned to the client.
-  supabaseResponse.cookies.getAll().forEach((cookie) => {
-    intlResponse.cookies.set(cookie.name, cookie.value, cookie);
-  });
+  // Refresh Supabase session cookies — wrapped so any auth failure never
+  // crashes the middleware worker and causes a 502.
+  try {
+    const supabaseResponse = await updateSession(request);
+    for (const cookie of supabaseResponse.cookies.getAll()) {
+      intlResponse.cookies.set(cookie.name, cookie.value, cookie);
+    }
+  } catch {
+    // Session refresh failed (e.g. stale refresh token). The request
+    // continues without updated auth cookies; getAuthenticatedUser()
+    // in route handlers handles auth independently.
+  }
 
   return intlResponse;
 }

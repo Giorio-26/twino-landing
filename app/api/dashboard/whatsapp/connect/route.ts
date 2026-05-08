@@ -54,20 +54,20 @@ export async function POST() {
     });
   } catch (err) {
     console.error("[whatsapp/connect] upstream fetch failed:", err);
-    return Response.json({ error: "Could not reach WhatsApp API" }, { status: 502 });
+    return Response.json({ error: "Could not reach WhatsApp API" }, { status: 503 });
   }
 
   if (!upstream.ok) {
     const text = await upstream.text().catch(() => "");
     console.error("[whatsapp/connect] upstream error:", upstream.status, text);
-    return Response.json({ error: "WhatsApp API returned an error", detail: text }, { status: 502 });
+    return Response.json({ error: "WhatsApp API returned an error", detail: text }, { status: 503 });
   }
 
   const data = await upstream.json().catch(() => null) as { base64?: string } | null;
 
   if (!data?.base64) {
     console.error("[whatsapp/connect] unexpected response shape:", data);
-    return Response.json({ error: "No QR code returned", detail: data }, { status: 502 });
+    return Response.json({ error: "No QR code returned", detail: data }, { status: 503 });
   }
 
   const qr = data.base64.startsWith("data:")
