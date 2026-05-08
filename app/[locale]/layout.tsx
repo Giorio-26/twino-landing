@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import "../globals.css";
@@ -42,6 +43,18 @@ export default async function RootLayout({
       lang={locale}
       className={`${helvetica.variable} ${helveticaNeue.variable} h-full antialiased`}
     >
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-071LQZ6L1D"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-071LQZ6L1D');
+        `}
+      </Script>
       <NextIntlClientProvider messages={messages}>
         <body className="flex min-h-full flex-col">{children}</body>
       </NextIntlClientProvider>
