@@ -27,6 +27,9 @@
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@parcel/watcher", "@swc/core", "sharp"]
+  },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
     "@tailwindcss/postcss": "^4",
