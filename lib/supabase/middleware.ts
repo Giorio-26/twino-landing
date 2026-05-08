@@ -35,9 +35,19 @@ export async function updateSession(request: NextRequest) {
   );
 
   try {
-    await supabase.auth.getUser();
+    const { error } = await supabase.auth.getUser();
+    if (error) {
+      // Token is invalid/expired and refresh failed — clear all Supabase
+      // auth cookies so the broken state doesn't persist across requests.
+      for (const cookie of request.cookies.getAll()) {
+        if (cookie.name.startsWith("sb-")) {
+          response.cookies.set(cookie.name, "", { maxAge: 0 });
+        }
+      }
+    }
   } catch {
-    // Clear all Supabase auth cookies so the stale token stops causing errors.
+    // Malformed cookie (e.g. invalid base64url) or unexpected error —
+    // clear everything so downstream code never sees the broken state.
     for (const cookie of request.cookies.getAll()) {
       if (cookie.name.startsWith("sb-")) {
         response.cookies.set(cookie.name, "", { maxAge: 0 });

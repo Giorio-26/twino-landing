@@ -1,4 +1,5 @@
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export async function createClient() {
@@ -36,18 +37,21 @@ export async function createClient() {
 }
 
 export async function getAuthenticatedUser() {
-  const supabase = await createClient();
   try {
+    const supabase = await createClient();
     const {
       data: { user },
+      error,
     } = await supabase.auth.getUser();
+    if (error) return { supabase, user: null };
     return { supabase, user };
   } catch {
-    return { supabase, user: null };
+    // Malformed cookie, base64 decode error, or Supabase unavailable.
+    // Fall back to the service-role client so route handlers always receive
+    // a usable Supabase reference while still treating the user as anonymous.
+    return { supabase: createAdminClient(), user: null };
   }
 }
-
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 export const createAdminClient = () => {
   return createSupabaseClient(
