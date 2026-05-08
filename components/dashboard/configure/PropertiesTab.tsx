@@ -396,7 +396,7 @@ export default function PropertiesTab() {
             <table className="w-full min-w-340">
               <thead>
                 <tr className="border-dash-border border-b">
-                  {["#", "Address", "Type", "Category", "District", "Area", "Rooms", "Condition", "Excl.", "Price", "₾/m²", "Note", ""].map((h) => (
+                  {["#", "Address", "Type", "Category", "District", "Area", "Rooms", "Condition", "Excl.", "Price", "$/m²", "Note", ""].map((h) => (
                     <th
                       key={h}
                       className="px-3 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider first:pl-5 last:pr-5"

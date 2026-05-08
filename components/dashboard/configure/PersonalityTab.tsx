@@ -25,13 +25,16 @@ export default function PersonalityTab({ initialConfig }: Props) {
     initialConfig.welcome_message,
   );
   const [savingIdentity, setSavingIdentity] = useState(false);
+  const [identityError, setIdentityError] = useState<string | null>(null);
 
   const [selectedTone, setSelectedTone] = useState(initialConfig.tone);
   const [savingTone, setSavingTone] = useState(false);
+  const [toneError, setToneError] = useState<string | null>(null);
 
   const saveIdentity = async () => {
     setSavingIdentity(true);
-    await Promise.all([
+    setIdentityError(null);
+    const [r1, r2] = await Promise.all([
       apiFetch("/api/twin-config", {
         method: "PUT",
         body: JSON.stringify({
@@ -47,12 +50,16 @@ export default function PersonalityTab({ initialConfig }: Props) {
         }),
       }),
     ]);
+    if (r1.error || r2.error) {
+      setIdentityError(r1.error ?? r2.error ?? "Save failed. Please try again.");
+    }
     setSavingIdentity(false);
   };
 
   const saveTone = async () => {
     setSavingTone(true);
-    await Promise.all([
+    setToneError(null);
+    const [r1, r2] = await Promise.all([
       apiFetch("/api/twin-config", {
         method: "PUT",
         body: JSON.stringify({ tone: selectedTone }),
@@ -62,6 +69,9 @@ export default function PersonalityTab({ initialConfig }: Props) {
         body: JSON.stringify({ tone: selectedTone }),
       }),
     ]);
+    if (r1.error || r2.error) {
+      setToneError(r1.error ?? r2.error ?? "Save failed. Please try again.");
+    }
     setSavingTone(false);
   };
 
@@ -111,7 +121,10 @@ export default function PersonalityTab({ initialConfig }: Props) {
           </div>
         </div>
 
-        <div className="mt-5 flex justify-end">
+        <div className="mt-5 flex items-center justify-end gap-4">
+          {identityError && (
+            <p className="text-dash-danger text-sm">{identityError}</p>
+          )}
           <SaveButton
             saving={savingIdentity}
             onClick={saveIdentity}
@@ -178,7 +191,10 @@ export default function PersonalityTab({ initialConfig }: Props) {
           </p>
         </div>
 
-        <div className="mt-5 flex justify-end">
+        <div className="mt-5 flex items-center justify-end gap-4">
+          {toneError && (
+            <p className="text-dash-danger text-sm">{toneError}</p>
+          )}
           <SaveButton
             saving={savingTone}
             onClick={saveTone}

@@ -141,7 +141,7 @@ function WorkingHoursPicker({
           >
             <Toggle enabled={h.enabled} onToggle={() => toggleDay(key)} />
             <span
-              className={`w-24 text-sm font-medium transition-colors select-none ${
+              className={`w-24 font-medium text-sm transition-colors select-none ${
                 h.enabled ? "text-dash-text" : "text-dash-text-muted"
               }`}
             >
@@ -198,6 +198,7 @@ export default function KnowledgeTab({ initialConfig }: Props) {
     additionalInfo: initialConfig.agency_additional_info ?? "",
   });
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const update =
     (field: "address" | "website" | "additionalInfo") =>
@@ -206,8 +207,9 @@ export default function KnowledgeTab({ initialConfig }: Props) {
 
   const save = async () => {
     setSaving(true);
+    setSaveError(null);
     const working_hours = formatWorkingHours(agencyInfo.workingHours);
-    await Promise.all([
+    const [r1, r2] = await Promise.all([
       apiFetch("/api/twin-config", {
         method: "PUT",
         body: JSON.stringify({
@@ -227,6 +229,9 @@ export default function KnowledgeTab({ initialConfig }: Props) {
         }),
       }),
     ]);
+    if (r1.error || r2.error) {
+      setSaveError(r1.error ?? r2.error ?? "Save failed. Please try again.");
+    }
     setSaving(false);
   };
 
@@ -299,7 +304,10 @@ export default function KnowledgeTab({ initialConfig }: Props) {
         </div>
       </div>
 
-      <div className="mt-5 flex justify-end">
+      <div className="mt-5 flex items-center justify-end gap-4">
+        {saveError && (
+          <p className="text-dash-danger text-sm">{saveError}</p>
+        )}
         <SaveButton
           saving={saving}
           onClick={save}

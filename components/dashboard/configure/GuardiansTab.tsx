@@ -18,7 +18,9 @@ export default function GuardiansTab() {
   const [loading, setLoading] = useState(true);
   const [newRule, setNewRule] = useState("");
   const [addingRule, setAddingRule] = useState(false);
+  const [addError, setAddError] = useState("");
   const [deletingRuleId, setDeletingRuleId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const words = wordCount(newRule);
   const overLimit = words > WORD_LIMIT;
@@ -41,6 +43,7 @@ export default function GuardiansTab() {
   const addRule = async () => {
     if (!newRule.trim() || addingRule || overLimit) return;
     setAddingRule(true);
+    setAddError("");
     const res = await apiFetch<Rule>("/api/twin-config/rules", {
       method: "POST",
       body: JSON.stringify({ rule_text: newRule.trim() }),
@@ -50,16 +53,23 @@ export default function GuardiansTab() {
       setRules(updated);
       setNewRule("");
       syncRules(updated);
+    } else {
+      setAddError(res.error ?? "Failed to add rule. Please try again.");
     }
     setAddingRule(false);
   };
 
   const deleteRule = async (id: string) => {
     setDeletingRuleId(id);
-    await apiFetch(`/api/twin-config/rules/${id}`, { method: "DELETE" });
-    const updated = rules.filter((r) => r.id !== id);
-    setRules(updated);
-    syncRules(updated);
+    setDeleteError("");
+    const res = await apiFetch(`/api/twin-config/rules/${id}`, { method: "DELETE" });
+    if (res.error) {
+      setDeleteError(res.error ?? "Failed to delete rule. Please try again.");
+    } else {
+      const updated = rules.filter((r) => r.id !== id);
+      setRules(updated);
+      syncRules(updated);
+    }
     setDeletingRuleId(null);
   };
 
@@ -140,13 +150,21 @@ export default function GuardiansTab() {
               {t("addButton")}
             </button>
           </div>
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between">
+            {addError ? (
+              <p className="text-dash-danger text-xs">{addError}</p>
+            ) : (
+              <span />
+            )}
             <span
               className={`text-xs ${overLimit ? "text-dash-danger" : "text-dash-text-muted"}`}
             >
               {t("wordCounter", { words, limit: WORD_LIMIT })}
             </span>
           </div>
+          {deleteError && (
+            <p className="text-dash-danger text-xs">{deleteError}</p>
+          )}
         </div>
 
         {rules.length === 0 && (

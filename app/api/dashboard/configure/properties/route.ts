@@ -84,9 +84,13 @@ export async function POST(req: Request) {
   }).catch(() => null);
 
   if (!upstream?.ok) {
-    const detail = await upstream?.text().catch(() => "");
-    console.error("[configure/properties POST] upstream error:", upstream?.status, detail);
-    return Response.json({ error: "Upload failed" }, { status: 503 });
+    let errorMsg = "Upload failed";
+    try {
+      const errBody = await upstream?.json();
+      errorMsg = errBody.detail ?? errBody.error ?? errBody.message ?? "Upload failed";
+    } catch {}
+    console.error("[configure/properties POST] upstream error:", upstream?.status, errorMsg);
+    return Response.json({ error: errorMsg }, { status: upstream?.status ?? 503 });
   }
 
   return Response.json({ ok: true });
