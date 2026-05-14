@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { enUS, ka } from "date-fns/locale";
+import { type Locale, enUS, ka } from "date-fns/locale";
 import {
   ArrowLeft,
   ArrowRight,
