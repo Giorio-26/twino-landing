@@ -75,6 +75,59 @@
     "successTitle": "You're all booked!",
     "successMessage": "We'll send a calendar invite to your email. See you then!"
   },
+  "bookADemoPage": {
+    "metadata": {
+      "title": "Book a Demo — TwinO",
+      "description": "Schedule a 15-minute live walkthrough of TwinO, the AI-powered lead qualification platform for real estate."
+    },
+    "banner": {
+      "title1": "See TwinO",
+      "title2": "in Action",
+      "description": "A 15-minute live session tailored to your agency — no generic slides, just your workflow.",
+      "feature1": "Live Sales Twin demo with your agency's data",
+      "feature2": "15 minutes — no prep, no slides, just real results",
+      "feature3": "GDPR-compliant, your data stays yours",
+      "feature4": "Join 100+ agencies already onboarded",
+      "tagline": "AI-powered lead qualification for real estate"
+    },
+    "form": {
+      "title": "Complete your booking",
+      "subtitle": "Fill in your details and pick a time that works for you.",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "John",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Doe",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+1 234 567 8900",
+      "companyName": "Company Name",
+      "companyNamePlaceholder": "ACME Real Estate",
+      "websiteSocial": "Website / Social",
+      "websiteSocialPlaceholder": "https://instagram.com/...",
+      "pickDate": "Pick a Date",
+      "backToCalendar": "Back to calendar",
+      "pickTime": "Pick a Time",
+      "tbilisiTime": "Tbilisi GMT+4",
+      "submit": "Book My Demo",
+      "privacy": "We respect your privacy. No spam, ever.",
+      "errorFirstName": "First name is required.",
+      "errorLastName": "Last name is required.",
+      "errorEmail": "A valid email address is required.",
+      "errorDate": "Please pick a date.",
+      "errorTime": "Please pick a time slot."
+    },
+    "success": {
+      "title": "You're booked, {name}!",
+      "message": "We'll see you at your scheduled time. Keep an eye on your inbox — a calendar invite is on its way.",
+      "scheduledFor": "Scheduled for",
+      "whatsNext": "What happens next",
+      "step1": "You'll receive a calendar invite via email",
+      "step2": "Our team will prepare a personalized walkthrough",
+      "step3": "Join the video call — no installation needed",
+      "back": "Back to TwinO"
+    }
+  },
   "footer": {
     "name": "TwinO",
     "logo": "TwinO",
