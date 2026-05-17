@@ -26,6 +26,7 @@ import {
   Key,
   Loader2,
   Mail,
+  Pencil,
   PhoneCall,
   Trash2,
   Trophy,
@@ -575,8 +576,17 @@ function BookingCard({
 type KeyState =
   | { phase: "idle" }
   | { phase: "loading" }
-  | { phase: "done"; key: string; emailSent: boolean; emailError: string | null }
+  | { phase: "done"; key: string; emailSent: boolean; emailError: string | null; expiresAt: string }
   | { phase: "error"; message: string };
+
+function formatTimeLeft(expiresAt: string): { label: string; urgent: boolean } {
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  if (diff <= 0) return { label: "Expired", urgent: true };
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days >= 1) return { label: `${days}d left`, urgent: days <= 3 };
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  return { label: hours > 0 ? `${hours}h left` : "< 1h left", urgent: true };
+}
 
 function AccessKeyButton({
   bookingId,
@@ -587,10 +597,14 @@ function AccessKeyButton({
 }) {
   const [state, setState] = useState<KeyState>(
     initialKey
-      ? { phase: "done", key: initialKey.key, emailSent: true, emailError: null }
+      ? { phase: "done", key: initialKey.key, emailSent: true, emailError: null, expiresAt: initialKey.expires_at }
       : { phase: "idle" },
   );
   const [copied, setCopied] = useState(false);
+  const [validityDays, setValidityDays] = useState(14);
+  const [editingExpiry, setEditingExpiry] = useState(false);
+  const [newDays, setNewDays] = useState(14);
+  const [updatingExpiry, setUpdatingExpiry] = useState(false);
 
   async function handleGenerate(e: React.MouseEvent) {
     e.stopPropagation();
@@ -599,7 +613,7 @@ function AccessKeyButton({
     const res = await fetch("/api/admin/generate-access-key", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId }),
+      body: JSON.stringify({ bookingId, validityDays }),
     });
 
     if (!res.ok) {
@@ -609,7 +623,27 @@ function AccessKeyButton({
     }
 
     const data = await res.json();
-    setState({ phase: "done", key: data.key, emailSent: data.emailSent, emailError: data.emailError ?? null });
+    setState({ phase: "done", key: data.key, emailSent: data.emailSent, emailError: data.emailError ?? null, expiresAt: data.expiresAt });
+  }
+
+  async function handleUpdateExpiry(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (state.phase !== "done") return;
+    setUpdatingExpiry(true);
+
+    const res = await fetch("/api/admin/generate-access-key", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId, validityDays: newDays }),
+    });
+
+    setUpdatingExpiry(false);
+
+    if (res.ok) {
+      const data = await res.json();
+      setState({ ...state, expiresAt: data.expiresAt });
+      setEditingExpiry(false);
+    }
   }
 
   async function handleCopy(e: React.MouseEvent) {
@@ -620,16 +654,38 @@ function AccessKeyButton({
     setTimeout(() => setCopied(false), 2000);
   }
 
-  // Prevent pointer-down from propagating to the drag listener
   function stopDrag(e: React.PointerEvent) {
     e.stopPropagation();
   }
 
+  function openExpiryEdit(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (state.phase !== "done") return;
+    const remaining = Math.ceil((new Date(state.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    setNewDays(Math.max(1, remaining));
+    setEditingExpiry(true);
+  }
+
   return (
-    <div
-      className="mt-3"
-      onPointerDown={stopDrag}
-    >
+    <div className="mt-3" onPointerDown={stopDrag}>
+      {/* Validity selector — shown when no key yet */}
+      {(state.phase === "idle" || state.phase === "error") && (
+        <div className="mb-2 flex items-center gap-1.5">
+          <Clock className="size-3 text-gray-400" strokeWidth={2} />
+          <span className="text-gray-500 text-xs">Valid for</span>
+          <input
+            type="number"
+            min={1}
+            max={365}
+            value={validityDays}
+            onChange={(e) => setValidityDays(Math.max(1, Math.min(365, Number(e.target.value) || 1)))}
+            onClick={(e) => e.stopPropagation()}
+            className="w-12 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-center font-medium text-gray-700 text-xs focus:border-emerald-400 focus:outline-none"
+          />
+          <span className="text-gray-500 text-xs">days</span>
+        </div>
+      )}
+
       {state.phase !== "done" && (
         <button
           type="button"
@@ -655,40 +711,87 @@ function AccessKeyButton({
         <p className="mt-1.5 text-center text-red-500 text-xs">{state.message}</p>
       )}
 
-      {state.phase === "done" && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-mono font-semibold text-emerald-800 text-xs tracking-widest">
-              {state.key}
-            </span>
+      {state.phase === "done" && (() => {
+        const { label, urgent } = formatTimeLeft(state.expiresAt);
+        return (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+            {/* Key + copy */}
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono font-semibold text-emerald-800 text-xs tracking-widest">
+                {state.key}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopy}
+                title="Copy key"
+                className="shrink-0 rounded p-0.5 text-emerald-600 transition-colors hover:bg-emerald-100"
+              >
+                {copied ? (
+                  <Check className="size-3.5" strokeWidth={2.5} />
+                ) : (
+                  <Copy className="size-3.5" strokeWidth={2} />
+                )}
+              </button>
+            </div>
+
+            {/* Expiry row */}
+            {!editingExpiry ? (
+              <div className="mt-1 flex items-center gap-1">
+                <p className={`text-xs ${urgent ? "text-amber-600" : "text-emerald-600"}`}>
+                  {state.emailSent ? `Sent to client's email · ${label}` : label}
+                </p>
+                <button
+                  type="button"
+                  onClick={openExpiryEdit}
+                  title="Change expiry"
+                  className="rounded p-0.5 text-emerald-400 transition-colors hover:bg-emerald-100 hover:text-emerald-600"
+                >
+                  <Pencil className="size-3" strokeWidth={2} />
+                </button>
+              </div>
+            ) : (
+              <div className="mt-1.5 flex items-center gap-1">
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={newDays}
+                  onChange={(e) => setNewDays(Math.max(1, Math.min(365, Number(e.target.value) || 1)))}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-12 rounded border border-emerald-300 bg-white px-1.5 py-0.5 text-center font-medium text-gray-700 text-xs focus:border-emerald-400 focus:outline-none"
+                />
+                <span className="text-emerald-600 text-xs">days</span>
+                <button
+                  type="button"
+                  onClick={handleUpdateExpiry}
+                  disabled={updatingExpiry}
+                  className="rounded bg-emerald-600 px-1.5 py-0.5 font-medium text-white text-xs transition-colors hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {updatingExpiry ? <Loader2 className="size-3 animate-spin" strokeWidth={2} /> : "Set"}
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setEditingExpiry(false); }}
+                  className="rounded p-0.5 text-gray-400 transition-colors hover:text-gray-600"
+                >
+                  <X className="size-3" strokeWidth={2} />
+                </button>
+              </div>
+            )}
+
+            {!state.emailSent && state.emailError && (
+              <p className="mt-0.5 text-red-500 text-xs">Email error: {state.emailError}</p>
+            )}
             <button
               type="button"
-              onClick={handleCopy}
-              title="Copy key"
-              className="shrink-0 rounded p-0.5 text-emerald-600 transition-colors hover:bg-emerald-100"
+              onClick={handleGenerate}
+              className="mt-1.5 text-emerald-500 text-xs underline-offset-2 hover:underline"
             >
-              {copied ? (
-                <Check className="size-3.5" strokeWidth={2.5} />
-              ) : (
-                <Copy className="size-3.5" strokeWidth={2} />
-              )}
+              Regenerate
             </button>
           </div>
-          <p className="mt-1 text-emerald-600 text-xs">
-            {state.emailSent ? "Sent to client's email · valid 14 days" : "valid 14 days"}
-          </p>
-          {!state.emailSent && state.emailError && (
-            <p className="mt-0.5 text-red-500 text-xs">Email error: {state.emailError}</p>
-          )}
-          <button
-            type="button"
-            onClick={handleGenerate}
-            className="mt-1.5 text-emerald-500 text-xs underline-offset-2 hover:underline"
-          >
-            Regenerate
-          </button>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

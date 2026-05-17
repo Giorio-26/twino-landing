@@ -21,13 +21,43 @@ function createMailTransporter() {
   });
 }
 
+export async function PATCH(request: NextRequest) {
+  try {
+    const body: { bookingId: number; validityDays: number } = await request.json();
+
+    if (!body.bookingId || !body.validityDays || body.validityDays < 1) {
+      return Response.json({ error: "Invalid parameters" }, { status: 400 });
+    }
+
+    const supabase = createAdminClient();
+    const expiresAt = new Date(Date.now() + body.validityDays * 24 * 60 * 60 * 1000);
+
+    const { error } = await supabase
+      .from("access_keys")
+      .update({ expires_at: expiresAt.toISOString() })
+      .eq("booking_id", body.bookingId);
+
+    if (error) {
+      console.error("Error updating key expiry:", error);
+      return Response.json({ error: "Failed to update expiry" }, { status: 500 });
+    }
+
+    return Response.json({ expiresAt: expiresAt.toISOString() }, { status: 200 });
+  } catch (err) {
+    console.error("update-key-expiry error:", err);
+    return Response.json({ error: "Failed to process request" }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body: { bookingId: number } = await request.json();
+    const body: { bookingId: number; validityDays?: number } = await request.json();
 
     if (!body.bookingId || typeof body.bookingId !== "number") {
       return Response.json({ error: "Invalid bookingId" }, { status: 400 });
     }
+
+    const validityDays = Math.max(1, Math.min(365, body.validityDays ?? 14));
 
     const supabase = createAdminClient();
 
@@ -58,10 +88,10 @@ export async function POST(request: NextRequest) {
       .eq("booking_id", body.bookingId)
       .maybeSingle();
 
-    // Preserve the original expiry — only reset it on the very first generation
+    // Preserve the original expiry on regeneration; use validityDays only on first generation
     const expiresAt = existing
       ? new Date(existing.expires_at)
-      : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+      : new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000);
 
     const { error: upsertError } = await supabase
       .from("access_keys")
@@ -112,7 +142,7 @@ export async function POST(request: NextRequest) {
               </span>
             </div>
             <p style="color:#888;font-size:13px;margin:0">
-              This key is valid until <strong>${expiryLabel}</strong> (14 days from now).
+              This key is valid until <strong>${expiryLabel}</strong>.
             </p>
           </div>
         `,
