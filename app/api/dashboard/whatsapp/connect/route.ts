@@ -47,7 +47,7 @@ export async function POST() {
 
   let upstream: Response;
   try {
-    upstream = await fetch(`${apiUrl}/setup-company`, {
+    upstream = await fetch(`${apiUrl}/company/setup-company`, {
       method: "POST",
       headers: { "X-API-KEY": apiKey },
       body: form,

@@ -48,7 +48,14 @@ export default function IntegrationClient({
     fetch("/api/dashboard/whatsapp/status")
       .then((r) => r.json())
       .then((d) => {
-        setWa(d.connected ? { phase: "connected" } : { phase: "ready" });
+        if (d.connected) {
+          setWa({ phase: "connected" });
+        } else if (d.qr) {
+          const src = d.qr.startsWith("data:") ? d.qr : `data:image/png;base64,${d.qr}`;
+          setWa({ phase: "qr", src });
+        } else {
+          setWa({ phase: "ready" });
+        }
       })
       .catch(() => setWa({ phase: "ready" }));
   }, [hasPhone, notReady]);
@@ -56,15 +63,30 @@ export default function IntegrationClient({
   async function handleConnect() {
     setWa({ phase: "loading" });
     try {
-      const res = await fetch("/api/dashboard/whatsapp/connect", {
-        method: "POST",
-      });
+      const statusRes = await fetch("/api/dashboard/whatsapp/status");
+      const statusData = await statusRes.json();
+
+      if (statusData.connected) {
+        setWa({ phase: "connected" });
+        return;
+      }
+
+      if (statusData.qr) {
+        const src = statusData.qr.startsWith("data:")
+          ? statusData.qr
+          : `data:image/png;base64,${statusData.qr}`;
+        setWa({ phase: "qr", src });
+        return;
+      }
+
+      const res = await fetch("/api/dashboard/whatsapp/connect", { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         setWa({ phase: "error", message: data.error ?? "Connection failed" });
         return;
       }
-      setWa({ phase: "qr", src: data.qr });
+      const src = data.qr.startsWith("data:") ? data.qr : `data:image/png;base64,${data.qr}`;
+      setWa({ phase: "qr", src });
     } catch {
       setWa({ phase: "error", message: "Network error. Please try again." });
     }

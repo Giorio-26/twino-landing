@@ -31,19 +31,31 @@ export async function GET() {
   }
 
   try {
-    const upstream = await fetch(`${apiUrl}/company/${booking.company_id}/connect`, {
-      headers: { "X-API-KEY": apiKey },
+    const upstream = await fetch(
+      `${apiUrl}/company/${booking.company_id}/connect`,
+      {
+        headers: { "X-API-KEY": apiKey },
+      },
+    );
+
+    // if (!upstream.ok) {
+    //   return Response.json({ connected: false });
+    // }
+
+    // const data = await upstream.json() as { instance?: { state?: string } };
+    // const connected = data?.instance?.state === "open";
+
+    const data = await upstream.json();
+
+    const connected =
+      data?.status === "open" || data?.instance?.state === "open";
+    const hasQr = !!data?.base64;
+
+    return Response.json({
+      connected,
+      qr: hasQr ? data.base64 : null,
     });
-
-    if (!upstream.ok) {
-      return Response.json({ connected: false });
-    }
-
-    const data = await upstream.json() as { instance?: { state?: string } };
-    const connected = data?.instance?.state === "open";
-
-    return Response.json({ connected });
-  } catch {
-    return Response.json({ connected: false });
+  } catch (error) {
+    return Response.json({ connected: false, error });
   }
 }
