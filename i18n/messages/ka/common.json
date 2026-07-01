@@ -59,6 +59,8 @@
     "lastNamePlaceholder": "გიორგაძე",
     "email": "ელ-ფოსტა",
     "emailPlaceholder": "name@example.com",
+    "phone": "ტელეფონი",
+    "phonePlaceholder": "555 123 456",
     "companyName": "კომპანიის სახელი",
     "companyNamePlaceholder": "შპს თვინო",
     "socialMediaUrl": "სოც. მედიის მისამართი",

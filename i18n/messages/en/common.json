@@ -59,6 +59,8 @@
     "lastNamePlaceholder": "Doe",
     "email": "Email",
     "emailPlaceholder": "name@example.com",
+    "phone": "Phone",
+    "phonePlaceholder": "555 123 456",
     "companyName": "Company Name",
     "companyNamePlaceholder": "TwinO LLC",
     "socialMediaUrl": "Social Media URL",

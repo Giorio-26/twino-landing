@@ -44,6 +44,8 @@ type Booking = {
   first_name: string;
   last_name: string;
   email: string;
+  phone_number: string | null;
+  country_code: string | null;
   company_name: string | null;
   company_id: number | null;
   social_media_url: string | null;
@@ -426,6 +428,10 @@ function BookingCard({
   const socialDisplay = booking.social_media_url
     ? booking.social_media_url.replace(/^https?:\/\/(www\.)?/, "")
     : null;
+  const phoneDisplay =
+    booking.phone_number && booking.country_code
+      ? `${booking.country_code} ${booking.phone_number}`
+      : null;
 
   return (
     <div
@@ -494,6 +500,17 @@ function BookingCard({
             <Mail className="size-3.5 shrink-0 text-gray-400" strokeWidth={2} />
             <span className="truncate">{booking.email}</span>
           </div>
+
+          {/* Phone */}
+          {phoneDisplay && (
+            <div className="flex items-center gap-2 text-gray-500 text-xs">
+              <PhoneCall
+                className="size-3.5 shrink-0 text-gray-400"
+                strokeWidth={2}
+              />
+              <span className="truncate">{phoneDisplay}</span>
+            </div>
+          )}
 
           {/* Company */}
           {booking.company_name && (

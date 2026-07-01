@@ -5,9 +5,34 @@ interface FormData {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string;
+  countryCode?: string;
   companyName: string;
   socialMediaUrl: string;
   scheduledAt: string; // ISO UTC timestamp for the chosen slot
+}
+
+function validatePhoneContact(phoneNumber?: string, countryCode?: string) {
+  const hasPhone = Boolean(phoneNumber?.trim());
+  const hasCode = Boolean(countryCode?.trim());
+
+  if (!hasPhone && !hasCode) return { isValid: true, message: "" };
+  if (hasPhone !== hasCode) {
+    return {
+      isValid: false,
+      message: "Phone number and country code must be provided together",
+    };
+  }
+
+  const cleanPhone = phoneNumber?.replace(/[\s\-()]/g, "") ?? "";
+  if (!/^\d{4,15}$/.test(cleanPhone)) {
+    return { isValid: false, message: "Invalid phone number format" };
+  }
+  if (!/^\+\d{1,4}$/.test(countryCode ?? "")) {
+    return { isValid: false, message: "Invalid country code format" };
+  }
+
+  return { isValid: true, message: "" };
 }
 
 export async function POST(request: NextRequest) {
@@ -51,6 +76,14 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "Invalid email format" }, { status: 400 });
     }
 
+    const phoneValidation = validatePhoneContact(
+      body.phoneNumber,
+      body.countryCode,
+    );
+    if (!phoneValidation.isValid) {
+      return Response.json({ error: phoneValidation.message }, { status: 400 });
+    }
+
     // Insert into Supabase
     const { error: supabaseError } = await supabase
       .from("booking_requests")
@@ -61,6 +94,8 @@ export async function POST(request: NextRequest) {
           email: body.email,
           company_name: body.companyName,
           social_media_url: body.socialMediaUrl,
+          phone_number: body.phoneNumber?.trim() || null,
+          country_code: body.countryCode?.trim() || null,
           scheduled_at: body.scheduledAt,
         },
       ]);
