@@ -27,7 +27,7 @@ jobs:
       image-tag: ${{ steps.meta.outputs.tags }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Create .env for build
         run: |
@@ -84,7 +84,7 @@ jobs:
     environment: production
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Ensure target directory exists
         uses: appleboy/ssh-action@v1.2.5
