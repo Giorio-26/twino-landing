@@ -8,10 +8,14 @@ import {
   Phone,
   Send,
   Video,
+  Zap,
+  MessageSquare,
+  CalendarCheck,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 type Channel = "whatsapp" | "facebook" | "instagram";
 
@@ -48,6 +52,7 @@ export default function HowItWorks() {
   const [step, setStep] = useState(0);
   const [activeChannel, setActiveChannel] = useState<Channel>("whatsapp");
   const chatRef = useRef<HTMLDivElement>(null);
+  const section = useScrollAnimation(0.1);
 
   useEffect(() => {
     const sequence = [
@@ -81,10 +86,9 @@ export default function HowItWorks() {
       top: chatRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, []);
+  }, [messages, isTyping]);
 
   const resetDemo = (channel: Channel) => {
-    console.log("Button clicked:", channel);
     setActiveChannel(channel);
     setMessages([]);
     setStep(0);
@@ -93,29 +97,81 @@ export default function HowItWorks() {
 
   const config = channelConfig[activeChannel];
 
-  return (
-    <section className="bg-white py-24 md:py-32 lg:py-40">
-      <div className="container">
-        {/* Header */}
+  const steps = [
+    {
+      icon: Zap,
+      title: t("step1Title"),
+      description: t("step1Description"),
+      number: "01",
+    },
+    {
+      icon: MessageSquare,
+      title: t("step2Title"),
+      description: t("step2Description"),
+      number: "02",
+    },
+    {
+      icon: CalendarCheck,
+      title: t("step3Title"),
+      description: t("step3Description"),
+      number: "03",
+    },
+  ];
 
-        {/* Main Content Grid */}
+  return (
+    <section className="py-24 md:py-32 lg:py-40" id="how-it-works">
+      <div className="container">
+        {/* Section header */}
+        <div
+          ref={section.ref}
+          className={`text-center mb-16 transition-all duration-700 ease-out ${
+            section.isVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-8"
+          }`}
+        >
+          <h2 className="font-Helvetica-Neue font-bold text-primary text-3xl leading-tight sm:text-4xl lg:text-5xl mb-4">
+            {t("title")}
+          </h2>
+        </div>
+
+        {/* Steps + Chat demo layout */}
         <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Left Column - Text & Controls */}
+          {/* Left - Steps */}
           <div className="space-y-8">
-            <div className="mb-16 flex flex-col items-start lg:mb-10">
-              <h2 className="mb-4 max-w-4xl font-Helvetica-Neue font-bold text-3xl text-primary leading-tight sm:text-4xl lg:text-5xl">
-                {t("titlePre")}
-                <span className="text-accent">{t("titleHighlight")}</span>
-                {t("titlePost")}
-              </h2>
-              <p className="max-w-2xl font-Helvetica text-base text-primary/70 leading-relaxed sm:text-lg">
-                {t("subtitle")}
-              </p>
+            <div className="space-y-8">
+              {steps.map((s, i) => {
+                const Icon = s.icon;
+                return (
+                  <div key={i} className="flex gap-5 group">
+                    <div className="flex flex-col items-center">
+                      <div className="h-12 w-12 rounded-xl bg-accent/5 border border-accent/10 flex items-center justify-center group-hover:bg-accent/10 group-hover:scale-105 transition-all duration-300">
+                        <Icon className="size-5 text-accent" />
+                      </div>
+                      {i < steps.length - 1 && (
+                        <div className="w-px h-12 bg-primary/10 mt-2" />
+                      )}
+                    </div>
+                    <div className="pt-1">
+                      <div className="text-xs font-mono text-muted mb-1">
+                        {s.number}
+                      </div>
+                      <h3 className="font-Helvetica-Neue font-bold text-primary text-lg mb-2">
+                        {s.title}
+                      </h3>
+                      <p className="font-Helvetica text-secondary text-sm leading-relaxed">
+                        {s.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            {/* Channel Selector */}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="font-bold text-primary/50 text-xs uppercase tracking-widest">
-                {t("channelLabel")}
+
+            {/* Channel selector */}
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <span className="font-medium text-xs text-muted uppercase tracking-wider">
+                {t("channelLabel") || "Try it on"}
               </span>
               <div className="flex flex-wrap gap-2">
                 {(Object.keys(channelConfig) as Channel[]).map((ch) => (
@@ -123,10 +179,10 @@ export default function HowItWorks() {
                     key={ch}
                     type="button"
                     onClick={() => resetDemo(ch)}
-                    className={`pointer-events-auto rounded-full border px-4 py-2 font-semibold text-sm transition-all duration-300 active:scale-95 ${
+                    className={`rounded-full border px-4 py-2 font-semibold text-sm transition-all duration-300 active:scale-95 ${
                       activeChannel === ch
                         ? "text-white shadow-lg"
-                        : "border-primary/10 bg-white text-primary/70 hover:border-primary/20"
+                        : "border-primary/10 bg-white text-secondary hover:border-primary/20"
                     }`}
                     style={
                       activeChannel === ch
@@ -143,51 +199,35 @@ export default function HowItWorks() {
               </div>
             </div>
 
-            {/* Info Box */}
-            {/* <div className="rounded-2xl border border-primary/10 bg-accent-light p-6">
-              <div className="mb-3 flex items-center gap-3">
-                <span
-                  className="h-2 w-2 animate-pulse rounded-full"
-                  style={{ background: config.color }}
-                />
-                <span className="font-Helvetica-Neue font-bold text-primary">
-                  {t("twinTitle")}
-                </span>
-              </div>
-              <p className="font-Helvetica text-primary/70 text-sm leading-relaxed">
-                {t("twinDescription")}
-              </p>
-            </div> */}
-
-            {/* CTA Button */}
+            {/* CTA */}
             <Link
-              href="#pilot"
-              className="group hover:-translate-y-0.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-8 py-3.5 font-semibold text-base text-white no-underline transition-all duration-250 ease-in-out hover:shadow-[0_8px_24px_rgba(0,114,255,0.3)] active:translate-y-0 active:shadow-[0_4px_12px_rgba(0,114,255,0.2)] sm:w-auto"
+              href="#book-demo"
+              className="group hover:-translate-y-0.5 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 font-semibold text-base text-white no-underline transition-all duration-250 ease-in-out hover:shadow-[0_8px_32px_rgba(0,0,0,0.2)] active:translate-y-0"
             >
               {t("ctaText")}
               <ArrowRight className="size-4 transition-transform duration-250 ease-out group-hover:translate-x-0.5" />
             </Link>
           </div>
 
-          {/* Right Column - Chat Window */}
+          {/* Right - Chat Window */}
           <div
-            className="flex flex-col overflow-hidden rounded-3xl border border-primary/10 bg-white shadow-2xl"
-            style={{ height: "560px" }}
+            className="flex flex-col overflow-hidden rounded-2xl border border-primary/10 bg-white shadow-2xl"
+            style={{ height: "520px" }}
           >
             {/* Chat Header */}
             <div
-              className="flex items-center justify-between px-6 py-4"
+              className="flex items-center justify-between px-5 py-3.5"
               style={{ background: config.gradient }}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3.5">
                 <div className="relative">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 font-bold text-lg text-white backdrop-blur-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 font-bold text-base text-white backdrop-blur-sm">
                     T
                   </div>
-                  <span className="-bottom-0.5 -right-0.5 absolute h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400" />
+                  <span className="-bottom-0.5 -right-0.5 absolute h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="font-Helvetica-Neue font-bold text-base text-white">
+                  <h3 className="font-semibold text-sm text-white">
                     TwinO Sales Agent
                   </h3>
                   <span className="font-medium text-white/70 text-xs">
@@ -195,16 +235,16 @@ export default function HowItWorks() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-white/70">
-                <Video className="h-5 w-5" />
-                <Phone className="h-5 w-5" />
-                <MoreVertical className="h-5 w-5" />
+              <div className="flex items-center gap-2.5 text-white/70">
+                <Video className="h-4.5 w-4.5" />
+                <Phone className="h-4.5 w-4.5" />
+                <MoreVertical className="h-4.5 w-4.5" />
               </div>
             </div>
 
             {/* Chat Messages */}
             <div
-              className="flex flex-1 flex-col space-y-4 overflow-y-auto p-5"
+              className="flex flex-1 flex-col space-y-3 overflow-y-auto p-4"
               ref={chatRef}
               style={{ background: config.bgChat }}
             >
@@ -216,7 +256,7 @@ export default function HowItWorks() {
                   }`}
                 >
                   <div
-                    className={`max-w-xs rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       msg.role === "user"
                         ? "rounded-tr-sm"
                         : "rounded-tl-sm bg-white text-primary shadow-sm"
@@ -279,18 +319,18 @@ export default function HowItWorks() {
             </div>
 
             {/* Chat Input */}
-            <div className="border-primary/10 border-t bg-white p-4">
+            <div className="border-primary/10 border-t bg-white p-3.5">
               <div className="relative flex items-center gap-2">
                 <input
                   type="text"
                   disabled
                   placeholder={t("inputPlaceholder")}
-                  className="w-full rounded-full border border-primary/10 bg-accent-secondary-light px-5 py-3.5 font-medium text-primary/40 text-sm placeholder-primary/30 focus:outline-none"
+                  className="w-full rounded-full border border-primary/10 bg-accent-secondary-light px-5 py-3 font-medium text-primary/40 text-sm placeholder-primary/30 focus:outline-none"
                 />
                 <button
                   type="button"
                   disabled
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white"
                   style={{ background: config.color }}
                 >
                   <Send

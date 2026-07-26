@@ -81,7 +81,7 @@ export default function Header() {
               <Link
                 href="#book-demo"
                 onClick={(e) => handleNavigate(e, "#book-demo")}
-                className="group hover:-translate-y-0.5 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 font-semibold text-sm text-white no-underline transition-all duration-250 ease-in-out hover:shadow-[0_8px_24px_rgba(0,114,255,0.3)] active:translate-y-0 active:shadow-[0_4px_12px_rgba(0,114,255,0.2)]"
+                className="group hover:-translate-y-0.5 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-semibold text-sm text-white no-underline transition-all duration-250 ease-in-out hover:shadow-lg active:translate-y-0"
               >
                 {t("header.bookDemo")}
                 <ArrowRight className="size-4 transition-transform duration-250 ease-out group-hover:translate-x-0.5" />
