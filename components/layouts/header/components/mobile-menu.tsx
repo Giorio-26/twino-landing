@@ -99,7 +99,7 @@ export default function MobileMenu({
             <Link
               href="#book-demo"
               onClick={(e) => handleNav(e, "#book-demo")}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 font-semibold text-sm text-white no-underline transition-transform duration-200 ease-out active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 font-semibold text-sm text-white no-underline transition-all duration-250 hover:shadow-lg active:scale-[0.98]"
             >
               {t("header.bookDemo")}
               <ArrowRight className="size-4" />

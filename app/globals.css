@@ -138,6 +138,28 @@
   -webkit-backdrop-filter: blur(40px);
 }
 
+@utility section-divider {
+  background: linear-gradient(to right, transparent, rgba(0, 114, 255, 0.06), transparent);
+  height: 1px;
+}
+
+@utility fade-in-up {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @layer base {
   body {
     background-color: var(--color-background);

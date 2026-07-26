@@ -1,9 +1,10 @@
 import type { Locale } from "@/lib/config";
 
 export const NAV_LINKS = [
-  { labelKey: "header.features", href: "#features" },
+  { labelKey: "header.product", href: "#product" },
   { labelKey: "header.howItWorks", href: "#how-it-works" },
-  { labelKey: "header.contact", href: "#contact" },
+  { labelKey: "header.pricing", href: "#why-twino" },
+  { labelKey: "header.contact", href: "#book-demo" },
 ] as const;
 
 export const LOCALES: { code: Locale; label: string }[] = [
