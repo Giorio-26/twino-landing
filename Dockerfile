@@ -27,6 +27,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+RUN npm install -g npm@latest
+
 RUN apk add --no-cache libc6-compat \
     && addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
