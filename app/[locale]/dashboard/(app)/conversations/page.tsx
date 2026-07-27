@@ -2,10 +2,15 @@
 
 import {
   AlertTriangle,
+  ArrowRight,
   Check,
   CheckCheck,
   Circle,
+  Clock,
+  ExternalLink,
   Loader2,
+  MessageSquare,
+  Phone,
   Search,
   Send,
   Shield,
@@ -20,8 +25,10 @@ interface Lead {
   id: number;
   company_id: string;
   chat_id: string;
+  customer_name: string | null;
   budget: string | null;
   location: string | null;
+  selected_property: string | null;
   intent: string | null;
   lead_score: number;
   status: "new" | "hot" | "qualified" | "call_in" | "deal";
@@ -55,6 +62,22 @@ function formatPhone(chatId: string): string {
   return `+${chatId.split("@")[0]}`;
 }
 
+function getDisplayName(lead: Lead): string {
+  if (lead.customer_name && lead.customer_name !== UNKNOWN_PLACEHOLDER) {
+    return lead.customer_name;
+  }
+  return formatPhone(lead.chat_id);
+}
+
+function getDisplayInitials(lead: Lead): string {
+  const name = getDisplayName(lead);
+  if (name.startsWith("+")) {
+    const digits = name.replace(/\D/g, "");
+    return digits.slice(-2);
+  }
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+}
+
 function timeAgo(isoDate: string): string {
   const utc =
     isoDate.endsWith("Z") || isoDate.includes("+") ? isoDate : `${isoDate}Z`;
@@ -66,6 +89,14 @@ function timeAgo(isoDate: string): string {
   if (hours < 24) return `${hours}h ago`;
   return `${Math.floor(hours / 24)}d ago`;
 }
+
+const STATUS_COLORS: Record<Lead["status"], { bg: string; text: string }> = {
+  new: { bg: "bg-dash-accent-muted", text: "text-dash-accent" },
+  hot: { bg: "bg-dash-warning-muted", text: "text-dash-warning" },
+  qualified: { bg: "bg-dash-success-muted", text: "text-dash-success" },
+  call_in: { bg: "bg-dash-purple-muted", text: "text-dash-purple" },
+  deal: { bg: "bg-teal-500/10", text: "text-teal-600" },
+};
 
 export default function ConversationsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -319,15 +350,15 @@ export default function ConversationsPage() {
   }, [selected]);
 
   // Scroll to bottom on new messages or typing indicator change.
-  // deps are intentional triggers, not values read inside the effect.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typingChats, selected]);
 
   const filtered = leads.filter((lead) => {
     const phone = formatPhone(lead.chat_id);
-    if (search && !phone.includes(search)) return false;
+    const name = lead.customer_name?.toLowerCase() ?? "";
+    const q = search.toLowerCase();
+    if (search && !phone.includes(search) && !name.includes(q)) return false;
     return true;
   });
 
@@ -363,7 +394,7 @@ export default function ConversationsPage() {
   };
 
   return (
-    <div className="w-full dash-animate-in flex h-[calc(100vh-4rem)] gap-0 overflow-hidden rounded-2xl border border-dash-border bg-dash-surface">
+    <div className="w-full dash-animate-in flex h-[calc(100vh-5rem)] gap-0 overflow-hidden rounded-2xl border border-dash-border bg-dash-surface">
       {/* Left: Lead list */}
       <div className="flex w-80 shrink-0 flex-col border-dash-border border-r">
         <div className="border-dash-border border-b p-4">
@@ -373,7 +404,7 @@ export default function ConversationsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by phone..."
+              placeholder="Search by name or phone..."
               className="w-full rounded-lg border border-dash-border bg-dash-bg py-2 pr-3 pl-9 text-dash-text text-sm placeholder-dash-text-muted focus:border-dash-accent/40 focus:outline-none"
             />
           </div>
@@ -441,21 +472,38 @@ export default function ConversationsPage() {
             </div>
           )}
           {leadsError && (
-            <p className="p-4 text-center text-dash-text-muted text-xs">
-              {leadsError}
-            </p>
+            <div className="p-4">
+              <div className="rounded-xl border border-dash-danger/20 bg-dash-danger-muted/30 p-4 text-center">
+                <p className="text-dash-danger text-sm font-medium">{leadsError}</p>
+                <button
+                  type="button"
+                  onClick={() => { setLeadsError(null); setLeadsLoading(true); fetch("/api/dashboard/leads").then((r) => r.json()).then((json) => { if (json.error) throw new Error(json.error); setLeads(json.data ?? []); }).catch((e) => setLeadsError(e.message)).finally(() => setLeadsLoading(false)); }}
+                  className="mt-2 rounded-lg bg-dash-danger px-3 py-1.5 text-white text-xs font-medium"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
           )}
           {!leadsLoading && !leadsError && filtered.length === 0 && (
-            <p className="p-4 text-center text-dash-text-muted text-xs">
-              No conversations found.
-            </p>
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-dash-surface-secondary mb-4">
+                <MessageSquare className="h-6 w-6 text-dash-text-muted" />
+              </div>
+              <p className="font-Helvetica-Neue font-semibold text-dash-text text-sm">No conversations yet</p>
+              <p className="mt-1 text-dash-text-muted text-xs max-w-[200px]">
+                Conversations will appear here once leads start messaging on WhatsApp.
+              </p>
+            </div>
           )}
           {filtered.map((lead) => {
-            const phone = formatPhone(lead.chat_id);
+            const name = getDisplayName(lead);
+            const initials = getDisplayInitials(lead);
             const lastMsg = lastMessages[lead.chat_id];
             const isClosed = closedChats.has(lead.chat_id);
             const isBlocked = blockedChats.has(lead.chat_id);
             const hasEscalation = Boolean(escalations[lead.chat_id]);
+            const isHuman = takeoverChats.has(lead.chat_id);
             return (
               <button
                 key={lead.id}
@@ -464,8 +512,8 @@ export default function ConversationsPage() {
                 className={`flex w-full items-start gap-3 border-dash-border border-b p-4 text-left transition-colors ${selected?.id === lead.id ? "bg-dash-accent-muted/30" : "hover:bg-dash-surface-hover"}`}
               >
                 <div className="relative">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-dash-surface-secondary font-semibold text-dash-text text-sm">
-                    {phone[1]}
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full font-semibold text-sm ${isHuman ? "bg-dash-warning-muted text-dash-warning" : "bg-dash-surface-secondary text-dash-text"}`}>
+                    {initials}
                   </div>
                   {!isClosed && !isBlocked && (
                     <span className="-bottom-0.5 -right-0.5 absolute h-3 w-3 rounded-full border-2 border-dash-surface bg-green-500" />
@@ -479,28 +527,38 @@ export default function ConversationsPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-dash-text text-sm">
-                      {phone}
+                    <span className="font-semibold text-dash-text text-sm truncate">
+                      {name}
                     </span>
-                    <span className="text-[11px] text-dash-text-muted">
+                    <span className="text-[11px] text-dash-text-muted shrink-0 ml-2">
                       {timeAgo(lead.updated_at)}
                     </span>
                   </div>
                   <p className="mt-0.5 truncate text-dash-text-muted text-xs">
                     {lastMsg ?? lead.intent ?? "—"}
                   </p>
-                  <div className="mt-1.5 flex items-center gap-1.5">
+                  <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                    {/* Status badge */}
+                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-medium uppercase tracking-wide ${STATUS_COLORS[lead.status].bg} ${STATUS_COLORS[lead.status].text}`}>
+                      {lead.status}
+                    </span>
+                    {/* Lead score */}
+                    {lead.lead_score >= 7 && (
+                      <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-dash-accent px-1 font-bold text-[9px] text-white">
+                        {lead.lead_score}
+                      </span>
+                    )}
                     {lead.budget && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-dash-success" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-dash-success" title="Budget known" />
                     )}
                     {lead.location && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-dash-success" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-dash-success" title="Location known" />
                     )}
                     {lead.intent && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-dash-success" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-dash-success" title="Intent known" />
                     )}
                     {(!lead.budget || !lead.location || !lead.intent) && (
-                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-dash-text-muted" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-dash-text-muted" title="Still qualifying" />
                     )}
                     {hasEscalation && (
                       <AlertTriangle className="h-3 w-3 text-dash-warning" />
@@ -515,13 +573,13 @@ export default function ConversationsPage() {
                         Blocked
                       </span>
                     )}
+                    {isHuman && (
+                      <span className="rounded px-1 py-0.5 text-[9px] font-medium uppercase tracking-wide bg-dash-warning-muted text-dash-warning">
+                        Human
+                      </span>
+                    )}
                   </div>
                 </div>
-                {/* {lead.lead_score >= 7 && (
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-dash-accent px-1 font-bold text-[10px] text-white">
-                    {lead.lead_score}
-                  </span>
-                )} */}
               </button>
             );
           })}
@@ -531,54 +589,80 @@ export default function ConversationsPage() {
       {/* Center: Chat */}
       <div className="flex flex-1 flex-col">
         {!selected ? (
-          <div className="flex flex-1 items-center justify-center text-dash-text-muted text-sm">
-            Select a conversation
+          <div className="flex flex-col items-center justify-center flex-1 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-dash-surface-secondary mb-4">
+              <MessageSquare className="h-7 w-7 text-dash-text-muted" />
+            </div>
+            <p className="font-Helvetica-Neue font-semibold text-dash-text text-base">Select a conversation</p>
+            <p className="mt-1 text-dash-text-muted text-sm max-w-[280px]">
+              Choose a lead from the left panel to view their conversation and take action.
+            </p>
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-between border-dash-border border-b px-6 py-3">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between border-dash-border border-b px-5 py-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-dash-surface-secondary font-semibold text-dash-text text-sm">
-                  {formatPhone(selected.chat_id)[1]}
+                <div className={`flex h-9 w-9 items-center justify-center rounded-full font-semibold text-sm ${takeoverChats.has(selected.chat_id) ? "bg-dash-warning-muted text-dash-warning" : "bg-dash-surface-secondary text-dash-text"}`}>
+                  {getDisplayInitials(selected)}
                 </div>
                 <div>
-                  <div className="font-semibold text-dash-text text-sm">
-                    {formatPhone(selected.chat_id)}
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-dash-text text-sm">
+                      {getDisplayName(selected)}
+                    </span>
+                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-medium uppercase tracking-wide ${STATUS_COLORS[selected.status].bg} ${STATUS_COLORS[selected.status].text}`}>
+                      {selected.status}
+                    </span>
                   </div>
-                  <div className="text-dash-text-muted text-xs">WhatsApp</div>
+                  <div className="flex items-center gap-2 text-dash-text-muted text-xs">
+                    <span>{formatPhone(selected.chat_id)}</span>
+                    <span>·</span>
+                    <span>WhatsApp</span>
+                  </div>
                 </div>
               </div>
-              {takeoverChats.has(selected.chat_id) ? (
-                <button
-                  type="button"
-                  onClick={handleTakeover}
-                  disabled={actionPending}
-                  className="flex items-center gap-1.5 rounded-lg border border-dash-success/30 bg-dash-success-muted px-3 py-1.5 font-semibold text-dash-success text-xs transition-colors hover:bg-dash-success/20 disabled:opacity-50"
-                >
-                  {actionPending ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Zap className="h-3.5 w-3.5" />
-                  )}
-                  Resume AI
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleTakeover}
-                  disabled={actionPending}
-                  className="flex items-center gap-1.5 rounded-lg border border-dash-warning/30 bg-dash-warning-muted px-3 py-1.5 font-semibold text-dash-warning text-xs transition-colors hover:bg-dash-warning/20 disabled:opacity-50"
-                >
-                  {actionPending ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <User className="h-3.5 w-3.5" />
-                  )}
-                  Take Over
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {takeoverChats.has(selected.chat_id) ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 rounded-lg border border-dash-warning/30 bg-dash-warning-muted px-3 py-1.5">
+                      <User className="h-3.5 w-3.5 text-dash-warning" />
+                      <span className="font-semibold text-dash-warning text-xs">You're responding</span>
+                      <span className="h-2 w-2 rounded-full bg-dash-warning animate-pulse" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleTakeover}
+                      disabled={actionPending}
+                      className="flex items-center gap-1.5 rounded-lg bg-dash-success px-3 py-1.5 font-semibold text-white text-xs transition-colors hover:bg-green-700 disabled:opacity-50"
+                    >
+                      {actionPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Zap className="h-3.5 w-3.5" />
+                      )}
+                      Resume AI
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleTakeover}
+                    disabled={actionPending}
+                    className="flex items-center gap-1.5 rounded-lg bg-dash-accent px-3 py-1.5 font-semibold text-white text-xs transition-colors hover:bg-dash-accent-hover disabled:opacity-50"
+                  >
+                    {actionPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <User className="h-3.5 w-3.5" />
+                    )}
+                    Take Over
+                  </button>
+                )}
+              </div>
             </div>
 
+            {/* Chat Messages */}
             <div
               className="flex-1 space-y-3 overflow-y-auto p-6"
               style={{ background: "var(--dash-bg)" }}
@@ -685,6 +769,7 @@ export default function ConversationsPage() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Input */}
             <div className="border-dash-border border-t p-4">
               <div className="flex items-center gap-2">
                 <input
@@ -779,19 +864,41 @@ export default function ConversationsPage() {
                 </div>
               )}
 
-            <div className="mt-6 space-y-2">
-              {/* <button
-                type="button"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-dash-accent py-2.5 font-semibold text-white text-xs hover:bg-dash-accent-hover"
+            {/* Action Buttons */}
+            <div className="mt-4 space-y-2">
+              <a
+                href={`tel:${formatPhone(selected.chat_id)}`}
+                className="flex items-center justify-center gap-2 rounded-xl bg-dash-accent py-2.5 font-semibold text-white text-xs hover:bg-dash-accent-hover"
               >
+                <Phone className="h-3.5 w-3.5" />
+                Call
+              </a>
+              <a
+                href={`https://wa.me/${selected.chat_id.split("@")[0]}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 font-semibold text-dash-text-secondary text-xs hover:bg-dash-surface-hover"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Open in WhatsApp
+              </a>
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dash-accent/20 bg-dash-accent-muted py-2.5 font-semibold text-dash-accent text-xs hover:bg-dash-accent-muted/60"
+              >
+                <ArrowRight className="h-3.5 w-3.5" />
                 Send to CRM
               </button>
               <button
                 type="button"
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 font-semibold text-dash-text-secondary text-xs hover:bg-dash-surface-hover"
               >
+                <Clock className="h-3.5 w-3.5" />
                 Schedule Meeting
-              </button> */}
+              </button>
+            </div>
+
+            <div className="border-dash-border border-t pt-3 mt-3 space-y-2">
               <button
                 type="button"
                 onClick={handleBlock}
