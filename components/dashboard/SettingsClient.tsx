@@ -5,10 +5,16 @@ import {
   Bell,
   Building2,
   Check,
+  CreditCard,
+  KeyRound,
   Loader2,
+  Mail,
+  Plus,
   Save,
+  Shield,
   Trash2,
   Users,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -23,6 +29,15 @@ type CompanyData = {
 };
 
 type SaveState = "idle" | "saving" | "saved" | "error";
+
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: "owner" | "admin" | "agent";
+  avatar?: string;
+  joinedAt: string;
+}
 
 export default function SettingsClient({
   initialCompany,
@@ -42,6 +57,26 @@ export default function SettingsClient({
     takeover: true,
   });
 
+  // Team state
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"admin" | "agent">("agent");
+  const [inviting, setInviting] = useState(false);
+
+  const [teamMembers] = useState<TeamMember[]>([
+    {
+      id: "1",
+      name: agency.name || "You",
+      email: agency.email || "you@twino.estate",
+      role: "owner",
+      joinedAt: "2024-01-01",
+    },
+  ]);
+
+  // Danger zone confirm
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteText, setDeleteText] = useState("");
+
   async function handleSave() {
     setSaveState("saving");
     try {
@@ -59,6 +94,24 @@ export default function SettingsClient({
     }
   }
 
+  async function handleInvite() {
+    setInviting(true);
+    try {
+      const res = await fetch("/api/dashboard/team/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
+      });
+      if (!res.ok) throw new Error();
+      setShowInvite(false);
+      setInviteEmail("");
+    } catch {
+      // silent
+    } finally {
+      setInviting(false);
+    }
+  }
+
   return (
     <div className="mx-auto w-full space-y-6">
       <div className="dash-animate-in">
@@ -66,7 +119,7 @@ export default function SettingsClient({
           Settings
         </h2>
         <p className="mt-1 text-dash-text-secondary text-sm">
-          Manage your account and preferences.
+          Manage your account, team, and preferences.
         </p>
       </div>
 
@@ -174,6 +227,107 @@ export default function SettingsClient({
         </div>
       </div>
 
+      {/* Team Members */}
+      <div
+        className="dash-card dash-animate-in overflow-hidden"
+        style={{ animationDelay: "0.1s" }}
+      >
+        <div className="flex items-center justify-between border-dash-border border-b p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-purple-muted">
+              <Users className="h-5 w-5 text-dash-purple" />
+            </div>
+            <div>
+              <h3 className="font-Helvetica-Neue font-semibold text-dash-text text-sm">
+                Team Members
+              </h3>
+              <p className="text-dash-text-muted text-xs">
+                {teamMembers.length} member{teamMembers.length !== 1 ? "s" : ""} · Manage access to your workspace
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowInvite(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-dash-accent px-3 py-1.5 font-medium text-white text-xs hover:bg-dash-accent-hover"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Invite
+          </button>
+        </div>
+
+        {/* Invite panel */}
+        {showInvite && (
+          <div className="border-dash-border border-b bg-dash-surface-secondary p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 space-y-3">
+                <div>
+                  <label className="block font-medium text-dash-text-secondary text-xs mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="agent@company.com"
+                    className="w-full rounded-lg border border-dash-border bg-dash-bg px-3 py-2 text-sm text-dash-text placeholder-dash-text-muted focus:border-dash-accent/40 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-dash-text-secondary text-xs mb-1">Role</label>
+                  <div className="flex gap-2">
+                    {(["admin", "agent"] as const).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setInviteRole(r)}
+                        className={`rounded-lg px-3 py-1.5 font-medium text-xs capitalize ${inviteRole === r ? "bg-dash-accent-muted text-dash-accent" : "bg-dash-surface text-dash-text-muted hover:bg-dash-surface-hover"}`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <button type="button" onClick={() => setShowInvite(false)} className="p-1 text-dash-text-muted hover:text-dash-text">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={handleInvite}
+              disabled={!inviteEmail.trim() || inviting}
+              className="mt-3 flex items-center gap-2 rounded-lg bg-dash-accent px-4 py-2 font-medium text-white text-sm hover:bg-dash-accent-hover disabled:opacity-50"
+            >
+              {inviting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+              Send Invite
+            </button>
+          </div>
+        )}
+
+        {/* Members list */}
+        <div className="divide-dash-border divide-y">
+          {teamMembers.map((member) => (
+            <div key={member.id} className="flex items-center justify-between px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-dash-accent/10 font-semibold text-dash-accent text-sm">
+                  {member.name[0]?.toUpperCase() || "?"}
+                </div>
+                <div>
+                  <div className="font-medium text-dash-text text-sm">{member.name}</div>
+                  <div className="text-dash-text-muted text-xs">{member.email}</div>
+                </div>
+              </div>
+              <span className={`rounded-full px-2.5 py-1 font-medium text-[11px] capitalize ${
+                member.role === "owner" ? "bg-dash-accent-muted text-dash-accent" :
+                member.role === "admin" ? "bg-dash-purple-muted text-dash-purple" :
+                "bg-dash-surface-secondary text-dash-text-muted"
+              }`}>
+                {member.role}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Notifications */}
       <div
         className="dash-card dash-animate-in overflow-hidden"
@@ -198,27 +352,27 @@ export default function SettingsClient({
               key: "email",
               label: "Email notifications",
               desc: "Receive daily lead summaries via email",
+              icon: Mail,
             },
-            // {
-            //   key: "telegram",
-            //   label: "Telegram alerts",
-            //   desc: "Get instant alerts for urgent events",
-            // },
             {
               key: "takeover",
               label: "Agent takeover alerts",
               desc: "Get notified when AI requests human intervention",
+              icon: Shield,
             },
           ].map((n) => (
             <div
               key={n.key}
               className="flex items-center justify-between rounded-xl border border-dash-border p-4"
             >
-              <div>
-                <div className="font-medium text-dash-text text-sm">
-                  {n.label}
+              <div className="flex items-center gap-3">
+                <n.icon className="h-4 w-4 text-dash-text-muted" />
+                <div>
+                  <div className="font-medium text-dash-text text-sm">
+                    {n.label}
+                  </div>
+                  <div className="text-dash-text-muted text-xs">{n.desc}</div>
                 </div>
-                <div className="text-dash-text-muted text-xs">{n.desc}</div>
               </div>
               <button
                 type="button"
@@ -232,7 +386,7 @@ export default function SettingsClient({
                 className={`relative h-6 w-11 rounded-full transition-colors ${notifications[n.key as keyof typeof notifications] ? "bg-dash-accent" : "bg-dash-surface-secondary"}`}
               >
                 <span
-                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${notifications[n.key as keyof typeof notifications] ? "translate-x-5" : ""}`}
+                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform shadow-sm ${notifications[n.key as keyof typeof notifications] ? "translate-x-5" : ""}`}
                 />
               </button>
             </div>
@@ -240,22 +394,62 @@ export default function SettingsClient({
         </div>
       </div>
 
-      {/* Team Members (Placeholder) */}
+      {/* Security */}
       <div
-        className="dash-card dash-animate-in p-6 opacity-60"
+        className="dash-card dash-animate-in overflow-hidden"
+        style={{ animationDelay: "0.15s" }}
+      >
+        <div className="flex items-center gap-4 border-dash-border border-b p-6">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-danger-muted">
+            <KeyRound className="h-5 w-5 text-dash-danger" />
+          </div>
+          <div>
+            <h3 className="font-Helvetica-Neue font-semibold text-dash-text text-sm">
+              Security
+            </h3>
+            <p className="text-dash-text-muted text-xs">
+              Protect your account and data
+            </p>
+          </div>
+        </div>
+        <div className="divide-dash-border divide-y p-6">
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <div className="font-medium text-dash-text text-sm">Two-Factor Authentication</div>
+              <div className="text-dash-text-muted text-xs">Add an extra layer of security to your account</div>
+            </div>
+            <button type="button" className="rounded-lg border border-dash-border px-3 py-1.5 text-dash-text-secondary text-xs font-medium hover:bg-dash-surface-hover">
+              Enable
+            </button>
+          </div>
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <div className="font-medium text-dash-text text-sm">Active Sessions</div>
+              <div className="text-dash-text-muted text-xs">1 active session · Last active: now</div>
+            </div>
+            <button type="button" className="rounded-lg border border-dash-border px-3 py-1.5 text-dash-text-secondary text-xs font-medium hover:bg-dash-surface-hover">
+              View
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Billing (placeholder) */}
+      <div
+        className="dash-card dash-animate-in p-6"
         style={{ animationDelay: "0.15s" }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-purple-muted">
-              <Users className="h-5 w-5 text-dash-purple" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-success-muted">
+              <CreditCard className="h-5 w-5 text-dash-success" />
             </div>
             <div>
               <h3 className="font-Helvetica-Neue font-semibold text-dash-text text-sm">
-                Team Members
+                Billing & Plan
               </h3>
               <p className="text-dash-text-muted text-xs">
-                Invite agents to your TwinO workspace.
+                Manage your subscription and invoices
               </p>
             </div>
           </div>
@@ -276,24 +470,57 @@ export default function SettingsClient({
             Danger Zone
           </h3>
         </div>
-        <div className="bg-dash-surface p-6">
+        <div className="bg-dash-surface p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium text-dash-text text-sm">
                 Delete Account
               </div>
               <div className="text-dash-text-muted text-xs">
-                Permanently delete your agency and all data.
+                Permanently delete your agency and all data. This cannot be undone.
               </div>
             </div>
             <button
               type="button"
+              onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
               className="flex items-center gap-2 rounded-xl border border-dash-danger/30 px-4 py-2 font-medium text-dash-danger text-sm transition-colors hover:bg-dash-danger-muted"
             >
               <Trash2 className="h-4 w-4" />
               Delete
             </button>
           </div>
+
+          {/* Confirmation panel */}
+          {showDeleteConfirm && (
+            <div className="rounded-xl border border-dash-danger/20 bg-dash-danger-muted/20 p-4 space-y-3">
+              <p className="text-dash-danger text-sm font-medium">
+                Type <strong>DELETE</strong> to confirm account deletion.
+              </p>
+              <input
+                type="text"
+                value={deleteText}
+                onChange={(e) => setDeleteText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full rounded-lg border border-dash-danger/30 bg-dash-bg px-3 py-2 text-sm text-dash-danger placeholder-dash-danger/50 focus:outline-none"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={deleteText !== "DELETE"}
+                  className="rounded-lg bg-dash-danger px-4 py-2 text-white text-sm font-medium disabled:opacity-40"
+                >
+                  Permanently Delete
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowDeleteConfirm(false); setDeleteText(""); }}
+                  className="rounded-lg px-3 py-2 text-dash-text-muted text-sm hover:bg-dash-surface-hover"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

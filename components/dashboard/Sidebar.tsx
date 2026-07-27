@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  Calendar,
   ChevronLeft,
   ChevronRight,
   Cog,
@@ -9,7 +10,9 @@ import {
   MessageSquare,
   Plug,
   Settings,
+  Shield,
   Users,
+  BookOpen,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -22,23 +25,30 @@ export default function Sidebar() {
   const t = useTranslations("dashboard.sidebar");
   const [collapsed, setCollapsed] = useState(false);
 
-  const navItems: Array<{
+  type NavItem = {
     label: string;
     href: string;
     icon: typeof BarChart3;
     badge?: number | null;
-  }> = [
-    { label: t("nav.overview"), href: "/dashboard", icon: BarChart3 },
-    { label: t("nav.configureTwin"), href: "/dashboard/configure", icon: Cog },
-    {
-      label: t("nav.conversations"),
-      href: "/dashboard/conversations",
-      icon: MessageSquare,
-      badge: null,
-    },
-    { label: t("nav.leads"), href: "/dashboard/leads", icon: Users },
-    { label: t("nav.integration"), href: "/dashboard/integration", icon: Plug },
-    { label: t("nav.settings"), href: "/dashboard/settings", icon: Settings },
+    section?: "main" | "config" | "admin";
+  };
+
+  const navItems: NavItem[] = [
+    { label: t("nav.overview"), href: "/dashboard", icon: BarChart3, section: "main" },
+    { label: t("nav.leads"), href: "/dashboard/leads", icon: Users, section: "main" },
+    { label: t("nav.conversations"), href: "/dashboard/conversations", icon: MessageSquare, badge: null, section: "main" },
+    { label: t("nav.calendar"), href: "/dashboard/calendar", icon: Calendar, badge: null, section: "main" },
+    { label: t("nav.integration"), href: "/dashboard/integration", icon: Plug, section: "config" },
+    { label: t("nav.configureTwin"), href: "/dashboard/configure", icon: Cog, section: "config" },
+    { label: t("nav.knowledgeBase"), href: "/dashboard/knowledge", icon: BookOpen, section: "config" },
+    { label: t("nav.guardrails"), href: "/dashboard/guardrails", icon: Shield, section: "config" },
+    { label: t("nav.settings"), href: "/dashboard/settings", icon: Settings, section: "admin" },
+  ];
+
+  const sections: { key: string; label: string; items: NavItem[] }[] = [
+    { key: "main", label: t("sections.workspace"), items: navItems.filter((i) => i.section === "main") },
+    { key: "config", label: t("sections.configuration"), items: navItems.filter((i) => i.section === "config") },
+    { key: "admin", label: t("sections.administration"), items: navItems.filter((i) => i.section === "admin") },
   ];
 
   const handleLogout = async () => {
@@ -54,7 +64,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`group/sidebar relative flex h-screen flex-col border-black/5 border-r bg-white transition-all duration-300 ease-in-out ${collapsed ? "w-18" : "w-65"}`}
+      className={`group/sidebar relative flex h-screen flex-col border-black/5 border-r bg-white transition-all duration-300 ease-in-out ${collapsed ? "w-[68px]" : "w-[260px]"}`}
     >
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center gap-3 border-black/5 border-b px-5">
@@ -75,40 +85,54 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <div className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
+        <div className="space-y-4">
+          {sections.map((section) => {
+            if (section.items.length === 0) return null;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-sm no-underline transition-all duration-200 ${active ? "bg-accent-light text-accent" : "text-primary/50 hover:bg-accent-secondary-light hover:text-primary"}`}
-              >
-                {active && (
-                  <div className="-translate-y-1/2 absolute top-1/2 left-0 h-5 w-0.75 rounded-r-full bg-accent shadow-accent/30 shadow-md" />
-                )}
-                <Icon
-                  className={`h-4.5 w-4.5 shrink-0 transition-colors ${active ? "text-accent" : "text-primary/30 group-hover:text-primary/50"}`}
-                />
+              <div key={section.key}>
                 {!collapsed && (
-                  <>
-                    <span className="flex-1 whitespace-nowrap">
-                      {item.label}
-                    </span>
-                    {item.badge && (
-                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 font-semibold text-[11px] text-white">
-                        {item.badge}
-                      </span>
-                    )}
-                  </>
+                  <p className="mb-1.5 px-3 font-Helvetica-Neue font-semibold text-[10px] uppercase tracking-wider text-dash-text-muted">
+                    {section.label}
+                  </p>
                 )}
-                {collapsed && item.badge && (
-                  <span className="-top-0.5 -right-0.5 absolute flex h-4 w-4 items-center justify-center rounded-full bg-accent font-bold text-[9px] text-white">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
+                <div className="space-y-0.5">
+                  {section.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-sm no-underline transition-all duration-200 ${active ? "bg-accent-light text-accent" : "text-primary/50 hover:bg-accent-secondary-light hover:text-primary"}`}
+                      >
+                        {active && (
+                          <div className="-translate-y-1/2 absolute top-1/2 left-0 h-5 w-0.75 rounded-r-full bg-accent shadow-accent/30 shadow-md" />
+                        )}
+                        <Icon
+                          className={`h-[18px] w-[18px] shrink-0 transition-colors ${active ? "text-accent" : "text-primary/30 group-hover:text-primary/50"}`}
+                        />
+                        {!collapsed && (
+                          <>
+                            <span className="flex-1 whitespace-nowrap">
+                              {item.label}
+                            </span>
+                            {item.badge && (
+                              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 font-semibold text-[11px] text-white">
+                                {item.badge}
+                              </span>
+                            )}
+                          </>
+                        )}
+                        {collapsed && item.badge && (
+                          <span className="-top-0.5 -right-0.5 absolute flex h-4 w-4 items-center justify-center rounded-full bg-accent font-bold text-[9px] text-white">
+                            {item.badge}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </div>
@@ -137,7 +161,7 @@ export default function Sidebar() {
           onClick={handleLogout}
           className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-primary/40 text-sm transition-all hover:bg-red-50 hover:text-red-500"
         >
-          <LogOut className="h-4.5 w-4.5 shrink-0" />
+          <LogOut className="h-[18px] w-[18px] shrink-0" />
           {!collapsed && (
             <span className="whitespace-nowrap">{t("signOut")}</span>
           )}
