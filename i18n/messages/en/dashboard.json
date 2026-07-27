@@ -130,12 +130,17 @@
   },
   "sidebar": {
     "name": "TwinO",
+    "sections": {
+      "workspace": "Workspace",
+      "setup": "Setup & Connections",
+      "system": "System"
+    },
     "nav": {
       "overview": "Overview",
-      "configureTwin": "Configure Twin",
+      "pipeline": "Pipeline",
       "conversations": "Conversations",
-      "leads": "Leads",
-      "integration": "Integration",
+      "twinSetup": "Twin Setup",
+      "integration": "Integrations",
       "settings": "Settings"
     },
     "collapse": "Collapse",

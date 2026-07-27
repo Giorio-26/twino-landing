@@ -130,12 +130,17 @@
   },
   "sidebar": {
     "name": "TwinO",
+    "sections": {
+      "workspace": "სამუშაო სივრცე",
+      "setup": "მოწყობა და კავშირები",
+      "system": "სისტემა"
+    },
     "nav": {
       "overview": "მიმოხილვა",
-      "configureTwin": "აგენტის კონფიგ.",
+      "pipeline": "პაიპლაინი",
       "conversations": "საუბრები",
-      "leads": "ლიდები",
-      "integration": "ინტეგრაცია",
+      "twinSetup": "აგენტის მოწყობა",
+      "integration": "ინტეგრაციები",
       "settings": "პარამეტრები"
     },
     "collapse": "დაკეცვა",
