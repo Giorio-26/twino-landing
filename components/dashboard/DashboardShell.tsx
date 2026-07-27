@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, X } from "lucide-react";
+import { Bell, Search, X, AlertTriangle, CheckCircle2, MessageSquare, Users, Calendar } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Sidebar from "./Sidebar";
@@ -8,12 +8,76 @@ import TwinStatusBadge from "./TwinStatusBadge";
 
 const routeTitles: Record<string, string> = {
   "/dashboard": "Overview",
-  "/dashboard/configure": "Configure Twin",
+  "/dashboard/configure": "Twin Setup",
   "/dashboard/conversations": "Conversations",
   "/dashboard/leads": "Pipeline",
   "/dashboard/integration": "Integrations",
   "/dashboard/settings": "Settings",
 };
+
+type NotificationPriority = "critical" | "high" | "low";
+
+interface Notification {
+  id: string;
+  type: "lead" | "conversation" | "takeover" | "booking" | "sync" | "system";
+  priority: NotificationPriority;
+  title: string;
+  description: string;
+  time: string;
+  read: boolean;
+  actionUrl?: string;
+}
+
+const NOTIFICATIONS: Notification[] = [
+  {
+    id: "1",
+    type: "takeover",
+    priority: "critical",
+    title: "AI needs human attention",
+    description: "Complex legal question from Giorgi M. — agent takeover requested",
+    time: "2 min ago",
+    read: false,
+    actionUrl: "/dashboard/conversations",
+  },
+  {
+    id: "2",
+    type: "lead",
+    priority: "high",
+    title: "New qualified lead",
+    description: "Nino T. — Budget $120K, Tbilisi, Living",
+    time: "8 min ago",
+    read: false,
+    actionUrl: "/dashboard/leads",
+  },
+  {
+    id: "3",
+    type: "booking",
+    priority: "high",
+    title: "Meeting booked",
+    description: "Ana K. — Saturday 14:00",
+    time: "25 min ago",
+    read: false,
+    actionUrl: "/dashboard/conversations",
+  },
+  {
+    id: "4",
+    type: "conversation",
+    priority: "low",
+    title: "Twin responded to 3 new messages",
+    description: "All conversations resolved automatically",
+    time: "1 hour ago",
+    read: true,
+  },
+  {
+    id: "5",
+    type: "system",
+    priority: "low",
+    title: "Daily summary ready",
+    description: "24 leads processed, 6 qualified, 1 meeting booked",
+    time: "Yesterday",
+    read: true,
+  },
+];
 
 export default function DashboardShell({
   children,
@@ -27,6 +91,9 @@ export default function DashboardShell({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const title = routeTitles[pathname] || "Dashboard";
+
+  const unreadCount = NOTIFICATIONS.filter((n) => !n.read).length;
+  const criticalCount = NOTIFICATIONS.filter((n) => !n.read && n.priority === "critical").length;
 
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
@@ -49,6 +116,21 @@ export default function DashboardShell({
   const handleSignOut = async () => {
     await fetch("/api/dashboard/sign-out", { method: "POST" });
     window.location.href = "/en/dashboard/access";
+  };
+
+  const priorityStyles: Record<NotificationPriority, { bg: string; icon: string; badge: string }> = {
+    critical: { bg: "bg-dash-danger-muted/50", icon: "text-dash-danger", badge: "bg-dash-danger" },
+    high: { bg: "bg-dash-warning-muted/30", icon: "text-dash-warning", badge: "bg-dash-warning" },
+    low: { bg: "bg-dash-surface-hover", icon: "text-dash-text-muted", badge: "bg-dash-text-muted" },
+  };
+
+  const notificationIcons = {
+    lead: Users,
+    conversation: MessageSquare,
+    takeover: AlertTriangle,
+    booking: Calendar,
+    sync: CheckCircle2,
+    system: Bell,
   };
 
   return (
@@ -146,24 +228,54 @@ export default function DashboardShell({
                 aria-label="Notifications"
               >
                 <Bell className="h-[18px] w-[18px]" />
-                <span className="-top-0.5 -right-0.5 absolute flex h-4 w-4 items-center justify-center rounded-full bg-accent font-bold text-[9px] text-white">
-                  2
-                </span>
+                {unreadCount > 0 && (
+                  <span className={`-top-0.5 -right-0.5 absolute flex h-4 w-4 items-center justify-center rounded-full font-bold text-[9px] text-white ${criticalCount > 0 ? "bg-dash-danger" : "bg-dash-accent"}`}>
+                    {unreadCount}
+                  </span>
+                )}
               </button>
               {notifOpen && (
-                <div className="dash-animate-scale absolute top-full right-0 z-40 mt-2 w-80 rounded-2xl border border-dash-border bg-dash-surface p-1 shadow-xl">
-                  <div className="px-4 py-3">
+                <div className="dash-animate-scale absolute top-full right-0 z-40 mt-2 w-96 rounded-2xl border border-dash-border bg-dash-surface shadow-xl">
+                  <div className="flex items-center justify-between px-4 py-3 border-dash-border border-b">
                     <h4 className="font-Helvetica-Neue font-semibold text-dash-text text-sm">Notifications</h4>
+                    <button type="button" className="text-dash-accent text-xs font-medium hover:underline">
+                      Mark all read
+                    </button>
                   </div>
-                  <div className="space-y-1">
-                    <div className="rounded-xl bg-dash-accent-muted/50 p-3">
-                      <p className="text-dash-text text-sm">AI requested takeover — complex legal question from Giorgi M.</p>
-                      <p className="mt-1 text-dash-text-muted text-xs">2 min ago</p>
-                    </div>
-                    <div className="rounded-xl bg-dash-surface-hover p-3">
-                      <p className="text-dash-text text-sm">3 new leads qualified from WhatsApp</p>
-                      <p className="mt-1 text-dash-text-muted text-xs">15 min ago</p>
-                    </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {NOTIFICATIONS.map((notif) => {
+                      const Icon = notificationIcons[notif.type];
+                      const style = priorityStyles[notif.priority];
+                      return (
+                        <button
+                          key={notif.id}
+                          type="button"
+                          onClick={() => {
+                            if (notif.actionUrl) {
+                              window.location.href = notif.actionUrl;
+                            }
+                            setNotifOpen(false);
+                          }}
+                          className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-dash-surface-hover ${notif.read ? "opacity-60" : ""}`}
+                        >
+                          <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${style.bg}`}>
+                            <Icon className={`h-4 w-4 ${style.icon}`} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-dash-text text-sm font-medium leading-tight">
+                              {notif.title}
+                            </p>
+                            <p className="mt-0.5 text-dash-text-muted text-xs leading-relaxed">
+                              {notif.description}
+                            </p>
+                            <p className="mt-1 text-dash-text-muted text-[11px]">{notif.time}</p>
+                          </div>
+                          {!notif.read && (
+                            <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-dash-accent" />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                   <div className="border-dash-border border-t px-4 py-2">
                     <button type="button" className="text-dash-accent text-xs font-medium hover:underline">
@@ -192,11 +304,9 @@ export default function DashboardShell({
                   </div>
                   <div className="border-dash-border border-t" />
                   <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-dash-text-secondary text-sm hover:bg-dash-surface-hover">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     Settings
                   </button>
                   <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-dash-text-secondary text-sm hover:bg-dash-surface-hover">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     Help & Support
                   </button>
                   <div className="border-dash-border border-t" />
@@ -205,7 +315,6 @@ export default function DashboardShell({
                     onClick={handleSignOut}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-dash-danger text-sm hover:bg-dash-danger-muted"
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                     Sign Out
                   </button>
                 </div>

@@ -10,9 +10,10 @@ import {
   Zap,
   Clock,
   DollarSign,
+  Activity,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 
 interface DashboardStats {
@@ -28,6 +29,7 @@ interface DashboardStats {
 }
 
 interface ActivityItem {
+  id: string;
   type: "lead" | "conversation" | "alert" | "deal" | "meeting";
   text: string;
   time: string;
@@ -43,68 +45,12 @@ function formatResponseTime(seconds: number): string {
   return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
 }
 
-function formatPercent(value: number): string {
-  return `${value}%`;
-}
-
 function getGreeting(): string {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 12) return "morning";
   if (hour >= 12 && hour < 18) return "afternoon";
   return "evening";
 }
-
-// Live activity feed (would be replaced with WebSocket data)
-const LIVE_ACTIVITY: ActivityItem[] = [
-  {
-    type: "meeting",
-    text: "Meeting booked: Ana K. — Saturday 14:00",
-    time: "2 min ago",
-    icon: Calendar,
-    color: "text-dash-success",
-    bg: "bg-dash-success-muted",
-  },
-  {
-    type: "lead",
-    text: "New qualified lead: Giorgi M. — Budget $80K, Batumi",
-    time: "5 min ago",
-    icon: Users,
-    color: "text-dash-accent",
-    bg: "bg-dash-accent-muted",
-  },
-  {
-    type: "conversation",
-    text: 'Sales Twin responded to +995 555 *** — "Investment inquiry"',
-    time: "8 min ago",
-    icon: MessageSquare,
-    color: "text-dash-accent",
-    bg: "bg-dash-accent-muted",
-  },
-  {
-    type: "alert",
-    text: "Agent takeover requested — complex legal question detected",
-    time: "15 min ago",
-    icon: Zap,
-    color: "text-dash-warning",
-    bg: "bg-dash-warning-muted",
-  },
-  {
-    type: "lead",
-    text: "Lead qualified: Nino T. — Budget $120K, Tbilisi, Living",
-    time: "25 min ago",
-    icon: Users,
-    color: "text-dash-success",
-    bg: "bg-dash-success-muted",
-  },
-  {
-    type: "conversation",
-    text: "New conversation started from WhatsApp",
-    time: "34 min ago",
-    icon: MessageSquare,
-    color: "text-dash-accent",
-    bg: "bg-dash-accent-muted",
-  },
-];
 
 function StatSkeleton() {
   return (
@@ -144,8 +90,12 @@ export default function DashboardOverview() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [liveActivity, setLiveActivity] = useState<ActivityItem[]>([]);
+  const wsRef = useRef<WebSocket | null>(null);
 
-  useEffect(() => {
+  // Fetch real stats from API
+  const fetchStats = useCallback(() => {
+    setLoading(true);
     fetch("/api/dashboard/stats")
       .then((r) => r.json())
       .then((data) => {
@@ -159,19 +109,100 @@ export default function DashboardOverview() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Quick retry on error
-  const retry = () => {
-    setError(null);
-    setLoading(true);
-    fetch("/api/dashboard/stats")
+  useEffect(() => {
+    fetchStats();
+
+    // Connect to WebSocket for live activity
+    fetch("/api/dashboard/ws-info")
       .then((r) => r.json())
       .then((data) => {
-        if (!data.error) setStats(data);
-        else setError("Unable to load dashboard data");
+        if (data.wsUrl) {
+          const ws = new WebSocket(data.wsUrl);
+          wsRef.current = ws;
+
+          ws.onmessage = (event) => {
+            try {
+              const parsed = JSON.parse(event.data);
+              // Map WebSocket events to activity items
+              if (parsed.type === "new_lead") {
+                setLiveActivity((prev) => [
+                  {
+                    id: parsed.id || Date.now().toString(),
+                    type: "lead",
+                    text: `New lead: ${parsed.name || "Unknown"} — ${parsed.message || "Message received"}`,
+                    time: "Just now",
+                    icon: Users,
+                    color: "text-dash-accent",
+                    bg: "bg-dash-accent-muted",
+                  },
+                  ...prev.slice(0, 9),
+                ]);
+              } else if (parsed.type === "qualified") {
+                setLiveActivity((prev) => [
+                  {
+                    id: parsed.id || Date.now().toString(),
+                    type: "lead",
+                    text: `Lead qualified: ${parsed.name || "Unknown"} — ${parsed.details || "Budget identified"}`,
+                    time: "Just now",
+                    icon: Users,
+                    color: "text-dash-success",
+                    bg: "bg-dash-success-muted",
+                  },
+                  ...prev.slice(0, 9),
+                ]);
+              } else if (parsed.type === "takeover_needed") {
+                setLiveActivity((prev) => [
+                  {
+                    id: parsed.id || Date.now().toString(),
+                    type: "alert",
+                    text: `AI needs attention — ${parsed.reason || "Complex question detected"}`,
+                    time: "Just now",
+                    icon: Zap,
+                    color: "text-dash-warning",
+                    bg: "bg-dash-warning-muted",
+                  },
+                  ...prev.slice(0, 9),
+                ]);
+              } else if (parsed.type === "meeting_booked") {
+                setLiveActivity((prev) => [
+                  {
+                    id: parsed.id || Date.now().toString(),
+                    type: "meeting",
+                    text: `Meeting booked: ${parsed.name || "Unknown"} — ${parsed.time || "Time TBC"}`,
+                    time: "Just now",
+                    icon: Calendar,
+                    color: "text-dash-success",
+                    bg: "bg-dash-success-muted",
+                  },
+                  ...prev.slice(0, 9),
+                ]);
+              }
+            } catch {
+              // ignore parse errors
+            }
+          };
+
+          ws.onclose = () => {
+            // Try to reconnect after 5s
+            setTimeout(() => {
+              if (wsRef.current === ws) fetchStats();
+            }, 5000);
+          };
+        }
       })
-      .catch(() => setError("Connection error. Retrying..."))
-      .finally(() => setLoading(false));
-  };
+      .catch(() => {
+        // WebSocket not available, poll every 30s
+        const interval = setInterval(fetchStats, 30000);
+        return () => clearInterval(interval);
+      });
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, [fetchStats]);
 
   const statCards = stats
     ? [
@@ -201,7 +232,7 @@ export default function DashboardOverview() {
         },
         {
           label: t("overview.stats.conversionRate"),
-          value: formatPercent(stats.conversion_rate),
+          value: `${stats.conversion_rate}%`,
           icon: TrendingUp,
           color: "text-dash-purple",
           bg: "bg-dash-purple-muted",
@@ -213,8 +244,8 @@ export default function DashboardOverview() {
   const funnelData = stats
     ? [
         { label: "Total Leads", value: stats.total_leads_today || stats.qualified * 3, color: "bg-dash-accent", pct: 100 },
-        { label: "Qualified", value: stats.qualified, color: "bg-dash-success", pct: stats.qualified > 0 ? 45 : 0 },
-        { label: "Meetings", value: stats.meetings_booked_today || 3, color: "bg-dash-purple", pct: 15 },
+        { label: "Qualified", value: stats.qualified, color: "bg-dash-success", pct: stats.qualified > 0 ? Math.round((stats.qualified / (stats.total_leads_today || stats.qualified * 3)) * 100) : 0 },
+        { label: "Meetings", value: stats.meetings_booked_today || 0, color: "bg-dash-purple", pct: stats.meetings_booked_today > 0 ? Math.round((stats.meetings_booked_today / (stats.total_leads_today || stats.qualified * 3)) * 100) : 0 },
         { label: "Deals", value: Math.floor(stats.qualified * 0.2), color: "bg-dash-warning", pct: 8 },
       ]
     : null;
@@ -233,6 +264,10 @@ export default function DashboardOverview() {
             {t("overview.subtitle")}
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-dash-text-muted text-xs font-medium">Live</span>
+        </div>
       </div>
 
       {/* Error State */}
@@ -240,9 +275,7 @@ export default function DashboardOverview() {
         <div className="dash-card flex items-center justify-between rounded-2xl border border-dash-danger/20 bg-dash-danger-muted/30 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-dash-danger-muted">
-              <svg className="h-4 w-4 text-dash-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+              <Zap className="h-4 w-4 text-dash-danger" />
             </div>
             <div>
               <p className="font-medium text-dash-danger text-sm">{error}</p>
@@ -251,7 +284,7 @@ export default function DashboardOverview() {
           </div>
           <button
             type="button"
-            onClick={retry}
+            onClick={fetchStats}
             className="rounded-lg bg-dash-danger px-3 py-1.5 font-medium text-white text-xs hover:bg-red-700"
           >
             Retry
@@ -368,15 +401,16 @@ export default function DashboardOverview() {
         )}
       </div>
 
-      {/* Recent Activity */}
+      {/* Live Activity Feed */}
       <div className="dash-card dash-animate-in overflow-hidden" style={{ animationDelay: "0.2s" }}>
         <div className="flex items-center justify-between border-dash-border border-b px-6 py-4">
           <div className="flex items-center gap-2">
+            <Activity className="h-4 w-4 text-dash-accent" />
             <h3 className="font-Helvetica-Neue font-semibold text-base text-dash-text">
-              Recent Activity
+              Live Activity
             </h3>
             <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-dash-text-muted text-[11px]">Live</span>
+            <span className="text-dash-text-muted text-[11px]">Real-time</span>
           </div>
           <Link
             href="/dashboard/conversations"
@@ -387,38 +421,45 @@ export default function DashboardOverview() {
           </Link>
         </div>
         <div className="divide-dash-border divide-y">
-          {LIVE_ACTIVITY.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.text}
-                className="flex items-start gap-3 px-6 py-3.5 transition-colors hover:bg-dash-surface-hover"
-              >
+          {liveActivity.length === 0 ? (
+            <div className="px-6 py-12 text-center">
+              <MessageSquare className="h-8 w-8 text-dash-text-muted mx-auto mb-2" />
+              <p className="text-dash-text-muted text-sm">No activity yet today. Leads will appear here in real-time.</p>
+            </div>
+          ) : (
+            liveActivity.map((item) => {
+              const Icon = item.icon;
+              return (
                 <div
-                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${item.bg} ${item.color}`}
+                  key={item.id}
+                  className="flex items-start gap-3 px-6 py-3.5 transition-colors hover:bg-dash-surface-hover"
                 >
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-dash-text text-sm leading-relaxed">
-                    {item.text}
-                  </p>
-                  <p className="mt-0.5 text-dash-text-muted text-xs">
-                    {item.time}
-                  </p>
-                </div>
-                {item.type === "alert" && (
-                  <button
-                    type="button"
-                    onClick={() => router.push("/dashboard/conversations")}
-                    className="shrink-0 rounded-lg bg-dash-warning px-3 py-1.5 font-medium text-white text-xs hover:bg-yellow-600"
+                  <div
+                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${item.bg} ${item.color}`}
                   >
-                    Take Over
-                  </button>
-                )}
-              </div>
-            );
-          })}
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-dash-text text-sm leading-relaxed">
+                      {item.text}
+                    </p>
+                    <p className="mt-0.5 text-dash-text-muted text-xs">
+                      {item.time}
+                    </p>
+                  </div>
+                  {item.type === "alert" && (
+                    <button
+                      type="button"
+                      onClick={() => router.push("/dashboard/conversations")}
+                      className="shrink-0 rounded-lg bg-dash-warning px-3 py-1.5 font-medium text-white text-xs hover:bg-yellow-600"
+                    >
+                      Take Over
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

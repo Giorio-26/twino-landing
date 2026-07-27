@@ -2,7 +2,6 @@
 
 import {
   BarChart3,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   Cog,
@@ -10,9 +9,7 @@ import {
   MessageSquare,
   Plug,
   Settings,
-  Shield,
   Users,
-  BookOpen,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -30,25 +27,22 @@ export default function Sidebar() {
     href: string;
     icon: typeof BarChart3;
     badge?: number | null;
-    section?: "main" | "config" | "admin";
+    section?: "operations" | "setup" | "system";
   };
 
   const navItems: NavItem[] = [
-    { label: t("nav.overview"), href: "/dashboard", icon: BarChart3, section: "main" },
-    { label: t("nav.leads"), href: "/dashboard/leads", icon: Users, section: "main" },
-    { label: t("nav.conversations"), href: "/dashboard/conversations", icon: MessageSquare, badge: null, section: "main" },
-    { label: t("nav.calendar"), href: "/dashboard/calendar", icon: Calendar, badge: null, section: "main" },
-    { label: t("nav.integration"), href: "/dashboard/integration", icon: Plug, section: "config" },
-    { label: t("nav.configureTwin"), href: "/dashboard/configure", icon: Cog, section: "config" },
-    { label: t("nav.knowledgeBase"), href: "/dashboard/knowledge", icon: BookOpen, section: "config" },
-    { label: t("nav.guardrails"), href: "/dashboard/guardrails", icon: Shield, section: "config" },
-    { label: t("nav.settings"), href: "/dashboard/settings", icon: Settings, section: "admin" },
+    { label: t("nav.overview"), href: "/dashboard", icon: BarChart3, section: "operations" },
+    { label: t("nav.pipeline"), href: "/dashboard/leads", icon: Users, section: "operations" },
+    { label: t("nav.conversations"), href: "/dashboard/conversations", icon: MessageSquare, badge: null, section: "operations" },
+    { label: t("nav.twinSetup"), href: "/dashboard/configure", icon: Cog, section: "setup" },
+    { label: t("nav.integration"), href: "/dashboard/integration", icon: Plug, section: "setup" },
+    { label: t("nav.settings"), href: "/dashboard/settings", icon: Settings, section: "system" },
   ];
 
   const sections: { key: string; label: string; items: NavItem[] }[] = [
-    { key: "main", label: t("sections.workspace"), items: navItems.filter((i) => i.section === "main") },
-    { key: "config", label: t("sections.configuration"), items: navItems.filter((i) => i.section === "config") },
-    { key: "admin", label: t("sections.administration"), items: navItems.filter((i) => i.section === "admin") },
+    { key: "operations", label: t("sections.workspace"), items: navItems.filter((i) => i.section === "operations") },
+    { key: "setup", label: t("sections.setup"), items: navItems.filter((i) => i.section === "setup") },
+    { key: "system", label: t("sections.system"), items: navItems.filter((i) => i.section === "system") },
   ];
 
   const handleLogout = async () => {
@@ -85,7 +79,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <div className="space-y-4">
+        <div className="space-y-5">
           {sections.map((section) => {
             if (section.items.length === 0) return null;
             return (
@@ -116,14 +110,14 @@ export default function Sidebar() {
                             <span className="flex-1 whitespace-nowrap">
                               {item.label}
                             </span>
-                            {item.badge && (
+                            {item.badge && item.badge > 0 && (
                               <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 font-semibold text-[11px] text-white">
                                 {item.badge}
                               </span>
                             )}
                           </>
                         )}
-                        {collapsed && item.badge && (
+                        {collapsed && item.badge && item.badge > 0 && (
                           <span className="-top-0.5 -right-0.5 absolute flex h-4 w-4 items-center justify-center rounded-full bg-accent font-bold text-[9px] text-white">
                             {item.badge}
                           </span>

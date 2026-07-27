@@ -3,17 +3,17 @@
 import {
   Building2,
   Check,
+  Clock,
   FlaskConical,
   Globe,
   Loader2,
   RotateCcw,
   Shield,
-  Zap,
   Sparkles,
   TestTube2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import GuardiansTab from "@/components/dashboard/configure/GuardiansTab";
 import KnowledgeTab from "@/components/dashboard/configure/KnowledgeTab";
 import PersonalityTab from "@/components/dashboard/configure/PersonalityTab";
@@ -24,32 +24,33 @@ import {
   type TwinConfig,
 } from "@/components/dashboard/configure/shared";
 
-const TAB_ICONS = {
-  personality: Sparkles,
-  guardians: Shield,
-  knowledge: Globe,
-  properties: Building2,
+type TabId = "business" | "personality" | "rules";
+
+const TAB_CONFIG = {
+  business: {
+    label: "Business Context",
+    description: "Hours, location, and contact info your Twin uses to answer leads",
+    icon: Clock,
+  },
+  personality: {
+    label: "Twin Personality",
+    description: "How your AI Twin sounds and behaves in conversations",
+    icon: Sparkles,
+  },
+  rules: {
+    label: "Rules & Guardrails",
+    description: "What your Twin can and cannot do — safety boundaries",
+    icon: Shield,
+  },
 } as const;
-
-type TabId = keyof typeof TAB_ICONS;
-
-const TAB_IDS = Object.keys(TAB_ICONS) as TabId[];
-
-const TAB_META: Record<TabId, { labelKey: string; descriptionKey: string; icon: typeof Sparkles }> = {
-  personality: { labelKey: "personality", descriptionKey: "personalityDesc", icon: Sparkles },
-  guardians: { labelKey: "guardians", descriptionKey: "guardiansDesc", icon: Shield },
-  knowledge: { labelKey: "knowledge", descriptionKey: "knowledgeDesc", icon: Globe },
-  properties: { labelKey: "properties", descriptionKey: "propertiesDesc", icon: Building2 },
-};
 
 export default function ConfigureTwinPage() {
   const t = useTranslations("dashboard.configure");
-
-  const [activeTab, setActiveTab] = useState<TabId>("personality");
+  const [activeTab, setActiveTab] = useState<TabId>("business");
   const [config, setConfig] = useState<TwinConfig>(DEFAULT_CONFIG);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const visited = useRef<Set<TabId>>(new Set(["personality"]));
+  const [visited, setVisited] = useState<Set<string>>(new Set(["business"]));
 
   // Test simulator
   const [testOpen, setTestOpen] = useState(false);
@@ -67,7 +68,7 @@ export default function ConfigureTwinPage() {
   }, []);
 
   const handleTabChange = (id: TabId) => {
-    visited.current.add(id);
+    setVisited((prev) => new Set([...prev, id]));
     setActiveTab(id);
   };
 
@@ -132,7 +133,14 @@ export default function ConfigureTwinPage() {
           <p className="font-medium text-dash-danger text-sm">{error}</p>
           <button
             type="button"
-            onClick={() => { setError(null); setInitialLoading(true); apiFetch<TwinConfig>("/api/twin-config").then((res) => { if (res.data) setConfig(res.data); setInitialLoading(false); }).catch(() => setError("Failed to reload")).finally(() => { if (!initialLoading) setInitialLoading(false); }); }}
+            onClick={() => {
+              setError(null);
+              setInitialLoading(true);
+              apiFetch<TwinConfig>("/api/twin-config")
+                .then((res) => { if (res.data) setConfig(res.data); setInitialLoading(false); })
+                .catch(() => setError("Failed to reload"))
+                .finally(() => { if (!initialLoading) setInitialLoading(false); });
+            }}
             className="rounded-lg bg-dash-danger px-3 py-1.5 text-white text-xs font-medium"
           >
             Retry
@@ -150,7 +158,9 @@ export default function ConfigureTwinPage() {
           </div>
           <div className="p-5 space-y-3">
             <div>
-              <label className="block font-medium text-dash-text-secondary text-xs mb-1.5">Send a test message as a customer:</label>
+              <label className="block font-medium text-dash-text-secondary text-xs mb-1.5">
+                Send a test message as a customer:
+              </label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -174,7 +184,7 @@ export default function ConfigureTwinPage() {
             {testOutput && (
               <div className="rounded-xl bg-dash-bg border border-dash-border p-4">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Zap className="h-3 w-3 text-dash-accent" />
+                  <Sparkles className="h-3 w-3 text-dash-accent" />
                   <span className="font-medium text-dash-text-muted text-xs">Twin Response Preview</span>
                 </div>
                 <p className="text-dash-text text-sm leading-relaxed">{testOutput}</p>
@@ -184,45 +194,44 @@ export default function ConfigureTwinPage() {
         </div>
       )}
 
-      {/* Tab Bar */}
+      {/* Simplified Tab Bar */}
       <div className="dash-animate-in flex gap-1 rounded-2xl bg-dash-surface-secondary p-1.5" style={{ animationDelay: "0.1s" }}>
-        {TAB_IDS.map((id) => {
-          const Icon = TAB_ICONS[id];
+        {(Object.keys(TAB_CONFIG) as TabId[]).map((id) => {
+          const cfg = TAB_CONFIG[id];
+          const Icon = cfg.icon;
           const active = activeTab === id;
           return (
             <button
               key={id}
               type="button"
               onClick={() => handleTabChange(id)}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold text-sm transition-all duration-200 ${
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold text-sm transition-all duration-200 ${
                 active
                   ? "bg-dash-accent text-white shadow-dash-accent/30 shadow-sm"
                   : "text-dash-text-muted hover:bg-dash-surface-active hover:text-dash-text"
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:block">{t(`tabs.${id}`)}</span>
+              <span className="hidden sm:block">{cfg.label}</span>
             </button>
           );
         })}
       </div>
 
+      {/* Tab Description */}
+      <div className="dash-animate-in px-2">
+        <p className="text-dash-text-muted text-sm">{TAB_CONFIG[activeTab].description}</p>
+      </div>
+
       {/* Tab Panels */}
+      <div className={activeTab === "business" ? "block" : "hidden"}>
+        {visited.has("business") && <KnowledgeTab initialConfig={config} />}
+      </div>
       <div className={activeTab === "personality" ? "block" : "hidden"}>
-        {visited.current.has("personality") && (
-          <PersonalityTab initialConfig={config} />
-        )}
+        {visited.has("personality") && <PersonalityTab initialConfig={config} />}
       </div>
-      <div className={activeTab === "guardians" ? "block" : "hidden"}>
-        {visited.current.has("guardians") && <GuardiansTab />}
-      </div>
-      <div className={activeTab === "knowledge" ? "block" : "hidden"}>
-        {visited.current.has("knowledge") && (
-          <KnowledgeTab initialConfig={config} />
-        )}
-      </div>
-      <div className={activeTab === "properties" ? "block" : "hidden"}>
-        {visited.current.has("properties") && <PropertiesTab />}
+      <div className={activeTab === "rules" ? "block" : "hidden"}>
+        {visited.has("rules") && <GuardiansTab />}
       </div>
     </div>
   );
