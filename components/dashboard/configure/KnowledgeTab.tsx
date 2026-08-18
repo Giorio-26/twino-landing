@@ -185,9 +185,10 @@ function WorkingHoursPicker({
 
 interface Props {
   initialConfig: TwinConfig;
+  onSaved?: () => void;
 }
 
-export default function KnowledgeTab({ initialConfig }: Props) {
+export default function KnowledgeTab({ initialConfig, onSaved }: Props) {
   const t = useTranslations("dashboard.configure");
   const tk = useTranslations("dashboard.configure.knowledge");
 
@@ -231,6 +232,8 @@ export default function KnowledgeTab({ initialConfig }: Props) {
     ]);
     if (r1.error || r2.error) {
       setSaveError(r1.error ?? r2.error ?? "Save failed. Please try again.");
+    } else {
+      onSaved?.();
     }
     setSaving(false);
   };
