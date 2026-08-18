@@ -131,7 +131,11 @@ function NumCell({
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function PropertiesTab() {
+interface PropertiesTabProps {
+  onSaved?: () => void;
+}
+
+export default function PropertiesTab({ onSaved }: PropertiesTabProps = {}) {
   const t = useTranslations("dashboard.configure.properties");
 
   // Upload state
@@ -208,6 +212,7 @@ export default function PropertiesTab() {
       setUploadState("success");
       setFile(null);
       fetchProperties();
+      onSaved?.();
     } catch {
       setUploadError("Network error. Please try again.");
       setUploadState("error");
@@ -257,6 +262,7 @@ export default function PropertiesTab() {
         ]),
       });
       if (!res.ok) throw new Error();
+      onSaved?.();
       setProperties((prev) =>
         prev.map((p) =>
           p.id === id

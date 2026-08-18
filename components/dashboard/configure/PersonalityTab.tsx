@@ -13,13 +13,17 @@ import {
 
 interface Props {
   initialConfig: TwinConfig;
+  focus?: "identity" | "tone";
+  onSaved?: () => void;
 }
 
-export default function PersonalityTab({ initialConfig }: Props) {
+export default function PersonalityTab(props: Props) {
+  const { initialConfig } = props;
   const t = useTranslations("dashboard.configure");
   const ti = useTranslations("dashboard.configure.personality.identity");
   const tt = useTranslations("dashboard.configure.personality.tone");
 
+  const focus = props.focus ?? "identity";
   const [twinName, setTwinName] = useState(initialConfig.twin_name);
   const [welcomeMessage, setWelcomeMessage] = useState(
     initialConfig.welcome_message,
@@ -52,6 +56,8 @@ export default function PersonalityTab({ initialConfig }: Props) {
     ]);
     if (r1.error || r2.error) {
       setIdentityError(r1.error ?? r2.error ?? "Save failed. Please try again.");
+    } else {
+      props.onSaved?.();
     }
     setSavingIdentity(false);
   };
@@ -71,13 +77,16 @@ export default function PersonalityTab({ initialConfig }: Props) {
     ]);
     if (r1.error || r2.error) {
       setToneError(r1.error ?? r2.error ?? "Save failed. Please try again.");
+    } else {
+      props.onSaved?.();
     }
     setSavingTone(false);
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Identity */}
+  if (focus === "tone") {
+    return (
+      <div className="space-y-6">
+      {/* Tone */}
       <div className="dash-card p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-dash-accent-muted">
@@ -133,8 +142,13 @@ export default function PersonalityTab({ initialConfig }: Props) {
           />
         </div>
       </div>
+      </div>
+    );
+  }
 
-      {/* Tone */}
+  return (
+    <div className="space-y-6">
+      {/* Identity */}
       <div className="dash-card p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-dash-accent-muted">

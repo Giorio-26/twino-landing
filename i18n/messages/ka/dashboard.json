@@ -3,7 +3,7 @@
     "pageTitle": "აგენტის კონფიგურაცია",
     "pageSubtitle": "მოარგე შენი AI გაყიდვების ასისტენტის პერსონალობა და ცოდნა.",
     "save": "შენახვა",
-    "saving": "ინახება\u2026",
+    "saving": "ინახება…",
     "tabs": {
       "personality": "პერსონალობა",
       "guardians": "მცველები",
@@ -34,7 +34,7 @@
           "friendly": {
             "label": "მეგობრული",
             "desc": "თბილი და ენერგიული",
-            "sample": "გამარჯობა! სიამოვნებით! \uD83C\uDFE0 ჩვენ გვაქვს შესანიშნავი ვარიანტები. რა ბიუჯეტზე ხარ გათვლილი?"
+            "sample": "გამარჯობა! სიამოვნებით! 🏠 ჩვენ გვაქვს შესანიშნავი ვარიანტები. რა ბიუჯეტზე ხარ გათვლილი?"
           },
           "direct": {
             "label": "პირდაპირი",
@@ -58,10 +58,10 @@
       "title": "მცველები",
       "subtitle": "რკინის წესები, რომელთა დარღვევა ტვინს არ შეუძლია",
       "rulesCount": "{count} წესი",
-      "inputPlaceholder": "დაამატე ახალი წესი\u2026",
+      "inputPlaceholder": "დაამატე ახალი წესი…",
       "addButton": "დამატება",
       "wordCounter": "{words}/{limit} სიტყვა",
-      "examplesLabel": "მაგალითები \u2014 დასაკლიკებელია:",
+      "examplesLabel": "მაგალითები — დასაკლიკებელია:",
       "examples": [
         "არასოდეს განიხილო კონკურენტი სააგენტოები ან მათი ფასები.",
         "ყოველთვის გირჩევ ნახვის ჩაბარებას შეძენის გადაწყვეტილების მიღებამდე.",
@@ -88,7 +88,7 @@
       "subtitle": "ობიექტები, რომელთა რეკომენდაციაც შეუძლია ტვინს",
       "countBadge": "{count}/15",
       "roomsBR": "{count} სძ.",
-      "areaM2": " \u00B7 {area}მ\u00B2",
+      "areaM2": " · {area}მ²",
       "statusAvailable": "ხელმისაწვდომი",
       "statusReserved": "დაჯავშნული",
       "statusSold": "გაყიდული",
@@ -102,13 +102,36 @@
         "location": "ლოკაცია",
         "locationPlaceholder": "ბათუმი",
         "rooms": "ოთახები",
-        "area": "ფართობი მ\u00B2",
+        "area": "ფართობი მ²",
         "status": "სტატუსი",
         "url": "URL",
         "submitButton": "დამატება",
-        "submitting": "ემატება\u2026",
+        "submitting": "ემატება…",
         "cancel": "გაუქმება"
       }
+    },
+    "wizard": {
+      "step1Title": "AI ტვინის იდენტობა",
+      "step1Desc": "Give your Twin a name and a welcome message customers will see first.",
+      "step2Title": "პიროვნება",
+      "step2Desc": "Choose one tone of voice. The Twin keeps it consistent in every conversation.",
+      "step3Title": "გაყიდვების ინსტრუქცია",
+      "step3Desc": "Tell the Twin what to do with every lead: qualify, ask about budget, book viewings.",
+      "step4Title": "ბიზნესის ცოდნა",
+      "step4Desc": "Company details, working hours, and contact info the Twin shares with customers.",
+      "step5Title": "ქონებები",
+      "step5Desc": "Add your properties so the Twin can recommend the right one to each buyer.",
+      "step6Title": "ტესტი",
+      "step6Desc": "Send a test message and see exactly how your Twin responds.",
+      "back": "უკან",
+      "next": "გაგრძელება",
+      "finish": "დასრულება",
+      "testTwin": "ტესტი",
+      "testPlaceholder": "e.g., I'm looking for a 2-bedroom apartment in Batumi...",
+      "testAwaiting": "Waiting for your test message...",
+      "testUnavailable": "Test service is not available yet. Save your configuration first.",
+      "step": "ნაბიჯი {n} / 6",
+      "saved": "შენახულია"
     }
   },
   "overview": {
@@ -130,12 +153,18 @@
   },
   "sidebar": {
     "name": "TwinO",
+    "sections": {
+      "workspace": "სამუშაო სივრცე",
+      "configuration": "კონფიგურაცია",
+      "account": "ანგარიში"
+    },
     "nav": {
       "overview": "მიმოხილვა",
-      "configureTwin": "აგენტის კონფიგ.",
-      "conversations": "საუბრები",
       "leads": "ლიდები",
-      "integration": "ინტეგრაცია",
+      "conversations": "საუბრები",
+      "properties": "ობიექტები",
+      "configureTwin": "აგენტის მოწყობა",
+      "integration": "ინტეგრაციები",
       "settings": "პარამეტრები"
     },
     "collapse": "დაკეცვა",
@@ -178,6 +207,312 @@
         "termsLink": "წესებსა და პირობებს",
         "termsError": "გაგრძელებისთვის საჭიროა წესებსა და პირობებზე თანხმობა."
       }
+    }
+  },
+  "leads": {
+    "pageTitle": "ლიდები",
+    "pageSubtitle": "მართეთ და დაალაგეთ თქვენი შემომავალი შესაძლებლობები.",
+    "addLead": "ლიდის დამატება",
+    "export": "CSV ექსპორტი",
+    "exporting": "ექსპორტი…",
+    "searchPlaceholder": "ლიდების ძიება...",
+    "filters": "ფილტრები",
+    "filterAll": "ყველა",
+    "filterNew": "ახალი",
+    "filterQualifying": "კვალიფიკაცია",
+    "filterQualified": "კვალიფიცირებული",
+    "filterNeedsAttention": "ყურადღება საჭირო",
+    "filterConverted": "კონვერტირებული",
+    "filterLost": "დაკარგული",
+    "selectedCount": "{count} ლიდი მონიშნული",
+    "changeStatus": "სტატუსის შეცვლა",
+    "clearSelection": "გასუფთავება",
+    "columns": {
+      "lead": "ლიდი",
+      "source": "წყარო",
+      "property": "ობიექტი",
+      "budget": "ბიუჯეტი",
+      "intent": "განზრახვა",
+      "score": "ქულა",
+      "status": "სტატუსი",
+      "lastActivity": "ბოლო აქტივობა",
+      "owner": "პასუხისმგებელი"
+    },
+    "scoreHigh": "მაღალი",
+    "scoreMedium": "საშუალო",
+    "scoreLow": "დაბალი",
+    "stats": {
+      "total": "სულ ლიდები",
+      "new": "ახალი",
+      "qualified": "კვალიფიცირებული",
+      "needsAttention": "ყურადღება საჭირო",
+      "converted": "კონვერტირებული"
+    },
+    "detail": {
+      "title": "ლიდის დეტალები",
+      "contactInfo": "საკონტაქტო ინფორმაცია",
+      "qualification": "AI კვალიფიკაციის შეჯამება",
+      "qualificationEmpty": "კვალიფიკაციის მონაცემები ჯერ არ არსებობს. აგენტი კვლავ ინფორმაციას აგროვებს.",
+      "notes": "შენიშვნები",
+      "notesPlaceholder": "დაამატეთ შენიშვნა გუნდისთვის...",
+      "addNote": "შენიშვნის დამატება",
+      "nextAction": "რეკომენდებული შემდეგი ნაბიჯი",
+      "conversation": "საუბარი",
+      "markQualified": "კვალიფიცირებულად მონიშვნა",
+      "assignToSales": "გადაცემა გაყიდვებზე",
+      "closeLead": "ლიდის დახურვა",
+      "viewConversation": "საუბრის ნახვა"
+    },
+    "empty": {
+      "title": "ლიდები ჯერ არ არის",
+      "description": "მიუერთეთ თქვენი ლიდების წყარო და TwinO ავტომატურად ჩაიჭერს და კვალიფიცირებას გაუკეთებს შემომავალ შეკითხვებს.",
+      "cta": "ლიდების წყაროს მიერთება"
+    },
+    "error": "ლიდების ჩატვირთვა ვერ მოხერხდა. გთხოვთ სცადოთ თავიდან."
+  },
+  "conversations": {
+    "pageTitle": "საუბრები",
+    "pageSubtitle": "თქვენი AI-ით აღჭურვილი გაყიდვების ყუთი.",
+    "searchPlaceholder": "საუბრების ძიება...",
+    "noConversation": "აირჩიეთ საუბარი დასაწყებად",
+    "noConversationDesc": "აირჩიეთ ლიდი სიიდან სრული საუბრისა და კვალიფიკაციის კონტექსტის სანახავად.",
+    "labels": {
+      "customer": "კლიენტი",
+      "twin": "TwinO AI",
+      "agent": "გაყიდვების აგენტი"
+    },
+    "panel": {
+      "title": "ლიდის კონტექსტი",
+      "score": "ლიდის ქულა",
+      "budget": "ბიუჯეტი",
+      "property": "ობიექტი",
+      "intent": "განზრახვა",
+      "timeline": "ვადები",
+      "location": "ლოკაცია",
+      "status": "სტატუსი",
+      "nextAction": "რეკომენდებული შემდეგი ნაბიჯი",
+      "assignToSales": "გადაცემა გაყიდვებზე",
+      "markQualified": "კვალიფიცირებულად მონიშვნა",
+      "addNote": "შენიშვნის დამატება",
+      "closeLead": "ლიდის დახურვა",
+      "notePlaceholder": "შენიშვნის დამატება..."
+    },
+    "empty": {
+      "title": "საუბრები ჯერ არ არის",
+      "description": "რაც კი თქვენი აგენტი შეკითხვას მიიღებს, საუბრები აქ გამოჩნდება.",
+      "cta": "ლიდების წყაროს მიერთება"
+    }
+  },
+  "properties": {
+    "pageTitle": "ობიექტები",
+    "pageSubtitle": "ობიექტები, რომლებსაც თქვენი აგენტი ყიდულებს ურჩევს.",
+    "addProperty": "ობიექტის დამატება",
+    "searchPlaceholder": "ობიექტების ძიება...",
+    "all": "ყველა",
+    "active": "აქტიური",
+    "inactive": "არააქტიური",
+    "form": {
+      "titleAdd": "ობიექტის დამატება",
+      "titleEdit": "ობიექტის რედაქტირება",
+      "name": "ობიექტის სახელი",
+      "namePlaceholder": "მაგ. Sunrise Residence",
+      "location": "ლოკაცია",
+      "locationPlaceholder": "მაგ. თბილისი, ვაკე",
+      "type": "ობიექტის ტიპი",
+      "priceFrom": "ფასიდან (USD)",
+      "priceTo": "ფასამდე (USD)",
+      "bedrooms": "საძინებლები",
+      "availability": "ხელმისაწვდომობა",
+      "description": "აღწერა",
+      "descriptionPlaceholder": "ობიექტის მოკლე აღწერა...",
+      "features": "მთავარი მახასიათებლები",
+      "featuresPlaceholder": "ზღვის ხედი, სპორტდარბაზი, პარკინგი (თითო ხაზზე)",
+      "statusActive": "აქტიური",
+      "statusInactive": "არააქტიური",
+      "submit": "ობიექტის შენახვა",
+      "submitting": "ინახება…",
+      "cancel": "გაუქმება",
+      "delete": "ობიექტის წაშლა",
+      "deleteConfirm": "დარწმუნებული ხართ, რომ გსურთ ამ ობიექტის წაშლა? აგენტი მის რეკომენდაციას შეწყვეტს."
+    },
+    "statusAvailable": "ხელმისაწვდომი",
+    "statusReserved": "დაჯავშნილი",
+    "statusSold": "გაყიდული",
+    "empty": {
+      "title": "ობიექტები ჯერ არ დამატებულა",
+      "description": "დაამატეთ თქვენი ობიექტები, რათა TwinO-მ თითოეულ ყიდულს შესაბამისი ობიექტი ურჩიოს.",
+      "cta": "ობიექტის დამატება"
+    },
+    "errorLoad": "ობიექტების ჩატვირთვა ვერ მოხერხდა. გთხოვთ სცადოთ თავიდან.",
+    "formName": "ქონების სახელი",
+    "formNamePlaceholder": "მაგ., Sunrise Residence",
+    "formLocation": "ლოკაცია",
+    "formLocationPlaceholder": "მაგ., ბათუმი, ძველი ქალაქი",
+    "formType": "ტიპი",
+    "formPrice": "საწყისი ფასი (USD)",
+    "formPricePlaceholder": "მაგ., 120000",
+    "formRooms": "საძინებლები",
+    "formArea": "ფართობი (მ²)",
+    "formStatus": "ხელმისაწვდომობა",
+    "formSave": "დამატება",
+    "formSaving": "ემატება...",
+    "formError": "სახელი, ლოკაცია და ფასი აუცილებელია.",
+    "formSuccess": "წარმატებით დაემატა.",
+    "maxReached": "მაქსიმალური რაოდენობა მიღწეულია.",
+    "noProperty": "ქონება არ არის",
+    "cardPrice": "საწყისი",
+    "cardRooms": "საძინებელი"
+  },
+  "onboarding": {
+    "title": "დაწყება",
+    "progress": "{total}-დან {done} ნაბიჯი დასრულებულია ({progress}%)",
+    "continue": "მოწყობის გაგრძელება",
+    "dismiss": "დამალვა",
+    "steps": {
+      "profile": "კომპანიის პროფილის შექმნა",
+      "property": "პირველი ობიექტის დამატება",
+      "configure": "AI აგენტის მოწყობა",
+      "whatsapp": "WhatsApp-ის მიერთება",
+      "test": "აგენტის ტესტირება",
+      "firstLead": "პირველი ლიდის მიღება"
+    },
+    "stepProfile": "კომპანიის პროფილი",
+    "stepProperty": "პირველი ქონების დამატება",
+    "stepConfigure": "AI ტვინის კონფიგურაცია",
+    "stepConnect": "ლიდების წყაროს შეერთება",
+    "stepTest": "ტესტი",
+    "stepFirstLead": "პირველი ლიდის მიღება",
+    "done": "ყველაფერი მზადაა",
+    "companyNameLabel": "კომპანიის სახელი",
+    "saveCompany": "შენახვა",
+    "complete": "ყველაფერი მზადაა! თქვენი ტყუპი აქტიურია.",
+    "profile": "კომპანიის პროფილის შევსება",
+    "configureTwin": "ტყუპის იდენტობისა და ტონის კონფიგურაცია",
+    "addProperty": "პირველი უძრავი ქონების დამატება",
+    "connectWhatsApp": "WhatsApp-ის დაკავშირება",
+    "testTwin": "ტყუპის ტესტირება",
+    "firstLead": "პირველი ლიდის მიღება"
+  },
+  "integrations": {
+    "pageTitle": "ინტეგრაციები",
+    "pageSubtitle": "მიუერთეთ TwinO იქ, საიდანაც თქვენი ლიდები უკვე მოდის.",
+    "leadSources": "ლიდების წყაროები",
+    "crm": "CRM",
+    "api": "API",
+    "comingSoon": "მალე",
+    "connected": "მიერთებულია",
+    "notConnected": "არ არის მიერთებული",
+    "connect": "მიერთება",
+    "disconnect": "გამოერთება",
+    "webhook": {
+      "title": "Webhook",
+      "description": "ლიდების მიღება ნებისმიერი სხვა წყაროდან.",
+      "yourUrl": "თქვენი Webhook URL",
+      "copy": "კოპირება",
+      "copied": "დაკოპირდა",
+      "regenerate": "გასაღების გენერირება",
+      "apiKey": "API გასაღები",
+      "apiSecret": "API საიდუმლო"
+    },
+    "sheets": {
+      "title": "Google Sheets",
+      "description": "კვალიფიცირებული ლიდების ავტომატური სინქრონიზაცია ცხრილში."
+    },
+    "emptyDesc": "დაიწყეთ პირველი ლიდების წყაროს მიერთებით.",
+    "whatsappTitle": "WhatsApp",
+    "whatsappDesc": "თქვენი მთავარი ლიდების წყარო.",
+    "messengerTitle": "Meta / Messenger",
+    "messengerDesc": "ლიდები Facebook Messenger-იდან.",
+    "instagramTitle": "Instagram",
+    "instagramDesc": "ავტომატური პასუხები DM-ებსა და კომენტარებზე.",
+    "webhookTitle": "Webhook",
+    "webhookDesc": "ლიდები ნებისმიერი სისტემიდან.",
+    "hubspotTitle": "HubSpot",
+    "salesforceTitle": "Salesforce",
+    "bitrixTitle": "Bitrix24",
+    "zohoTitle": "Zoho",
+    "sheetsTitle": "Google Sheets",
+    "sheetsDesc": "კვალიფიციური ლიდების ავტომატური ექსპორტი.",
+    "customApiTitle": "Custom API",
+    "customApiDesc": "საკუთარი ინტეგრაცია ჩვენი API-ით.",
+    "connectWebhook": "Webhook-ის კონფიგურაცია"
+  },
+  "settings": {
+    "pageTitle": "პარამეტრები",
+    "sections": {
+      "company": "კომპანიის პროფილი",
+      "team": "გუნდი",
+      "notifications": "შეტყობინებები",
+      "security": "უსაფრთხოება",
+      "billing": "ანგარიშსწორება"
+    },
+    "company": {
+      "name": "კომპანიის სახელი",
+      "industry": "დარგი",
+      "website": "ვებსაიტი",
+      "save": "ცვლილებების შენახვა",
+      "saved": "შენახულია"
+    },
+    "team": {
+      "invite": "წევრის მოწვევა",
+      "invitePlaceholder": "კოლეგა@კომპანია.ge",
+      "role": "როლი",
+      "owner": "მფლობელი",
+      "member": "წევრი",
+      "remove": "წაშლა"
+    },
+    "security": {
+      "title": "უსაფრთხოება",
+      "accessKey": "წვდომის გასაღები",
+      "changeKey": "გასაღების შეცვლა",
+      "sessions": "აქტიური სესიები",
+      "signOutAll": "ყველა მოწყობილობიდან გასვლა"
+    },
+    "billing": {
+      "title": "ანგარიშსწორება",
+      "plan": "მიმდინარე გეგმა",
+      "pilot": "პილოტური პროგრამა",
+      "description": "თქვენ TwinO-ს პილოტურ პროგრამაზე ხართ. ანგარიშსწორების დეტალები პილოტის დასრულებამდე მოგეწოდებათ.",
+      "contact": "დაგვიკავშირდით"
+    }
+  },
+  "overviewMvp": {
+    "viewLeads": "ლიდების ნახვა",
+    "testTwin": "აგენტის ტესტი",
+    "viewAllLeads": "ყველა ლიდის ნახვა",
+    "allLeads": "ყველა ლიდი",
+    "kpi": {
+      "newLeads": "ახალი ლიდები",
+      "qualified": "კვალიფიცირებული",
+      "qualRate": "კვალიფიკაციის მაჩვენებელი",
+      "avgResponse": "საშ. პასუხის დრო",
+      "needsAttention": "ყურადღება საჭირო"
+    },
+    "recentLeads": {
+      "title": "ბოლო ლიდები",
+      "name": "სახელი",
+      "source": "წყარო",
+      "property": "ობიექტი",
+      "budget": "ბიუჯეტი",
+      "intent": "განზრახვა",
+      "status": "სტატუსი",
+      "created": "შეიქმნა"
+    },
+    "activity": {
+      "title": "AI აქტივობა",
+      "empty": "აქტივობა ჯერ არ არის. რაც კი თქვენი აგენტი ლიდს დაამუშავებს, აქ ნახავთ მის მოქმედებებს.",
+      "qualified": "AI აგენტმა ახალი ლიდი კვალიფიცირება გაუკეთა",
+      "requestedViewing": "ლიდმა ობიექტის ნახვა მოითხოვა",
+      "handedOff": "ლიდი გაყიდვების გუნდს გადაეცა",
+      "newInquiry": "ახალი შეკითხვა მიღებულია {channel}-ით",
+      "responded": "AI აგენტმა ახალ შეკითხვას უპასუხა",
+      "collected": "AI აგენტმა ბიუჯეტის ინფორმაცია შეაგროვა"
+    },
+    "twinStatus": {
+      "active": "აგენტი აქტიურია",
+      "idle": "აგენტი ლოდინშია",
+      "paused": "აგენტი შეჩერებულია",
+      "error": "აგენტის შეცდომა"
     }
   }
 }

@@ -2,7 +2,6 @@
 
 import {
   BarChart3,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   Cog,
@@ -10,15 +9,21 @@ import {
   MessageSquare,
   Plug,
   Settings,
-  Shield,
   Users,
-  BookOpen,
+  Building2,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
+/**
+ * MVP Navigation — strictly per product spec:
+ *   WORKSPACE: Overview, Leads, Conversations, Properties
+ *   CONFIGURATION: Configure Twin, Integrations
+ *   ACCOUNT: Settings
+ * Knowledge Base, Guardrails and Calendar are removed as standalone sections.
+ */
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -30,25 +35,23 @@ export default function Sidebar() {
     href: string;
     icon: typeof BarChart3;
     badge?: number | null;
-    section?: "main" | "config" | "admin";
+    section: "workspace" | "configuration" | "account";
   };
 
   const navItems: NavItem[] = [
-    { label: t("nav.overview"), href: "/dashboard", icon: BarChart3, section: "main" },
-    { label: t("nav.leads"), href: "/dashboard/leads", icon: Users, section: "main" },
-    { label: t("nav.conversations"), href: "/dashboard/conversations", icon: MessageSquare, badge: null, section: "main" },
-    { label: t("nav.calendar"), href: "/dashboard/calendar", icon: Calendar, badge: null, section: "main" },
-    { label: t("nav.integration"), href: "/dashboard/integration", icon: Plug, section: "config" },
-    { label: t("nav.configureTwin"), href: "/dashboard/configure", icon: Cog, section: "config" },
-    { label: t("nav.knowledgeBase"), href: "/dashboard/knowledge", icon: BookOpen, section: "config" },
-    { label: t("nav.guardrails"), href: "/dashboard/guardrails", icon: Shield, section: "config" },
-    { label: t("nav.settings"), href: "/dashboard/settings", icon: Settings, section: "admin" },
+    { label: t("nav.overview"), href: "/dashboard", icon: BarChart3, section: "workspace" },
+    { label: t("nav.leads"), href: "/dashboard/leads", icon: Users, section: "workspace" },
+    { label: t("nav.conversations"), href: "/dashboard/conversations", icon: MessageSquare, badge: null, section: "workspace" },
+    { label: t("nav.properties"), href: "/dashboard/properties", icon: Building2, section: "workspace" },
+    { label: t("nav.configureTwin"), href: "/dashboard/configure", icon: Cog, section: "configuration" },
+    { label: t("nav.integration"), href: "/dashboard/integration", icon: Plug, section: "configuration" },
+    { label: t("nav.settings"), href: "/dashboard/settings", icon: Settings, section: "account" },
   ];
 
   const sections: { key: string; label: string; items: NavItem[] }[] = [
-    { key: "main", label: t("sections.workspace"), items: navItems.filter((i) => i.section === "main") },
-    { key: "config", label: t("sections.configuration"), items: navItems.filter((i) => i.section === "config") },
-    { key: "admin", label: t("sections.administration"), items: navItems.filter((i) => i.section === "admin") },
+    { key: "workspace", label: t("sections.workspace"), items: navItems.filter((i) => i.section === "workspace") },
+    { key: "configuration", label: t("sections.configuration"), items: navItems.filter((i) => i.section === "configuration") },
+    { key: "account", label: t("sections.account"), items: navItems.filter((i) => i.section === "account") },
   ];
 
   const handleLogout = async () => {

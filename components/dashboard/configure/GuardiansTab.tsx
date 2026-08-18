@@ -11,7 +11,13 @@ function wordCount(text: string) {
   return text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
 }
 
-export default function GuardiansTab() {
+interface GuardiansTabProps {
+  title?: string;
+  subtitle?: string;
+  onSaved?: () => void;
+}
+
+export default function GuardiansTab(props?: GuardiansTabProps) {
   const t = useTranslations("dashboard.configure.guardians");
 
   const [rules, setRules] = useState<Rule[]>([]);
@@ -53,6 +59,7 @@ export default function GuardiansTab() {
       setRules(updated);
       setNewRule("");
       syncRules(updated);
+      props?.onSaved?.();
     } else {
       setAddError(res.error ?? "Failed to add rule. Please try again.");
     }
@@ -69,6 +76,7 @@ export default function GuardiansTab() {
       const updated = rules.filter((r) => r.id !== id);
       setRules(updated);
       syncRules(updated);
+      props?.onSaved?.();
     }
     setDeletingRuleId(null);
   };
@@ -94,9 +102,11 @@ export default function GuardiansTab() {
         </div>
         <div>
           <h3 className="font-Helvetica-Neue font-semibold text-dash-text text-sm">
-            {t("title")}
+            {props?.title ?? t("title")}
           </h3>
-          <p className="text-dash-text-muted text-xs">{t("subtitle")}</p>
+          <p className="text-dash-text-muted text-xs">
+            {props?.subtitle ?? t("subtitle")}
+          </p>
         </div>
         <span className="ml-auto rounded-full bg-dash-accent-muted px-2.5 py-0.5 font-medium text-[11px] text-dash-accent">
           {t("rulesCount", { count: rules.length })}

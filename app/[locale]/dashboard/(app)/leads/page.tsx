@@ -4,24 +4,25 @@ import {
   ArrowUpDown,
   Calendar,
   ChevronDown,
-  ChevronRight,
+  ChevronLeft,
   Check,
+  Clock,
   Download,
+  ExternalLink,
   Filter,
   Loader2,
+  MapPin,
   MessageSquare,
-  MoreHorizontal,
   Phone,
   Search,
+  Sparkle,
   Target,
-  Trash2,
   User,
   Users,
   X,
-  ChevronLeft,
-  ExternalLink,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
 interface Lead {
   id: number;
@@ -41,17 +42,18 @@ interface Lead {
 const STATUSES = ["new", "hot", "qualified", "call_in", "deal"] as const;
 type Status = (typeof STATUSES)[number];
 
-const STATUS_LABELS: Record<Status, string> = {
+// Backend statuses mapped to MVP front-end filter labels (spec filters)
+const STATUS_FILTER_LABELS: Record<Status, string> = {
   new: "New",
-  hot: "Hot",
+  hot: "Needs Attention",
   qualified: "Qualified",
-  call_in: "Call In",
-  deal: "Deal",
+  call_in: "Qualifying",
+  deal: "Converted",
 };
 
 const statusColors: Record<Status, { bg: string; text: string; dot: string }> = {
   new: { bg: "bg-dash-accent-muted", text: "text-dash-accent", dot: "bg-dash-accent" },
-  hot: { bg: "bg-dash-warning-muted", text: "text-dash-warning", dot: "bg-dash-warning" },
+  hot: { bg: "bg-dash-danger-muted", text: "text-dash-danger", dot: "bg-dash-danger" },
   qualified: { bg: "bg-dash-success-muted", text: "text-dash-success", dot: "bg-dash-success" },
   call_in: { bg: "bg-dash-purple-muted", text: "text-dash-purple", dot: "bg-dash-purple" },
   deal: { bg: "bg-teal-500/10", text: "text-teal-600", dot: "bg-teal-500" },
@@ -73,7 +75,12 @@ function getInitials(lead: Lead): string {
     const digits = name.replace(/\D/g, "");
     return digits.slice(-2);
   }
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function timeAgo(iso: string): string {
@@ -89,10 +96,32 @@ function timeAgo(iso: string): string {
 
 function formatDate(iso: string): string {
   const utc = iso.endsWith("Z") || iso.includes("+") ? iso : `${iso}Z`;
-  return new Date(utc).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(utc).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+/** Simple, instantly-readable score label. No complex AI scoring. */
+function scoreLevel(score: number | null): "High" | "Medium" | "Low" | null {
+  if (score == null) return null;
+  if (score >= 7) return "High";
+  if (score >= 4) return "Medium";
+  return "Low";
+}
+
+/** Channel guess from chat_id suffix. Backend carries no explicit source column yet. */
+function guessSource(chatId: string): string {
+  if (chatId.endsWith("@s.whatsapp.net") || chatId.includes("whatsapp")) return "WhatsApp";
+  if (chatId.endsWith("@messaging") || chatId.includes("messenger")) return "Messenger";
+  if (chatId.endsWith("@instagram") || chatId.includes("instagram")) return "Instagram";
+  return "Inbox";
 }
 
 export default function LeadsPage() {
+  const t = useTranslations("dashboard.leads");
+  const tConvo = useTranslations("dashboard.conversations");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -112,7 +141,6 @@ export default function LeadsPage() {
 
   // Detail drawer
   const [drawerLead, setDrawerLead] = useState<Lead | null>(null);
-  const [drawerLoading, setDrawerLoading] = useState(false);
 
   // Inline status update
   const [inlineStatusUpdating, setInlineStatusUpdating] = useState<number | null>(null);
@@ -120,8 +148,8 @@ export default function LeadsPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 400);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(timer);
   }, [search]);
 
   useEffect(() => {
@@ -152,17 +180,14 @@ export default function LeadsPage() {
     qualified: leads.filter((l) => l.status === "qualified").length,
     deal: leads.filter((l) => l.status === "deal").length,
     newCount: leads.filter((l) => l.status === "new").length,
+    needsAttention: leads.filter((l) => l.status === "hot").length,
   };
 
   const isAllSelected = leads.length > 0 && selectedIds.size === leads.length;
   const isSomeSelected = selectedIds.size > 0 && selectedIds.size < leads.length;
 
   function toggleSelectAll() {
-    if (isAllSelected) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(leads.map((l) => l.id)));
-    }
+    setSelectedIds(isAllSelected ? new Set() : new Set(leads.map((l) => l.id)));
   }
 
   function toggleSelect(id: number) {
@@ -187,13 +212,13 @@ export default function LeadsPage() {
       setLeads((prev) =>
         prev.map((l) => {
           const updated = json.data?.find((u: Lead) => u.id === l.id);
-          return updated ? updated : l;
-        })
+          return updated ?? l;
+        }),
       );
       setSelectedIds(new Set());
       setBulkStatusOpen(false);
     } catch {
-      // keep open for retry
+      // keep dropdown open for retry
     } finally {
       setBulkActionLoading(false);
     }
@@ -210,6 +235,7 @@ export default function LeadsPage() {
       if (!res.ok) throw new Error();
       const updated: Lead = await res.json();
       setLeads((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+      if (drawerLead?.id === leadId) setDrawerLead({ ...drawerLead, ...updated });
     } catch {
       // silent
     } finally {
@@ -229,14 +255,10 @@ export default function LeadsPage() {
   return (
     <div className="mx-auto w-full space-y-6">
       {/* Header */}
-      <div className="dash-animate-in flex items-start justify-between">
+      <div className="dash-animate-in flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="font-Helvetica-Neue font-bold text-2xl text-dash-text">
-            Pipeline
-          </h2>
-          <p className="mt-1 text-dash-text-secondary text-sm">
-            Manage qualified prospects from your Sales Twin conversations.
-          </p>
+          <h2 className="font-Helvetica-Neue font-bold text-2xl text-dash-text">{t("pageTitle")}</h2>
+          <p className="mt-1 text-dash-text-secondary text-sm">{t("pageSubtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -249,73 +271,49 @@ export default function LeadsPage() {
                 if (!res.ok) throw new Error();
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "leads.csv";
-                a.click();
+                const anchor = document.createElement("a");
+                anchor.href = url;
+                anchor.download = "leads.csv";
+                anchor.click();
                 URL.revokeObjectURL(url);
               } finally {
                 setExporting(false);
               }
             }}
-            className="flex items-center gap-2 rounded-xl border border-dash-border px-4 py-2.5 font-medium text-dash-text-secondary text-sm transition-colors hover:bg-dash-surface-hover hover:text-dash-text disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl border border-dash-border bg-white px-4 py-2.5 font-medium text-dash-text-secondary text-sm no-underline transition-colors hover:bg-dash-surface-hover hover:text-dash-text disabled:opacity-50"
           >
-            <Download className="h-4 w-4" />
-            {exporting ? "Exporting…" : "Export CSV"}
+            {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {exporting ? t("exporting") : t("export")}
           </button>
+          <a
+            href="/dashboard/leads/new"
+            className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 font-semibold text-white text-sm shadow-accent/25 shadow-md no-underline transition-all hover:bg-accent-hover hover:shadow-lg"
+          >
+            <User className="h-4 w-4" />
+            {t("addLead")}
+          </a>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="dash-stagger grid gap-4 sm:grid-cols-4">
-        <div className="dash-card flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-accent-muted">
-            <User className="h-5 w-5 text-dash-accent" />
-          </div>
-          <div>
-            <div className="font-bold text-2xl text-dash-text">{statCounts.total}</div>
-            <div className="text-dash-text-muted text-xs">Total Leads</div>
-          </div>
-        </div>
-        <div className="dash-card flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-warning-muted">
-            <Target className="h-5 w-5 text-dash-warning" />
-          </div>
-          <div>
-            <div className="font-bold text-2xl text-dash-text">{statCounts.newCount}</div>
-            <div className="text-dash-text-muted text-xs">New / Unqualified</div>
-          </div>
-        </div>
-        <div className="dash-card flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-success-muted">
-            <Check className="h-5 w-5 text-dash-success" />
-          </div>
-          <div>
-            <div className="font-bold text-2xl text-dash-text">{statCounts.qualified}</div>
-            <div className="text-dash-text-muted text-xs">Qualified</div>
-          </div>
-        </div>
-        <div className="dash-card flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dash-purple-muted">
-            <Users className="h-5 w-5 text-dash-purple" />
-          </div>
-          <div>
-            <div className="font-bold text-2xl text-dash-text">{statCounts.deal}</div>
-            <div className="text-dash-text-muted text-xs">Deals Closed</div>
-          </div>
-        </div>
+      {/* KPI mini-stats */}
+      <div className="dash-stagger grid gap-4 sm:grid-cols-5">
+        <KpiStat label={t("stats.total")} value={statCounts.total} icon={Users} bg="bg-dash-surface-secondary" color="text-dash-text-secondary" />
+        <KpiStat label={t("stats.new")} value={statCounts.newCount} icon={Target} bg="bg-dash-accent-muted" color="text-dash-accent" />
+        <KpiStat label={t("stats.qualified")} value={statCounts.qualified} icon={Check} bg="bg-dash-success-muted" color="text-dash-success" />
+        <KpiStat label={t("stats.needsAttention")} value={statCounts.needsAttention} icon={Clock} bg="bg-dash-danger-muted" color="text-dash-danger" />
+        <KpiStat label={t("stats.converted")} value={statCounts.deal} icon={User} bg="bg-dash-purple-muted" color="text-dash-purple" />
       </div>
 
-      {/* Toolbar: Search + Filters + Bulk Actions */}
+      {/* Toolbar */}
       <div className="dash-animate-in" style={{ animationDelay: "0.15s" }}>
         {/* Bulk action bar */}
         {selectedIds.size > 0 && (
-          <div className="dash-card mb-3 flex items-center justify-between bg-dash-accent-muted/40 border-dash-accent/20 border p-3">
+          <div className="dash-card mb-3 flex flex-wrap items-center justify-between gap-3 border-dash-accent/20 border bg-dash-accent-muted/40 p-3">
             <div className="flex items-center gap-3">
               <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-dash-accent px-1.5 font-bold text-[11px] text-white">
                 {selectedIds.size}
               </span>
-              <span className="font-medium text-dash-text text-sm">leads selected</span>
+              <span className="font-medium text-dash-text text-sm">{t("selectedCount", { count: selectedIds.size })}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
@@ -326,11 +324,11 @@ export default function LeadsPage() {
                   className="flex items-center gap-1.5 rounded-lg bg-dash-accent px-3 py-1.5 font-medium text-white text-xs disabled:opacity-50"
                 >
                   {bulkActionLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
-                  Change Status
+                  {t("changeStatus")}
                   <ChevronDown className="h-3 w-3" />
                 </button>
                 {bulkStatusOpen && (
-                  <div className="dash-animate-scale absolute right-0 z-30 mt-1 w-44 rounded-xl border border-dash-border bg-dash-surface p-1 shadow-lg">
+                  <div className="dash-animate-scale absolute right-0 z-30 mt-1 w-48 rounded-xl border border-dash-border bg-dash-surface p-1 shadow-lg">
                     {STATUSES.map((s) => (
                       <button
                         key={s}
@@ -340,7 +338,7 @@ export default function LeadsPage() {
                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-dash-surface-hover"
                       >
                         <span className={`h-2 w-2 rounded-full ${statusColors[s].dot}`} />
-                        <span className={`font-medium ${statusColors[s].text}`}>{STATUS_LABELS[s]}</span>
+                        <span className={`font-medium ${statusColors[s].text}`}>{STATUS_FILTER_LABELS[s]}</span>
                       </button>
                     ))}
                   </div>
@@ -351,13 +349,13 @@ export default function LeadsPage() {
                 onClick={() => setSelectedIds(new Set())}
                 className="rounded-lg px-3 py-1.5 font-medium text-dash-text-muted text-xs hover:bg-dash-surface-hover"
               >
-                Clear
+                {t("clearSelection")}
               </button>
             </div>
           </div>
         )}
 
-        {/* Search and filter bar */}
+        {/* Search + filter bar */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-dash-text-muted" />
@@ -365,34 +363,45 @@ export default function LeadsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, phone, property..."
-              className="w-full rounded-xl border border-dash-border bg-dash-surface py-2.5 pr-3 pl-9 text-dash-text text-sm placeholder-dash-text-muted focus:border-dash-accent/40 focus:outline-none"
+              placeholder={t("searchPlaceholder")}
+              className="w-full rounded-xl border border-dash-border bg-white py-2.5 pr-3 pl-9 text-dash-text text-sm placeholder-dash-text-muted focus:border-dash-accent/40 focus:outline-none"
             />
           </div>
           <button
             type="button"
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 rounded-xl px-3 py-2.5 font-medium text-xs transition-colors ${showFilters ? "bg-dash-accent-muted text-dash-accent" : "border border-dash-border text-dash-text-muted hover:bg-dash-surface-hover"}`}
+            className={`flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-xs font-medium transition-colors ${
+              showFilters
+                ? "bg-dash-accent-muted text-dash-accent"
+                : "border border-dash-border text-dash-text-muted hover:bg-dash-surface-hover"
+            }`}
           >
             <Filter className="h-3.5 w-3.5" />
-            Filters
+            {t("filters")}
           </button>
           {showFilters && (
             <div className="dash-animate-in flex flex-wrap gap-2">
-              {(["all", ...STATUSES] as const).map((s) => (
+              {(
+                [
+                  { key: "all", label: t("filterAll") },
+                  { key: "new", label: t("filterNew") },
+                  { key: "call_in", label: t("filterQualifying") },
+                  { key: "qualified", label: t("filterQualified") },
+                  { key: "hot", label: t("filterNeedsAttention") },
+                  { key: "deal", label: t("filterConverted") },
+                ] as const
+              ).map((f) => (
                 <button
-                  key={s}
+                  key={f.key}
                   type="button"
-                  onClick={() => setStatusFilter(s)}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-colors ${statusFilter === s ? "bg-dash-accent-muted text-dash-accent ring-1 ring-dash-accent/20" : "border border-dash-border text-dash-text-muted hover:bg-dash-surface-hover"}`}
+                  onClick={() => setStatusFilter(f.key as typeof statusFilter)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                    statusFilter === f.key
+                      ? "bg-dash-accent-muted text-dash-accent ring-1 ring-dash-accent/20"
+                      : "border border-dash-border text-dash-text-muted hover:bg-dash-surface-hover"
+                  }`}
                 >
-                  {s !== "all" && <span className={`h-2 w-2 rounded-full ${statusColors[s as Status].dot}`} />}
-                  {s === "all" ? "All" : STATUS_LABELS[s as Status]}
-                  {s !== "all" && (
-                    <span className="ml-0.5 text-dash-text-muted">
-                      {leads.filter((l) => l.status === s).length}
-                    </span>
-                  )}
+                  {f.label}
                 </button>
               ))}
             </div>
@@ -406,19 +415,7 @@ export default function LeadsPage() {
         style={{ animationDelay: "0.2s" }}
       >
         {error ? (
-          <div className="flex flex-col items-center justify-center px-5 py-16 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-dash-danger-muted mb-4">
-              <X className="h-6 w-6 text-dash-danger" />
-            </div>
-            <p className="font-Helvetica-Neue font-semibold text-dash-text text-sm">{error}</p>
-            <button
-              type="button"
-              onClick={() => { setError(null); setLoading(true); }}
-              className="mt-3 rounded-lg bg-dash-danger px-4 py-2 text-white text-xs font-medium"
-            >
-              Retry
-            </button>
-          </div>
+          <ErrorState message={error} onRetry={() => { setError(null); setLoading(true); }} />
         ) : loading ? (
           <div className="px-5 py-16 text-center">
             <div className="inline-flex items-center gap-2 text-dash-text-muted text-sm">
@@ -427,15 +424,18 @@ export default function LeadsPage() {
             </div>
           </div>
         ) : leads.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-5 py-16 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-dash-surface-secondary mb-4">
+          <div className="flex flex-col items-center justify-center gap-2 px-5 py-16 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-dash-surface-secondary">
               <Users className="h-7 w-7 text-dash-text-muted" />
             </div>
-            <p className="font-Helvetica-Neue font-bold text-dash-text text-lg">No leads yet</p>
-            <p className="mt-2 text-dash-text-muted text-sm max-w-md">
-              Leads will appear here once the Sales Twin starts qualifying conversations.
-              Make sure WhatsApp is connected in <span className="text-dash-accent font-medium">Integrations</span>.
-            </p>
+            <p className="font-Helvetica-Neue font-bold text-dash-text text-lg">{tConvo("empty.title")}</p>
+            <p className="max-w-md text-dash-text-muted text-sm">{tConvo("empty.description")}</p>
+            <a
+              href="/dashboard/integration"
+              className="mt-2 flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 font-medium text-white text-xs no-underline hover:bg-accent-hover"
+            >
+              {tConvo("empty.cta")}
+            </a>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -446,48 +446,62 @@ export default function LeadsPage() {
                     <input
                       type="checkbox"
                       checked={isAllSelected}
-                      ref={(el) => { if (el) el.indeterminate = isSomeSelected; }}
+                      ref={(el) => {
+                        if (el) el.indeterminate = isSomeSelected;
+                      }}
                       onChange={toggleSelectAll}
                       className="h-4 w-4 rounded border-dash-border accent-dash-accent"
                     />
                   </th>
                   <th className="px-4 py-3 text-left">
-                    <button type="button" onClick={() => toggleSort("created_at")} className="flex items-center gap-1 font-medium text-dash-text-muted text-xs uppercase tracking-wider hover:text-dash-text">
-                      Contact
-                      <ArrowUpDown className={`h-3 w-3 ${sortBy === "created_at" ? "text-dash-accent" : ""}`} />
-                    </button>
+                    <SortHeader active={sortBy === "created_at"} dir={sortDir} onSort={() => toggleSort("created_at")}>
+                      {t("columns.lead")}
+                    </SortHeader>
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Budget</th>
-                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Location</th>
-                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Property</th>
-                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Intent</th>
-                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left">
-                    <button type="button" onClick={() => toggleSort("lead_score")} className="flex items-center gap-1 font-medium text-dash-text-muted text-xs uppercase tracking-wider hover:text-dash-text">
-                      Score
-                      <ArrowUpDown className={`h-3 w-3 ${sortBy === "lead_score" ? "text-dash-accent" : ""}`} />
-                    </button>
+                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
+                    {t("columns.source")}
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
+                    {t("columns.property")}
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
+                    {t("columns.budget")}
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
+                    {t("columns.intent")}
                   </th>
                   <th className="px-4 py-3 text-left">
-                    <button type="button" onClick={() => toggleSort("updated_at")} className="flex items-center gap-1 font-medium text-dash-text-muted text-xs uppercase tracking-wider hover:text-dash-text">
-                      Activity
-                      <ArrowUpDown className={`h-3 w-3 ${sortBy === "updated_at" ? "text-dash-accent" : ""}`} />
-                    </button>
+                    <SortHeader active={sortBy === "lead_score"} dir={sortDir} onSort={() => toggleSort("lead_score")}>
+                      {t("columns.score")}
+                    </SortHeader>
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
+                    {t("columns.status")}
+                  </th>
+                  <th className="px-4 py-3 text-left">
+                    <SortHeader active={sortBy === "updated_at"} dir={sortDir} onSort={() => toggleSort("updated_at")}>
+                      {t("columns.lastActivity")}
+                    </SortHeader>
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
+                    {t("columns.owner")}
                   </th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {leads.map((lead) => {
-                  const phone = extractPhone(lead.chat_id);
                   const initials = getInitials(lead);
                   const colors = statusColors[lead.status] ?? statusColors.new;
                   const name = getDisplayName(lead);
+                  const level = scoreLevel(lead.lead_score);
                   return (
                     <tr
                       key={lead.id}
                       onClick={() => setDrawerLead(lead)}
-                      className={`cursor-pointer border-dash-border border-b transition-colors ${selectedIds.has(lead.id) ? "bg-dash-accent-muted/10" : "hover:bg-dash-surface-hover"}`}
+                      className={`cursor-pointer border-dash-border border-b transition-colors ${
+                        selectedIds.has(lead.id) ? "bg-dash-accent-muted/10" : "hover:bg-dash-surface-hover"
+                      }`}
                     >
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <input
@@ -499,52 +513,66 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className={`flex h-9 w-9 items-center justify-center rounded-full font-semibold text-xs ${lead.customer_name ? "bg-gradient-to-br from-accent/20 to-purple-500/10 text-dash-accent" : "bg-dash-surface-secondary text-dash-text"}`}>
+                          <div
+                            className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold ${
+                              lead.customer_name
+                                ? "bg-gradient-to-br from-accent/20 to-purple-500/10 text-dash-accent"
+                                : "bg-dash-surface-secondary text-dash-text"
+                            }`}
+                          >
                             {initials}
                           </div>
                           <div>
-                            <div className="font-medium text-dash-text text-sm">{name}</div>
-                            <div className="text-dash-text-muted text-xs mt-0.5">{phone}</div>
+                            <div className="text-dash-text text-sm font-medium">{name}</div>
+                            <div className="mt-0.5 text-dash-text-muted text-xs">{extractPhone(lead.chat_id)}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 font-semibold text-dash-text text-sm">{lead.budget ?? <span className="text-dash-text-muted">—</span>}</td>
-                      <td className="px-4 py-3 text-dash-text-secondary text-sm">{lead.location ?? <span className="text-dash-text-muted">—</span>}</td>
-                      <td className="px-4 py-3 text-dash-text-secondary text-sm">{lead.selected_property ?? <span className="text-dash-text-muted">—</span>}</td>
-                      <td className="px-4 py-3 text-dash-text-secondary text-sm capitalize">{lead.intent ?? <span className="text-dash-text-muted">—</span>}</td>
-                      <td className="px-4 py-3">
-                        <div className="relative inline-block">
-                          <button
-                            type="button"
-                            onClick={(e) => e.stopPropagation()}
-                            className={`rounded-full px-2.5 py-1 font-semibold text-[11px] ${colors.bg} ${colors.text} hover:ring-1 hover:ring-current/20`}
-                          >
-                            {STATUS_LABELS[lead.status]}
-                          </button>
-                          <div className="dash-animate-scale absolute right-0 z-20 mt-1 hidden group-hover:block">
-                            {/* Inline status change on hover - accessible via click */}
-                          </div>
-                        </div>
+                      <td className="px-4 py-3 whitespace-nowrap text-dash-text-secondary text-sm">
+                        {guessSource(lead.chat_id)}
                       </td>
-                      <td className="px-4 py-3">
-                        {lead.lead_score != null ? (
-                          <div className="flex items-center gap-2">
-                            <div className="h-1.5 w-12 rounded-full bg-dash-surface-secondary overflow-hidden">
-                              <div
-                                className={`h-full rounded-full transition-all ${lead.lead_score >= 7 ? "bg-dash-accent" : lead.lead_score >= 4 ? "bg-dash-warning" : "bg-dash-text-muted"}`}
-                                style={{ width: `${lead.lead_score * 10}%` }}
+                      <td className="px-4 py-3 whitespace-nowrap text-dash-text-secondary text-sm">
+                        {lead.selected_property ? (
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-dash-text-muted" />
+                            {lead.selected_property}
+                          </span>
+                        ) : (
+                          <span className="text-dash-text-muted">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-dash-text text-sm font-semibold">
+                        {lead.budget ?? <span className="text-dash-text-muted font-normal">—</span>}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap capitalize text-dash-text-secondary text-sm">
+                        {lead.intent ?? <span className="text-dash-text-muted">—</span>}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {level ? <ScoreBadge level={level} score={lead.lead_score!} /> : <span className="text-dash-text-muted">—</span>}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold hover:ring-1 hover:ring-current/20 disabled:opacity-50"
+                        >
+                          {inlineStatusUpdating === lead.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <>
+                              <span className={`mr-1.5 h-1.5 w-1.5 self-center rounded-full ${colors.dot}`} />
+                              <InlineStatusSelect
+                                current={lead.status}
+                                colors={colors}
+                                onChange={(s) => handleInlineStatus(lead.id, s)}
                               />
-                            </div>
-                            <span className="text-dash-text text-xs font-semibold">{lead.lead_score}</span>
-                          </div>
-                        ) : <span className="text-dash-text-muted">—</span>}
-                      </td>
-                      <td className="px-4 py-3 text-dash-text-muted text-xs">{timeAgo(lead.updated_at)}</td>
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <button type="button" className="rounded-lg p-1.5 text-dash-text-muted hover:bg-dash-surface-hover hover:text-dash-text">
-                          <MoreHorizontal className="h-4 w-4" />
+                            </>
+                          )}
                         </button>
                       </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-dash-text-muted text-xs">{timeAgo(lead.updated_at)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-dash-text-muted text-sm">—</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()} />
                     </tr>
                   );
                 })}
@@ -554,177 +582,409 @@ export default function LeadsPage() {
         )}
       </div>
 
-      {/* Detail Drawer (slide-in from right) */}
+      {/* Detail Drawer */}
       {drawerLead && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <LeadDrawer
+          lead={drawerLead}
+          onClose={() => setDrawerLead(null)}
+          onUpdateStatus={(updated) => {
+            setLeads((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+            setDrawerLead(updated);
+          }}
+          inlineUpdating={inlineStatusUpdating}
+          setInlineUpdating={setInlineStatusUpdating}
+        />
+      )}
+    </div>
+  );
+}
+
+function SortHeader({
+  children,
+  active,
+  dir,
+  onSort,
+}: {
+  children: React.ReactNode;
+  active: boolean;
+  dir: "asc" | "desc";
+  onSort: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSort}
+      className="flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-dash-text-muted hover:text-dash-text"
+    >
+      {children}
+      <ArrowUpDown className={`h-3 w-3 ${active ? "text-dash-accent" : ""}`} />
+      {active && <span className="sr-only">{dir === "asc" ? "ascending" : "descending"}</span>}
+    </button>
+  );
+}
+
+function KpiStat({
+  label,
+  value,
+  icon: Icon,
+  bg,
+  color,
+}: {
+  label: string;
+  value: number;
+  icon: typeof Users;
+  bg: string;
+  color: string;
+}) {
+  return (
+    <div className="dash-card flex items-center gap-4 p-4">
+      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${bg}`}>
+        <Icon className={`h-5 w-5 ${color}`} />
+      </div>
+      <div>
+        <div className="text-dash-text text-2xl font-bold">{value}</div>
+        <div className="text-dash-text-muted text-xs">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function ScoreBadge({ level, score }: { level: "High" | "Medium" | "Low"; score: number }) {
+  const style =
+    level === "High"
+      ? "bg-dash-success-muted text-dash-success"
+      : level === "Medium"
+        ? "bg-dash-warning-muted text-dash-warning"
+        : "bg-dash-surface-secondary text-dash-text-muted";
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${style}`}>
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          level === "High" ? "bg-dash-success" : level === "Medium" ? "bg-dash-warning" : "bg-dash-text-muted"
+        }`}
+      />
+      {level}
+      <span className="opacity-60">{score}/10</span>
+    </span>
+  );
+}
+
+function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center px-5 py-16 text-center">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-dash-danger-muted">
+        <X className="h-6 w-6 text-dash-danger" />
+      </div>
+      <p className="font-Helvetica-Neue font-semibold text-dash-text text-sm">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-3 rounded-lg bg-dash-danger px-4 py-2 font-medium text-white text-xs"
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
+
+function InlineStatusSelect({
+  current,
+  colors,
+  onChange,
+}: {
+  current: Status;
+  colors: { text: string };
+  onChange: (s: Status) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative inline-block">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-1 font-medium ${colors.text}`}
+      >
+        {STATUS_FILTER_LABELS[current]}
+        <ChevronDown className="h-3 w-3" />
+      </button>
+      {open && (
+        <>
+          <button type="button" className="fixed inset-0 z-10 cursor-default" onClick={() => setOpen(false)} aria-hidden />
+          <span className="dash-animate-scale absolute right-0 z-20 mt-1 w-44 rounded-xl border border-dash-border bg-dash-surface p-1 shadow-lg">
+            {STATUSES.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => {
+                  onChange(s);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-dash-surface-hover"
+              >
+                <span className={`h-2 w-2 rounded-full ${statusColors[s].dot}`} />
+                <span className={`font-medium ${statusColors[s].text}`}>{STATUS_FILTER_LABELS[s]}</span>
+              </button>
+            ))}
+          </span>
+        </>
+      )}
+    </span>
+  );
+}
+
+function LeadDrawer({
+  lead,
+  onClose,
+  onUpdateStatus,
+  inlineUpdating,
+  setInlineUpdating,
+}: {
+  lead: Lead;
+  onClose: () => void;
+  onUpdateStatus: (updated: Lead) => void;
+  inlineUpdating: number | null;
+  setInlineUpdating: (id: number | null) => void;
+}) {
+  const t = useTranslations("dashboard.leads");
+
+  async function handleStatus(status: Status) {
+    setInlineUpdating(lead.id);
+    try {
+      const res = await fetch(`/api/dashboard/leads/${lead.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error();
+      const updated: Lead = await res.json();
+      onUpdateStatus(updated);
+    } catch {
+      // silent
+    } finally {
+      setInlineUpdating(null);
+    }
+  }
+
+  const name = getDisplayName(lead);
+  const level = scoreLevel(lead.lead_score);
+  const known = (v: string | null | undefined) => !!v && v !== "უცნობია";
+
+  const summaryItems = [
+    { label: "Budget", value: lead.budget, icon: "budget" },
+    { label: "Preferred location", value: lead.location, icon: "location" },
+    { label: "Property type", value: lead.selected_property, icon: "property" },
+    { label: "Intent", value: lead.intent, icon: "intent" },
+  ];
+
+  const hasQualification = summaryItems.some((i) => known(i.value));
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <button type="button" className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="dash-animate-slide relative z-10 flex h-full w-full max-w-md flex-col border-dash-border border-l bg-dash-surface shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-dash-border border-b px-6 py-4">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-1 text-dash-text-muted hover:bg-dash-surface-hover hover:text-dash-text"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${
+                lead.customer_name
+                  ? "bg-gradient-to-br from-accent/20 to-purple-500/10 text-dash-accent"
+                  : "bg-dash-surface-secondary text-dash-text"
+              }`}
+            >
+              {getInitials(lead)}
+            </div>
+            <div>
+              <h3 className="font-Helvetica-Neue text-base font-bold text-dash-text">{name}</h3>
+              <p className="text-dash-text-muted text-xs">
+                {extractPhone(lead.chat_id)} · {guessSource(lead.chat_id)}
+              </p>
+            </div>
+          </div>
           <button
             type="button"
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setDrawerLead(null)}
-          />
-          <div
-            className="dash-animate-slide relative z-10 flex h-full w-full max-w-md flex-col border-dash-border border-l bg-dash-surface shadow-2xl"
+            onClick={onClose}
+            className="rounded-lg p-1 text-dash-text-muted hover:bg-dash-surface-hover hover:text-dash-text"
           >
-            {/* Drawer Header */}
-            <div className="flex items-center justify-between border-dash-border border-b px-6 py-4">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDrawerLead(null)}
-                  className="rounded-lg p-1 text-dash-text-muted hover:bg-dash-surface-hover hover:text-dash-text"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full font-semibold text-sm ${drawerLead.customer_name ? "bg-gradient-to-br from-accent/20 to-purple-500/10 text-dash-accent" : "bg-dash-surface-secondary text-dash-text"}`}>
-                  {getInitials(drawerLead)}
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
+          {/* AI Qualification Summary */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <Sparkle className="h-4 w-4 text-accent" />
+              <h4 className="font-Helvetica-Neue text-xs font-semibold uppercase tracking-wider text-dash-text-muted">
+                {t("detail.qualification")}
+              </h4>
+            </div>
+            {hasQualification ? (
+              <div className="rounded-2xl border border-dash-success/25 bg-dash-success-muted/40 p-4">
+                <ul className="space-y-2.5">
+                  {summaryItems.map((item) => (
+                    <li key={item.label} className="flex items-start justify-between gap-3 text-sm">
+                      <span className="text-dash-text-muted">{item.label}</span>
+                      <span className={`font-semibold text-right text-dash-text ${known(item.value) ? "" : "text-dash-text-muted"}`}>
+                        {known(item.value) ? item.value : "Not yet collected"}
+                      </span>
+                    </li>
+                  ))}
+                  <li className="flex items-center gap-1.5 pt-1.5 text-xs font-medium text-dash-success">
+                    <Check className="h-3.5 w-3.5" />
+                    {lead.status === "qualified" || lead.status === "deal"
+                      ? "Recommended: follow up within 15 minutes"
+                      : "Twin is still collecting qualification details"}
+                  </li>
+                </ul>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-dash-border bg-dash-surface-secondary/50 p-4 text-center">
+                <p className="text-dash-text-muted text-xs">{t("detail.qualificationEmpty")}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Score */}
+          <div>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-dash-text-muted">Lead Score</h4>
+            <div className="rounded-xl bg-dash-surface-secondary p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-dash-text-secondary text-sm">Quality</span>
+                <span className="flex items-center gap-2">
+                  {level && <ScoreBadge level={level} score={lead.lead_score!} />}
+                  <span className="text-dash-accent text-xl font-bold">{lead.lead_score ?? "—"}</span>
+                </span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-dash-accent-muted">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    (lead.lead_score ?? 0) >= 7
+                      ? "bg-dash-success"
+                      : (lead.lead_score ?? 0) >= 4
+                        ? "bg-dash-warning"
+                        : "bg-dash-text-muted"
+                  }`}
+                  style={{ width: `${((lead.lead_score ?? 0) / 10) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          <div>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-dash-text-muted">
+              {t("detail.contactInfo")}
+            </h4>
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex items-center gap-2 rounded-lg bg-dash-surface-secondary px-3 py-2 text-sm">
+                <Phone className="h-3.5 w-3.5 text-dash-text-muted" />
+                <a href={`tel:${extractPhone(lead.chat_id)}`} className="font-medium text-dash-text no-underline hover:text-dash-accent">
+                  {extractPhone(lead.chat_id)}
+                </a>
+              </div>
+              {known(lead.location) && (
+                <div className="flex items-center gap-2 rounded-lg bg-dash-surface-secondary px-3 py-2 text-sm text-dash-text">
+                  <MapPin className="h-3.5 w-3.5 text-dash-text-muted" />
+                  {lead.location}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Status */}
+          <div>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-dash-text-muted">Pipeline Status</h4>
+            <div className="flex flex-wrap items-center gap-2">
+              {STATUSES.map((s) => {
+                const c = statusColors[s];
+                const isActive = lead.status === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => handleStatus(s)}
+                    disabled={inlineUpdating === lead.id}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                      isActive
+                        ? `${c.bg} ${c.text} ring-1 ring-current/20`
+                        : "border border-dash-border text-dash-text-muted hover:bg-dash-surface-hover"
+                    }`}
+                  >
+                    {inlineUpdating === lead.id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <span className={`h-2 w-2 rounded-full ${c.dot}`} />
+                    )}
+                    {STATUS_FILTER_LABELS[s]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-dash-text-muted">Activity Timeline</h4>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dash-accent-muted">
+                  <MessageSquare className="h-3.5 w-3.5 text-dash-accent" />
                 </div>
                 <div>
-                  <h3 className="font-Helvetica-Neue font-bold text-dash-text text-base">
-                    {getDisplayName(drawerLead)}
-                  </h3>
-                  <p className="text-dash-text-muted text-xs">
-                    {extractPhone(drawerLead.chat_id)} · WhatsApp
-                  </p>
+                  <p className="text-dash-text text-sm">Lead created</p>
+                  <p className="text-dash-text-muted text-xs">{formatDate(lead.created_at)}</p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setDrawerLead(null)}
-                className="rounded-lg p-1 text-dash-text-muted hover:bg-dash-surface-hover hover:text-dash-text"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Drawer Content */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
-              {/* Qualification Data */}
-              <div>
-                <h4 className="font-Helvetica-Neue font-semibold text-dash-text-muted text-xs uppercase tracking-wider mb-3">Qualification</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: "Budget", value: drawerLead.budget },
-                    { label: "Location", value: drawerLead.location },
-                    { label: "Property", value: drawerLead.selected_property },
-                    { label: "Intent", value: drawerLead.intent },
-                  ].map((item) => {
-                    const known = !!item.value && item.value !== "უცნობია";
-                    return (
-                      <div
-                        key={item.label}
-                        className={`rounded-xl p-3 ${known ? "bg-dash-success-muted" : "bg-dash-surface-secondary"}`}
-                      >
-                        <div className="font-medium text-[10px] text-dash-text-muted uppercase">{item.label}</div>
-                        <div className={`font-semibold text-sm mt-0.5 ${known ? "text-dash-text" : "text-dash-text-muted"}`}>
-                          {known ? item.value : "Pending"}
-                        </div>
-                      </div>
-                    );
-                  })}
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dash-success-muted">
+                  <Check className="h-3.5 w-3.5 text-dash-success" />
                 </div>
-              </div>
-
-              {/* Lead Score */}
-              <div>
-                <h4 className="font-Helvetica-Neue font-semibold text-dash-text-muted text-xs uppercase tracking-wider mb-3">Lead Score</h4>
-                <div className="rounded-xl bg-dash-surface-secondary p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-dash-text-secondary text-sm">Quality Score</span>
-                    <span className="font-bold text-dash-accent text-xl">{drawerLead.lead_score ?? "—"}</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-dash-accent-muted overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-dash-accent transition-all"
-                      style={{ width: `${(drawerLead.lead_score ?? 0) * 10}%` }}
-                    />
-                  </div>
+                <div>
+                  <p className="text-dash-text text-sm">Last activity</p>
+                  <p className="text-dash-text-muted text-xs">{timeAgo(lead.updated_at)}</p>
                 </div>
-              </div>
-
-              {/* Status */}
-              <div>
-                <h4 className="font-Helvetica-Neue font-semibold text-dash-text-muted text-xs uppercase tracking-wider mb-3">Pipeline Status</h4>
-                <div className="flex items-center gap-2">
-                  {STATUSES.map((s) => {
-                    const c = statusColors[s];
-                    const isActive = drawerLead.status === s;
-                    return (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => handleInlineStatus(drawerLead.id, s)}
-                        disabled={inlineStatusUpdating === drawerLead.id}
-                        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-xs transition-all ${isActive ? `${c.bg} ${c.text} ring-1 ring-current/20` : "bg-dash-surface-secondary text-dash-text-muted hover:bg-dash-surface-hover"}`}
-                      >
-                        {inlineStatusUpdating === drawerLead.id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <span className={`h-2 w-2 rounded-full ${c.dot}`} />
-                        )}
-                        {STATUS_LABELS[s]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Timeline */}
-              <div>
-                <h4 className="font-Helvetica-Neue font-semibold text-dash-text-muted text-xs uppercase tracking-wider mb-3">Activity Timeline</h4>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dash-accent-muted">
-                      <MessageSquare className="h-3.5 w-3.5 text-dash-accent" />
-                    </div>
-                    <div>
-                      <p className="text-dash-text text-sm">Lead created</p>
-                      <p className="text-dash-text-muted text-xs">{formatDate(drawerLead.created_at)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dash-success-muted">
-                      <Check className="h-3.5 w-3.5 text-dash-success" />
-                    </div>
-                    <div>
-                      <p className="text-dash-text text-sm">Last activity</p>
-                      <p className="text-dash-text-muted text-xs">{timeAgo(drawerLead.updated_at)}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Drawer Footer Actions */}
-            <div className="border-dash-border border-t px-6 py-4 space-y-2">
-              <a
-                href={`tel:${extractPhone(drawerLead.chat_id)}`}
-                className="flex items-center justify-center gap-2 rounded-xl bg-dash-accent py-2.5 font-semibold text-white text-sm hover:bg-dash-accent-hover"
-              >
-                <Phone className="h-4 w-4" />
-                Call {getDisplayName(drawerLead)}
-              </a>
-              <div className="grid grid-cols-2 gap-2">
-                <a
-                  href={`https://wa.me/${drawerLead.chat_id.split("@")[0]}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 font-semibold text-dash-text-secondary text-sm hover:bg-dash-surface-hover"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  WhatsApp
-                </a>
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 font-semibold text-dash-text-secondary text-sm hover:bg-dash-surface-hover"
-                >
-                  <Calendar className="h-3.5 w-3.5" />
-                  Schedule
-                </button>
               </div>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Footer Actions */}
+        <div className="space-y-2 border-dash-border border-t px-6 py-4">
+          <a
+            href={`tel:${extractPhone(lead.chat_id)}`}
+            className="flex items-center justify-center gap-2 rounded-xl bg-dash-accent py-2.5 text-sm font-semibold text-white hover:bg-dash-accent-hover"
+          >
+            <Phone className="h-4 w-4" />
+            Call {name}
+          </a>
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              href={`https://wa.me/${lead.chat_id.split("@")[0]}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 text-sm font-semibold text-dash-text-secondary hover:bg-dash-surface-hover"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              WhatsApp
+            </a>
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 text-sm font-semibold text-dash-text-secondary hover:bg-dash-surface-hover"
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              Schedule
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
