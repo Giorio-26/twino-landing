@@ -122,6 +122,8 @@ jobs:
             export NEXT_PUBLIC_API_URL="${{ secrets.NEXT_PUBLIC_API_URL }}"
             export TWINO_API_KEY="${{ secrets.TWINO_API_KEY }}"
             export ACCESS_SESSION_SECRET="${{ secrets.ACCESS_SESSION_SECRET }}"
+            export ADMIN_SUPABASE_USER_IDS="${{ secrets.ADMIN_SUPABASE_USER_IDS }}"
+            export ADMIN_EMAILS="${{ secrets.ADMIN_EMAILS }}"
             export SMTP_HOST="${{ secrets.SMTP_HOST }}"
             export SMTP_PORT="${{ secrets.SMTP_PORT }}"
             export SMTP_SECURE="${{ secrets.SMTP_SECURE }}"
