@@ -3,7 +3,20 @@ import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { updateSession } from "./lib/supabase/middleware";
 
-const intlMiddleware = createIntlMiddleware(routing);\n\nfunction isDisabledLiveEventPath(pathname: string): boolean {\n  return (\n    pathname === "/api/event" ||\n    pathname.startsWith("/api/event/") ||\n    pathname === "/api/admin/event-companies" ||\n    pathname.startsWith("/api/admin/event-companies/") ||\n    pathname === "/api/admin/generate-event-key" ||\n    pathname.startsWith("/api/admin/generate-event-key/") ||\n    /^\\/(?:[a-z]{2}\\/)?event(?:\\/|$)/.test(pathname) ||\n    /^\\/(?:[a-z]{2}\\/)?admin\\/event-keys(?:\\/|$)/.test(pathname)\n  );\n}
+const intlMiddleware = createIntlMiddleware(routing);
+
+function isDisabledLiveEventPath(pathname: string): boolean {
+  return (
+    pathname === "/api/event" ||
+    pathname.startsWith("/api/event/") ||
+    pathname === "/api/admin/event-companies" ||
+    pathname.startsWith("/api/admin/event-companies/") ||
+    pathname === "/api/admin/generate-event-key" ||
+    pathname.startsWith("/api/admin/generate-event-key/") ||
+    /^\/(?:[a-z]{2}\/)?event(?:\/|$)/.test(pathname) ||
+    /^\/(?:[a-z]{2}\/)?admin\/event-keys(?:\/|$)/.test(pathname)
+  );
+}
 
 // Only pay the getUser() network cost when Supabase cookies are present.
 // For unauthenticated visitors there is nothing to refresh.
@@ -28,7 +41,11 @@ function clearSupabaseCookies(
 // middleware to block forever — that would make Nginx return 502.
 const SESSION_TIMEOUT_MS = 8_000;
 
-export default async function middleware(request: NextRequest) {\n  if (isDisabledLiveEventPath(request.nextUrl.pathname)) {\n    return NextResponse.json({ error: "Not Found" }, { status: 404 });\n  }\n
+export default async function middleware(request: NextRequest) {
+  if (isDisabledLiveEventPath(request.nextUrl.pathname)) {
+    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  }
+
   // i18n middleware is authoritative for routing / locale headers.
   const intlResponse = intlMiddleware(request);
 
@@ -62,5 +79,11 @@ export default async function middleware(request: NextRequest) {\n  if (isDisabl
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
+    "/api/event/:path*",
+    "/api/admin/event-companies/:path*",
+    "/api/admin/generate-event-key/:path*",
+  ],
 };
+
