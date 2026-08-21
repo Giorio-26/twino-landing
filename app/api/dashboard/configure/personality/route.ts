@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -20,22 +20,14 @@ export async function POST(req: Request) {
 
   const upstream = await fetch(`${apiUrl}/company/${companyId}/personality`, {
     method: "PATCH",
-    headers: {
-      ...backendAuthorizationHeaders(String(companyId)),
-      "Content-Type": "application/json",
-    },
+    headers: { ...backendAuthorizationHeaders(String(companyId)), "Content-Type": "application/json" },
     body: JSON.stringify(body),
   }).catch(() => null);
 
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
-    console.error(
-      "[configure/personality] upstream error:",
-      upstream?.status,
-      detail,
-    );
+    console.error("[configure/personality] upstream error:", upstream?.status, detail);
   }
 
   return Response.json({ ok: true });
 }
-
