@@ -41,10 +41,7 @@ export async function PATCH(request: NextRequest) {
 
         if (companyError || !company) {
           console.error("Error creating company:", companyError);
-          return Response.json(
-            { error: "Failed to create company" },
-            { status: 500 },
-          );
+          return Response.json({ error: "Failed to create company" }, { status: 500 });
         }
 
         const { error } = await supabase
@@ -54,10 +51,7 @@ export async function PATCH(request: NextRequest) {
 
         if (error) {
           console.error("Error updating booking:", error);
-          return Response.json(
-            { error: "Database update failed" },
-            { status: 500 },
-          );
+          return Response.json({ error: "Database update failed" }, { status: 500 });
         }
 
         return Response.json({ ok: true, company_id: company.id });
@@ -71,18 +65,12 @@ export async function PATCH(request: NextRequest) {
 
     if (error) {
       console.error("Error updating booking status:", error);
-      return Response.json(
-        { error: "Database update failed" },
-        { status: 500 },
-      );
+      return Response.json({ error: "Database update failed" }, { status: 500 });
     }
 
     return Response.json({ ok: true });
   } catch (err) {
     console.error("Booking status update error:", err);
-    return Response.json(
-      { error: "Failed to process request" },
-      { status: 500 },
-    );
+    return Response.json({ error: "Failed to process request" }, { status: 500 });
   }
 }
