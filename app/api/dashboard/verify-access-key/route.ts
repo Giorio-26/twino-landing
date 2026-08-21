@@ -1,12 +1,12 @@
 import { createHmac } from "node:crypto";
+import { cookies } from "next/headers";
+import type { NextRequest } from "next/server";
 import {
   getAccessSessionSecret,
   SESSION_COOKIE,
   signSession,
 } from "@/lib/session";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
-import type { NextRequest } from "next/server";
 
 function companyEmail(companyId: number | string): string {
   return `company-${companyId}@system.twino.app`;
