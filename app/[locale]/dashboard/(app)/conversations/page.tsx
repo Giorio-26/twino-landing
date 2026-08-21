@@ -58,7 +58,8 @@ function formatPhone(chatId: string): string {
 }
 
 function getDisplayName(lead: Lead): string {
-  if (lead.customer_name && lead.customer_name !== "უცნობია") return lead.customer_name;
+  if (lead.customer_name && lead.customer_name !== "უცნობია")
+    return lead.customer_name;
   return formatPhone(lead.chat_id);
 }
 
@@ -74,7 +75,8 @@ function getDisplayInitials(lead: Lead): string {
 }
 
 function timeAgo(isoDate: string): string {
-  const utc = isoDate.endsWith("Z") || isoDate.includes("+") ? isoDate : `${isoDate}Z`;
+  const utc =
+    isoDate.endsWith("Z") || isoDate.includes("+") ? isoDate : `${isoDate}Z`;
   const diff = Date.now() - new Date(utc).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "just now";
@@ -101,9 +103,12 @@ const STATUS_LABELS: Record<Lead["status"], string> = {
 };
 
 function guessChannel(chatId: string): string {
-  if (chatId.endsWith("@s.whatsapp.net") || chatId.includes("whatsapp")) return "WhatsApp";
-  if (chatId.endsWith("@messaging") || chatId.includes("messenger")) return "Messenger";
-  if (chatId.endsWith("@instagram") || chatId.includes("instagram")) return "Instagram";
+  if (chatId.endsWith("@s.whatsapp.net") || chatId.includes("whatsapp"))
+    return "WhatsApp";
+  if (chatId.endsWith("@messaging") || chatId.includes("messenger"))
+    return "Messenger";
+  if (chatId.endsWith("@instagram") || chatId.includes("instagram"))
+    return "Instagram";
   return "Inbox";
 }
 
@@ -150,9 +155,12 @@ export default function ConversationsPage() {
     setActionPending(true);
     const isTakeover = takeoverChats.has(selected.chat_id);
     const action = isTakeover ? "start-ai" : "takeover";
-    await fetch(`/api/dashboard/chat-controls/${encodeURIComponent(selected.chat_id)}/${action}`, {
-      method: "POST",
-    }).catch(() => null);
+    await fetch(
+      `/api/dashboard/chat-controls/${encodeURIComponent(selected.chat_id)}/${action}`,
+      {
+        method: "POST",
+      },
+    ).catch(() => null);
     setTakeoverChats((prev) => {
       const s = new Set(prev);
       if (isTakeover) s.delete(selected.chat_id);
@@ -167,9 +175,12 @@ export default function ConversationsPage() {
     setActionPending(true);
     const isBlocked = blockedChats.has(selected.chat_id);
     const action = isBlocked ? "unblock" : "block";
-    await fetch(`/api/dashboard/chat-controls/${encodeURIComponent(selected.chat_id)}/${action}`, {
-      method: "POST",
-    }).catch(() => null);
+    await fetch(
+      `/api/dashboard/chat-controls/${encodeURIComponent(selected.chat_id)}/${action}`,
+      {
+        method: "POST",
+      },
+    ).catch(() => null);
     setBlockedChats((prev) => {
       const s = new Set(prev);
       if (isBlocked) s.delete(selected.chat_id);
@@ -219,9 +230,12 @@ export default function ConversationsPage() {
   async function handleCloseLead() {
     if (!selected || actionPending) return;
     setActionPending(true);
-    await fetch(`/api/dashboard/chat-controls/${encodeURIComponent(selected.chat_id)}/close`, {
-      method: "POST",
-    }).catch(() => null);
+    await fetch(
+      `/api/dashboard/chat-controls/${encodeURIComponent(selected.chat_id)}/close`,
+      {
+        method: "POST",
+      },
+    ).catch(() => null);
     setClosedChats((prev) => new Set([...prev, selected.chat_id]));
     setActionPending(false);
   }
@@ -231,8 +245,14 @@ export default function ConversationsPage() {
     const text = input.trim();
     setInput("");
     setSending(true);
-    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    setMessages((prev) => [...prev, { sender: "human_agent", text, time: now }]);
+    const now = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    setMessages((prev) => [
+      ...prev,
+      { sender: "human_agent", text, time: now },
+    ]);
     await fetch("/api/dashboard/send-message", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -257,8 +277,8 @@ export default function ConversationsPage() {
     let ws: WebSocket | null = null;
     fetch("/api/dashboard/ws-info")
       .then((r) => r.json())
-      .then((json: { wsUrl: string }) => {
-        ws = new WebSocket(json.wsUrl);
+      .then((json: { wsUrl: string; wsToken: string }) => {
+        ws = new WebSocket(json.wsUrl, ["twino", json.wsToken]);
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data as string) as WsEvent;
@@ -272,12 +292,22 @@ export default function ConversationsPage() {
                     return s;
                   });
                 }
-                setLastMessages((prev) => ({ ...prev, [data.chat_id]: data.text }));
+                setLastMessages((prev) => ({
+                  ...prev,
+                  [data.chat_id]: data.text,
+                }));
                 if (selectedRef.current?.chat_id === data.chat_id) {
-                  const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                  const now = new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
                   setMessages((prev) => [
                     ...prev,
-                    { sender: data.type === "ai_msg" ? "ai" : "user", text: data.text, time: now },
+                    {
+                      sender: data.type === "ai_msg" ? "ai" : "user",
+                      text: data.text,
+                      time: now,
+                    },
                   ]);
                 }
                 break;
@@ -291,9 +321,15 @@ export default function ConversationsPage() {
                 });
                 break;
               case "lead_updated": {
-                setLeads((prev) => prev.map((l) => (l.chat_id === data.chat_id ? { ...l, ...data.lead } : l)));
+                setLeads((prev) =>
+                  prev.map((l) =>
+                    l.chat_id === data.chat_id ? { ...l, ...data.lead } : l,
+                  ),
+                );
                 if (selectedRef.current?.chat_id === data.chat_id) {
-                  setSelected((prev) => (prev ? { ...prev, ...data.lead } : prev));
+                  setSelected((prev) =>
+                    prev ? { ...prev, ...data.lead } : prev,
+                  );
                 }
                 break;
               }
@@ -306,7 +342,10 @@ export default function ConversationsPage() {
                 });
                 break;
               case "escalate":
-                setEscalations((prev) => ({ ...prev, [data.chat_id]: data.manager_summary }));
+                setEscalations((prev) => ({
+                  ...prev,
+                  [data.chat_id]: data.manager_summary,
+                }));
                 break;
               case "conversation_closed":
                 setClosedChats((prev) => new Set([...prev, data.chat_id]));
@@ -317,7 +356,8 @@ export default function ConversationsPage() {
             }
           } catch {}
         };
-        ws.onerror = (e) => console.error("[WS] connection error", json.wsUrl, e);
+        ws.onerror = (e) =>
+          console.error("[WS] connection error", json.wsUrl, e);
         ws.onclose = (e) => console.warn("[WS] closed", e.code, e.reason);
       })
       .catch(() => console.error("[WS] failed to get ws-info"));
@@ -335,10 +375,15 @@ export default function ConversationsPage() {
       .then((r) => r.json())
       .then(
         (json: {
-          state?: { human_takeover: boolean; is_blocked: boolean; conversation_closed: boolean };
+          state?: {
+            human_takeover: boolean;
+            is_blocked: boolean;
+            conversation_closed: boolean;
+          };
         }) => {
           if (!json.state) return;
-          const { human_takeover, is_blocked, conversation_closed } = json.state;
+          const { human_takeover, is_blocked, conversation_closed } =
+            json.state;
           setTakeoverChats((prev) => {
             const s = new Set(prev);
             human_takeover ? s.add(chatId) : s.delete(chatId);
@@ -384,10 +429,13 @@ export default function ConversationsPage() {
   function nextActionFor(lead: Lead): string {
     if (closedChats.has(lead.chat_id)) return "Closed — no action needed";
     if (lead.status === "deal") return "Closed — deal handed to sales";
-    if (isKnown(lead.budget) && isKnown(lead.location) && isKnown(lead.intent)) return "Fully qualified — book a viewing";
+    if (isKnown(lead.budget) && isKnown(lead.location) && isKnown(lead.intent))
+      return "Fully qualified — book a viewing";
     if (lead.lead_score >= 7) return "High-intent lead — respond within 15 min";
-    if (isKnown(lead.intent) && !isKnown(lead.budget)) return "Ask about budget and timeline";
-    if (!isKnown(lead.intent)) return "Ask what property type they are looking for";
+    if (isKnown(lead.intent) && !isKnown(lead.budget))
+      return "Ask about budget and timeline";
+    if (!isKnown(lead.intent))
+      return "Ask what property type they are looking for";
     return "Continue qualification — the Twin is collecting details";
   }
 
@@ -426,7 +474,9 @@ export default function ConversationsPage() {
           {leadsError && (
             <div className="p-4">
               <div className="rounded-xl border border-dash-danger/20 bg-dash-danger-muted/30 p-4 text-center">
-                <p className="font-medium text-dash-danger text-sm">{leadsError}</p>
+                <p className="font-medium text-dash-danger text-sm">
+                  {leadsError}
+                </p>
                 <button
                   type="button"
                   onClick={() => {
@@ -453,8 +503,12 @@ export default function ConversationsPage() {
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-dash-surface-secondary">
                 <MessageSquare className="h-6 w-6 text-dash-text-muted" />
               </div>
-              <p className="font-Helvetica-Neue text-sm font-semibold text-dash-text">{t("empty.title")}</p>
-              <p className="mt-1 max-w-[200px] text-xs text-dash-text-muted">{t("empty.description")}</p>
+              <p className="font-Helvetica-Neue text-sm font-semibold text-dash-text">
+                {t("empty.title")}
+              </p>
+              <p className="mt-1 max-w-[200px] text-xs text-dash-text-muted">
+                {t("empty.description")}
+              </p>
               <a
                 href="/dashboard/integration"
                 className="mt-3 rounded-lg bg-accent px-3.5 py-2 font-medium text-white text-xs no-underline hover:bg-accent-hover"
@@ -478,32 +532,48 @@ export default function ConversationsPage() {
                 type="button"
                 onClick={() => setSelected(lead)}
                 className={`flex w-full items-start gap-3 border-dash-border border-b p-4 text-left transition-colors ${
-                  selected?.id === lead.id ? "bg-dash-accent-muted/30" : "hover:bg-dash-surface-hover"
+                  selected?.id === lead.id
+                    ? "bg-dash-accent-muted/30"
+                    : "hover:bg-dash-surface-hover"
                 }`}
               >
                 <div className="relative">
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${
-                      isHuman ? "bg-dash-warning-muted text-dash-warning" : "bg-dash-surface-secondary text-dash-text"
+                      isHuman
+                        ? "bg-dash-warning-muted text-dash-warning"
+                        : "bg-dash-surface-secondary text-dash-text"
                     }`}
                   >
                     {initials}
                   </div>
                   <span
                     className={`-bottom-0.5 -right-0.5 absolute h-3 w-3 rounded-full border-2 border-dash-surface ${
-                      isClosed ? "bg-dash-text-muted" : isBlocked ? "bg-red-500" : "bg-green-500"
+                      isClosed
+                        ? "bg-dash-text-muted"
+                        : isBlocked
+                          ? "bg-red-500"
+                          : "bg-green-500"
                     }`}
                   />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-semibold text-dash-text">{name}</span>
-                    <span className="ml-2 shrink-0 text-[11px] text-dash-text-muted">{timeAgo(lead.updated_at)}</span>
+                    <span className="truncate text-sm font-semibold text-dash-text">
+                      {name}
+                    </span>
+                    <span className="ml-2 shrink-0 text-[11px] text-dash-text-muted">
+                      {timeAgo(lead.updated_at)}
+                    </span>
                   </div>
                   <div className="mt-0.5 flex items-center gap-2 text-[11px] text-dash-text-muted">
-                    <span className="truncate">{lead.selected_property ?? "No property yet"}</span>
+                    <span className="truncate">
+                      {lead.selected_property ?? "No property yet"}
+                    </span>
                     <span>·</span>
-                    <span className="shrink-0">{guessChannel(lead.chat_id)}</span>
+                    <span className="shrink-0">
+                      {guessChannel(lead.chat_id)}
+                    </span>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-dash-text-muted">
                     {lastMsg ?? lead.intent ?? "—"}
@@ -519,13 +589,35 @@ export default function ConversationsPage() {
                         {lead.lead_score}
                       </span>
                     )}
-                    {isKnown(lead.budget) && <span className="h-1.5 w-1.5 rounded-full bg-dash-success" title="Budget known" />}
-                    {isKnown(lead.location) && <span className="h-1.5 w-1.5 rounded-full bg-dash-success" title="Location known" />}
-                    {isKnown(lead.intent) && <span className="h-1.5 w-1.5 rounded-full bg-dash-success" title="Intent known" />}
-                    {(!isKnown(lead.budget) || !isKnown(lead.location) || !isKnown(lead.intent)) && (
-                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-dash-text-muted" title="Still qualifying" />
+                    {isKnown(lead.budget) && (
+                      <span
+                        className="h-1.5 w-1.5 rounded-full bg-dash-success"
+                        title="Budget known"
+                      />
                     )}
-                    {hasEscalation && <AlertTriangle className="h-3 w-3 text-dash-warning" />}
+                    {isKnown(lead.location) && (
+                      <span
+                        className="h-1.5 w-1.5 rounded-full bg-dash-success"
+                        title="Location known"
+                      />
+                    )}
+                    {isKnown(lead.intent) && (
+                      <span
+                        className="h-1.5 w-1.5 rounded-full bg-dash-success"
+                        title="Intent known"
+                      />
+                    )}
+                    {(!isKnown(lead.budget) ||
+                      !isKnown(lead.location) ||
+                      !isKnown(lead.intent)) && (
+                      <span
+                        className="h-1.5 w-1.5 animate-pulse rounded-full bg-dash-text-muted"
+                        title="Still qualifying"
+                      />
+                    )}
+                    {hasEscalation && (
+                      <AlertTriangle className="h-3 w-3 text-dash-warning" />
+                    )}
                     {isClosed && (
                       <span className="rounded px-1 py-0.5 text-[9px] font-medium uppercase tracking-wide bg-dash-surface-secondary text-dash-text-muted">
                         Closed
@@ -556,8 +648,12 @@ export default function ConversationsPage() {
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-dash-surface-secondary">
               <MessageSquare className="h-7 w-7 text-dash-text-muted" />
             </div>
-            <p className="font-Helvetica-Neue text-base font-semibold text-dash-text">{t("noConversation")}</p>
-            <p className="mt-1 max-w-[280px] text-sm text-dash-text-muted">{t("noConversationDesc")}</p>
+            <p className="font-Helvetica-Neue text-base font-semibold text-dash-text">
+              {t("noConversation")}
+            </p>
+            <p className="mt-1 max-w-[280px] text-sm text-dash-text-muted">
+              {t("noConversationDesc")}
+            </p>
           </div>
         ) : (
           <>
@@ -575,7 +671,9 @@ export default function ConversationsPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-dash-text">{getDisplayName(selected)}</span>
+                    <span className="text-sm font-semibold text-dash-text">
+                      {getDisplayName(selected)}
+                    </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[9px] font-medium uppercase tracking-wide ${STATUS_COLORS[selected.status].bg} ${STATUS_COLORS[selected.status].text}`}
                     >
@@ -603,7 +701,9 @@ export default function ConversationsPage() {
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1.5 rounded-lg border border-dash-warning/30 bg-dash-warning-muted px-3 py-1.5">
                       <User className="h-3.5 w-3.5 text-dash-warning" />
-                      <span className="text-xs font-semibold text-dash-warning">You're responding</span>
+                      <span className="text-xs font-semibold text-dash-warning">
+                        You're responding
+                      </span>
                       <span className="h-2 w-2 animate-pulse rounded-full bg-dash-warning" />
                     </div>
                     <button
@@ -612,7 +712,11 @@ export default function ConversationsPage() {
                       disabled={actionPending}
                       className="flex items-center gap-1.5 rounded-lg bg-dash-success px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
                     >
-                      {actionPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Zap className="h-3.5 w-3.5" />}
+                      {actionPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Zap className="h-3.5 w-3.5" />
+                      )}
                       Resume TwinO AI
                     </button>
                   </div>
@@ -623,7 +727,11 @@ export default function ConversationsPage() {
                     disabled={actionPending}
                     className="flex items-center gap-1.5 rounded-lg bg-dash-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-dash-accent-hover disabled:opacity-50"
                   >
-                    {actionPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <User className="h-3.5 w-3.5" />}
+                    {actionPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <User className="h-3.5 w-3.5" />
+                    )}
                     Take Over
                   </button>
                 )}
@@ -631,7 +739,10 @@ export default function ConversationsPage() {
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 space-y-3 overflow-y-auto p-6" style={{ background: "var(--dash-bg)" }}>
+            <div
+              className="flex-1 space-y-3 overflow-y-auto p-6"
+              style={{ background: "var(--dash-bg)" }}
+            >
               {messagesLoading && (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-5 w-5 animate-spin text-dash-text-muted" />
@@ -639,14 +750,21 @@ export default function ConversationsPage() {
               )}
               {!messagesLoading &&
                 messages.map((msg, i) => {
-                  const isOutbound = msg.sender === "ai" || msg.sender === "human_agent";
+                  const isOutbound =
+                    msg.sender === "ai" || msg.sender === "human_agent";
                   const displayTime =
                     msg.time ??
                     (msg.timestamp
-                      ? new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                      ? new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
                       : undefined);
                   return (
-                    <div key={`${msg.sender}-${i}-${msg.text.slice(0, 12)}`} className={`flex ${isOutbound ? "justify-end" : "justify-start"}`}>
+                    <div
+                      key={`${msg.sender}-${i}-${msg.text.slice(0, 12)}`}
+                      className={`flex ${isOutbound ? "justify-end" : "justify-start"}`}
+                    >
                       <div
                         className={`max-w-xs rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                           msg.sender === "ai"
@@ -680,7 +798,9 @@ export default function ConversationsPage() {
                         {displayTime && (
                           <div
                             className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${
-                              isOutbound ? "text-white/60" : "text-dash-text-muted"
+                              isOutbound
+                                ? "text-white/60"
+                                : "text-dash-text-muted"
                             }`}
                           >
                             {displayTime}
@@ -740,7 +860,11 @@ export default function ConversationsPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                  placeholder={takeoverChats.has(selected.chat_id) ? "Type as Sales Agent…" : "Take over to reply…"}
+                  placeholder={
+                    takeoverChats.has(selected.chat_id)
+                      ? "Type as Sales Agent…"
+                      : "Take over to reply…"
+                  }
                   className="flex-1 rounded-xl border border-dash-border bg-dash-bg px-4 py-3 text-dash-text text-sm placeholder-dash-text-muted focus:border-dash-accent/40 focus:outline-none"
                 />
                 <button
@@ -749,7 +873,11 @@ export default function ConversationsPage() {
                   disabled={!input.trim() || sending}
                   className="flex h-11 w-11 items-center justify-center rounded-xl bg-dash-accent text-white transition-colors hover:bg-dash-accent-hover disabled:opacity-50"
                 >
-                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  {sending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -761,22 +889,37 @@ export default function ConversationsPage() {
       {selected && (
         <div className="hidden w-72 shrink-0 flex-col border-dash-border border-l overflow-y-auto xl:flex">
           <div className="border-dash-border border-b p-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-dash-text-muted">{t("panel.title")}</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-dash-text-muted">
+              {t("panel.title")}
+            </h4>
           </div>
           <div className="space-y-3 p-4">
             {/* Score */}
             <div className="flex items-center justify-between rounded-xl bg-dash-surface-secondary p-3">
-              <span className="text-[10px] font-medium uppercase text-dash-text-muted">{t("panel.score")}</span>
-              <span className="text-sm font-bold text-dash-accent">{selected.lead_score} / 10</span>
+              <span className="text-[10px] font-medium uppercase text-dash-text-muted">
+                {t("panel.score")}
+              </span>
+              <span className="text-sm font-bold text-dash-accent">
+                {selected.lead_score} / 10
+              </span>
             </div>
 
             {/* Qualification grid */}
             <div className="grid grid-cols-1 gap-2">
               <QualBadge label={t("panel.budget")} value={selected.budget} />
-              <QualBadge label={t("panel.property")} value={selected.selected_property} />
+              <QualBadge
+                label={t("panel.property")}
+                value={selected.selected_property}
+              />
               <QualBadge label={t("panel.intent")} value={selected.intent} />
-              <QualBadge label={t("panel.location")} value={selected.location} />
-              <QualBadge label={t("panel.status")} value={STATUS_LABELS[selected.status]} />
+              <QualBadge
+                label={t("panel.location")}
+                value={selected.location}
+              />
+              <QualBadge
+                label={t("panel.status")}
+                value={STATUS_LABELS[selected.status]}
+              />
             </div>
 
             {/* Timeline */}
@@ -806,7 +949,10 @@ export default function ConversationsPage() {
                   </div>
                 )}
                 {notes.map((n, i) => (
-                  <div key={i} className="flex items-center gap-2 rounded-lg bg-amber-500/10 px-2 py-1.5 text-xs text-amber-700">
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 rounded-lg bg-amber-500/10 px-2 py-1.5 text-xs text-amber-700"
+                  >
                     <StickyNote className="h-3 w-3 shrink-0" />
                     {n}
                   </div>
@@ -832,7 +978,9 @@ export default function ConversationsPage() {
                   <AlertTriangle className="h-3 w-3" />
                   Escalation
                 </div>
-                <p className="text-xs leading-relaxed text-dash-text-secondary">{escalations[selected.chat_id]}</p>
+                <p className="text-xs leading-relaxed text-dash-text-secondary">
+                  {escalations[selected.chat_id]}
+                </p>
                 <button
                   type="button"
                   onClick={() => {
@@ -858,7 +1006,11 @@ export default function ConversationsPage() {
                 disabled={assignmentPending}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-dash-accent py-2.5 text-xs font-semibold text-white hover:bg-dash-accent-hover disabled:opacity-50"
               >
-                {assignmentPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <User className="h-3.5 w-3.5" />}
+                {assignmentPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <User className="h-3.5 w-3.5" />
+                )}
                 {t("panel.assignToSales")}
               </button>
               <div className="grid grid-cols-2 gap-2">
@@ -902,7 +1054,11 @@ export default function ConversationsPage() {
                   disabled={!noteText.trim() || notePending}
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-dash-border text-dash-text-muted transition-colors hover:bg-dash-surface-hover hover:text-dash-text disabled:opacity-50"
                 >
-                  {notePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <StickyNote className="h-4 w-4" />}
+                  {notePending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <StickyNote className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -952,18 +1108,25 @@ export default function ConversationsPage() {
 function QualBadge({ label, value }: { label: string; value: string | null }) {
   const known = value != null && value !== "უცნობია";
   return (
-    <div className={`flex items-center gap-2 rounded-lg p-2.5 ${known ? "bg-dash-success-muted" : "bg-dash-surface-secondary"}`}>
+    <div
+      className={`flex items-center gap-2 rounded-lg p-2.5 ${known ? "bg-dash-success-muted" : "bg-dash-surface-secondary"}`}
+    >
       {known ? (
         <Check className="h-3.5 w-3.5 text-dash-success" />
       ) : (
         <Circle className="h-3.5 w-3.5 text-dash-text-muted" />
       )}
       <div className="min-w-0">
-        <div className="text-[10px] font-medium uppercase text-dash-text-muted">{label}</div>
-        <div className={`truncate text-xs font-semibold ${known ? "text-dash-success" : "text-dash-text-muted"}`}>
+        <div className="text-[10px] font-medium uppercase text-dash-text-muted">
+          {label}
+        </div>
+        <div
+          className={`truncate text-xs font-semibold ${known ? "text-dash-success" : "text-dash-text-muted"}`}
+        >
           {known ? value : "Pending"}
         </div>
       </div>
     </div>
   );
 }
+
