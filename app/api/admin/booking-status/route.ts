@@ -1,10 +1,14 @@
 import type { NextRequest } from "next/server";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 const VALID_STATUSES = ["new", "reached", "deal"] as const;
 type BookingStatus = (typeof VALID_STATUSES)[number];
 
 export async function PATCH(request: NextRequest) {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   try {
     const body: { id: number; status: BookingStatus } = await request.json();
 
@@ -37,7 +41,10 @@ export async function PATCH(request: NextRequest) {
 
         if (companyError || !company) {
           console.error("Error creating company:", companyError);
-          return Response.json({ error: "Failed to create company" }, { status: 500 });
+          return Response.json(
+            { error: "Failed to create company" },
+            { status: 500 },
+          );
         }
 
         const { error } = await supabase
@@ -47,7 +54,10 @@ export async function PATCH(request: NextRequest) {
 
         if (error) {
           console.error("Error updating booking:", error);
-          return Response.json({ error: "Database update failed" }, { status: 500 });
+          return Response.json(
+            { error: "Database update failed" },
+            { status: 500 },
+          );
         }
 
         return Response.json({ ok: true, company_id: company.id });
@@ -61,12 +71,18 @@ export async function PATCH(request: NextRequest) {
 
     if (error) {
       console.error("Error updating booking status:", error);
-      return Response.json({ error: "Database update failed" }, { status: 500 });
+      return Response.json(
+        { error: "Database update failed" },
+        { status: 500 },
+      );
     }
 
     return Response.json({ ok: true });
   } catch (err) {
     console.error("Booking status update error:", err);
-    return Response.json({ error: "Failed to process request" }, { status: 500 });
+    return Response.json(
+      { error: "Failed to process request" },
+      { status: 500 },
+    );
   }
 }
