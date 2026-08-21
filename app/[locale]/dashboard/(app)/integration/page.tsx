@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { getCompanyId } from "@/app/api/dashboard/configure/_lib";
 import IntegrationClient from "@/components/dashboard/IntegrationClient";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { createAdminClient, getAuthenticatedUser } from "@/lib/supabase/server";
 
@@ -70,7 +71,10 @@ async function getConfigReadiness(): Promise<ConfigReadiness> {
       if (apiKey && apiUrl) {
         const upstream = await fetch(
           `${apiUrl}/company/${companyId}/properties`,
-          { headers: { "X-API-KEY": apiKey }, cache: "no-store" },
+          {
+            headers: backendAuthorizationHeaders(String(companyId)),
+            cache: "no-store",
+          },
         ).catch(() => null);
         if (upstream?.ok) {
           const raw = await upstream.json().catch(() => null);
@@ -102,3 +106,4 @@ export default async function IntegrationPage() {
 
   return <IntegrationClient hasPhone={hasPhone} missingTabs={missingTabs} />;
 }
+
