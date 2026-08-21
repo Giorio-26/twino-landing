@@ -1,10 +1,14 @@
 import type { NextRequest } from "next/server";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   try {
     const { id } = await params;
     const bookingId = Number(id);
@@ -33,7 +37,10 @@ export async function DELETE(
 
     if (deleteError) {
       console.error("Error deleting booking:", deleteError);
-      return Response.json({ error: "Failed to delete booking" }, { status: 500 });
+      return Response.json(
+        { error: "Failed to delete booking" },
+        { status: 500 },
+      );
     }
 
     // Delete linked company if present (booking FK was SET NULL, company row still exists)
@@ -52,6 +59,9 @@ export async function DELETE(
     return Response.json({ ok: true });
   } catch (err) {
     console.error("Booking delete error:", err);
-    return Response.json({ error: "Failed to process request" }, { status: 500 });
+    return Response.json(
+      { error: "Failed to process request" },
+      { status: 500 },
+    );
   }
 }
