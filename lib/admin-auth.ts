@@ -20,7 +20,6 @@ export async function getAdminAuthorization(): Promise<AdminAuthorization> {
     authorized: isTrustedAdminIdentity(
       user,
       process.env.ADMIN_SUPABASE_USER_IDS,
-      process.env.ADMIN_EMAILS,
     ),
   };
 }
