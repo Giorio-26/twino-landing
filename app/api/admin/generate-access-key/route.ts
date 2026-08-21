@@ -27,17 +27,14 @@ export async function PATCH(request: NextRequest) {
   if (denial) return denial;
 
   try {
-    const body: { bookingId: number; validityDays: number } =
-      await request.json();
+    const body: { bookingId: number; validityDays: number } = await request.json();
 
     if (!body.bookingId || !body.validityDays || body.validityDays < 1) {
       return Response.json({ error: "Invalid parameters" }, { status: 400 });
     }
 
     const supabase = createAdminClient();
-    const expiresAt = new Date(
-      Date.now() + body.validityDays * 24 * 60 * 60 * 1000,
-    );
+    const expiresAt = new Date(Date.now() + body.validityDays * 24 * 60 * 60 * 1000);
 
     const { error } = await supabase
       .from("access_keys")
@@ -46,22 +43,13 @@ export async function PATCH(request: NextRequest) {
 
     if (error) {
       console.error("Error updating key expiry:", error);
-      return Response.json(
-        { error: "Failed to update expiry" },
-        { status: 500 },
-      );
+      return Response.json({ error: "Failed to update expiry" }, { status: 500 });
     }
 
-    return Response.json(
-      { expiresAt: expiresAt.toISOString() },
-      { status: 200 },
-    );
+    return Response.json({ expiresAt: expiresAt.toISOString() }, { status: 200 });
   } catch (err) {
     console.error("update-key-expiry error:", err);
-    return Response.json(
-      { error: "Failed to process request" },
-      { status: 500 },
-    );
+    return Response.json({ error: "Failed to process request" }, { status: 500 });
   }
 }
 
@@ -70,8 +58,7 @@ export async function POST(request: NextRequest) {
   if (denial) return denial;
 
   try {
-    const body: { bookingId: number; validityDays?: number } =
-      await request.json();
+    const body: { bookingId: number; validityDays?: number } = await request.json();
 
     if (!body.bookingId || typeof body.bookingId !== "number") {
       return Response.json({ error: "Invalid bookingId" }, { status: 400 });
@@ -113,15 +100,17 @@ export async function POST(request: NextRequest) {
       ? new Date(existing.expires_at)
       : new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000);
 
-    const { error: upsertError } = await supabase.from("access_keys").upsert(
-      {
-        booking_id: body.bookingId,
-        key,
-        expires_at: expiresAt.toISOString(),
-        created_at: existing ? undefined : new Date().toISOString(),
-      },
-      { onConflict: "booking_id" },
-    );
+    const { error: upsertError } = await supabase
+      .from("access_keys")
+      .upsert(
+        {
+          booking_id: body.bookingId,
+          key,
+          expires_at: expiresAt.toISOString(),
+          created_at: existing ? undefined : new Date().toISOString(),
+        },
+        { onConflict: "booking_id" },
+      );
 
     if (upsertError) {
       console.error("Error saving access key:", upsertError);
@@ -168,8 +157,7 @@ export async function POST(request: NextRequest) {
 
       emailSent = true;
     } catch (mailError) {
-      emailError =
-        mailError instanceof Error ? mailError.message : String(mailError);
+      emailError = mailError instanceof Error ? mailError.message : String(mailError);
       console.error("Failed to send access key email:", mailError);
     }
 
@@ -179,9 +167,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (err) {
     console.error("generate-access-key error:", err);
-    return Response.json(
-      { error: "Failed to process request" },
-      { status: 500 },
-    );
+    return Response.json({ error: "Failed to process request" }, { status: 500 });
   }
 }
