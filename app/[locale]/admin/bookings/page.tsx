@@ -1,7 +1,16 @@
 import BookingsClient from "@/components/common/admin/client";
+import AdminShell from "@/components/common/admin/shell";
+import { requireAdminPage } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
-export default async function BookingsPage() {
+export default async function BookingsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  await requireAdminPage(locale);
+
   const supabase = createAdminClient();
 
   const [{ data: bookings, error }, { data: accessKeys, error: keysError }] =
@@ -34,5 +43,9 @@ export default async function BookingsPage() {
     access_keys: keysByBookingId[b.id] ? [keysByBookingId[b.id]] : null,
   }));
 
-  return <BookingsClient initialBookings={initialBookings} />;
+  return (
+    <AdminShell locale={locale}>
+      <BookingsClient initialBookings={initialBookings} />
+    </AdminShell>
+  );
 }
