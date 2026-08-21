@@ -1,6 +1,10 @@
+import { requireAdminApi } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET() {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("event_companies")
