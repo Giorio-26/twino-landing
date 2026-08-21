@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -22,14 +22,8 @@ export async function GET() {
   }).catch(() => null);
 
   if (!upstream?.ok) {
-    console.error(
-      "[configure/properties GET] upstream error:",
-      upstream?.status,
-    );
-    return Response.json(
-      { error: "Failed to fetch properties" },
-      { status: upstream?.status ?? 503 },
-    );
+    console.error("[configure/properties GET] upstream error:", upstream?.status);
+    return Response.json({ error: "Failed to fetch properties" }, { status: upstream?.status ?? 503 });
   }
 
   const raw = await upstream.json();
@@ -61,14 +55,8 @@ export async function PUT(req: Request) {
   }).catch(() => null);
 
   if (!upstream?.ok) {
-    console.error(
-      "[configure/properties PUT] upstream error:",
-      upstream?.status,
-    );
-    return Response.json(
-      { error: "Failed to update properties" },
-      { status: upstream?.status ?? 503 },
-    );
+    console.error("[configure/properties PUT] upstream error:", upstream?.status);
+    return Response.json({ error: "Failed to update properties" }, { status: upstream?.status ?? 503 });
   }
 
   const raw = await upstream.json();
@@ -100,20 +88,11 @@ export async function POST(req: Request) {
     let errorMsg = "Upload failed";
     try {
       const errBody = await upstream?.json();
-      errorMsg =
-        errBody.detail ?? errBody.error ?? errBody.message ?? "Upload failed";
+      errorMsg = errBody.detail ?? errBody.error ?? errBody.message ?? "Upload failed";
     } catch {}
-    console.error(
-      "[configure/properties POST] upstream error:",
-      upstream?.status,
-      errorMsg,
-    );
-    return Response.json(
-      { error: errorMsg },
-      { status: upstream?.status ?? 503 },
-    );
+    console.error("[configure/properties POST] upstream error:", upstream?.status, errorMsg);
+    return Response.json({ error: errorMsg }, { status: upstream?.status ?? 503 });
   }
 
   return Response.json({ ok: true });
 }
-
