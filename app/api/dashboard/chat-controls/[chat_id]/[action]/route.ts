@@ -1,7 +1,13 @@
-import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
+import type { NextRequest } from "next/server";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import { getCompanyId, missingEnv, noCompany, unauthorized } from "../../../configure/_lib";
+import {
+  getCompanyId,
+  missingEnv,
+  noCompany,
+  unauthorized,
+} from "../../../configure/_lib";
 
 const ALLOWED_ACTIONS = new Set(["takeover", "start-ai", "block", "unblock"]);
 
@@ -31,15 +37,23 @@ export async function POST(
     `${apiUrl}/chat/${companyId}/${encodeURIComponent(chat_id)}/${action}`,
     {
       method: "POST",
-      headers: { "X-API-KEY": apiKey },
+      headers: backendAuthorizationHeaders(String(companyId)),
     },
   ).catch(() => null);
 
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
-    console.error(`[chat-controls POST ${action}] upstream error:`, upstream?.status, detail);
-    return Response.json({ error: `Failed to ${action}` }, { status: upstream?.status ?? 503 });
+    console.error(
+      `[chat-controls POST ${action}] upstream error:`,
+      upstream?.status,
+      detail,
+    );
+    return Response.json(
+      { error: `Failed to ${action}` },
+      { status: upstream?.status ?? 503 },
+    );
   }
 
   return Response.json({ ok: true });
 }
+
