@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -22,10 +22,7 @@ export async function POST(req: Request) {
   console.log("[configure/tone] calling:", url, "body:", body);
   const upstream = await fetch(url, {
     method: "PATCH",
-    headers: {
-      ...backendAuthorizationHeaders(String(companyId)),
-      "Content-Type": "application/json",
-    },
+    headers: { ...backendAuthorizationHeaders(String(companyId)), "Content-Type": "application/json" },
     body: JSON.stringify(body),
   }).catch(() => null);
 
@@ -36,4 +33,3 @@ export async function POST(req: Request) {
 
   return Response.json({ ok: true });
 }
-
