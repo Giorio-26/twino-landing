@@ -1,12 +1,7 @@
 import { cookies } from "next/headers";
-import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import {
-  getCompanyId,
-  missingEnv,
-  noCompany,
-  unauthorized,
-} from "../configure/_lib";
+import { getCompanyId, missingEnv, noCompany, unauthorized } from "../configure/_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -35,4 +30,3 @@ export async function GET() {
   const data = await upstream.json();
   return Response.json(data);
 }
-
