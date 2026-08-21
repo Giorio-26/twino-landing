@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../configure/_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -16,7 +17,7 @@ export async function GET() {
   if (!companyId) return noCompany();
 
   const upstream = await fetch(`${apiUrl}/leads/${companyId}/dashboard-stats`, {
-    headers: { "X-API-KEY": apiKey },
+    headers: backendAuthorizationHeaders(String(companyId)),
     cache: "no-store",
   }).catch(() => null);
 

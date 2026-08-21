@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../../../configure/_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 const ALLOWED_ACTIONS = new Set(["takeover", "start-ai", "block", "unblock"]);
 
@@ -31,7 +32,7 @@ export async function POST(
     `${apiUrl}/chat/${companyId}/${encodeURIComponent(chat_id)}/${action}`,
     {
       method: "POST",
-      headers: { "X-API-KEY": apiKey },
+      headers: backendAuthorizationHeaders(String(companyId)),
     },
   ).catch(() => null);
 

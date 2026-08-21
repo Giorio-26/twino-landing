@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../configure/_lib";
+import { createBackendAccessToken } from "@/lib/backend-auth";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -19,7 +20,8 @@ export async function GET() {
   // Derive WS URL: https://api.twino.estate/langchain/api → wss://api.twino.estate/langchain/ws/chat/{id}
   const { host, pathname } = new URL(apiUrl);
   const wsBase = pathname.replace(/\/api$/, "");
-  const wsUrl = `wss://${host}${wsBase}/ws/chat/${companyId}?api_key=${apiKey}`;
+  const wsUrl = `wss://${host}${wsBase}/ws/chat/${companyId}`;
+  const wsToken = createBackendAccessToken(String(companyId));
 
-  return Response.json({ wsUrl, companyId });
+  return Response.json({ wsUrl, wsToken, companyId });
 }

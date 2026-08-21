@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../_lib";
 
@@ -19,7 +20,10 @@ export async function POST(req: Request) {
 
   const upstream = await fetch(`${apiUrl}/company/${companyId}/base`, {
     method: "PATCH",
-    headers: { "X-API-KEY": apiKey, "Content-Type": "application/json" },
+    headers: {
+      ...backendAuthorizationHeaders(String(companyId)),
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(body),
   }).catch(() => null);
 
@@ -30,3 +34,4 @@ export async function POST(req: Request) {
 
   return Response.json({ ok: true });
 }
+

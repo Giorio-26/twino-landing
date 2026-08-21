@@ -1,7 +1,13 @@
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import { getCompanyId, missingEnv, noCompany, unauthorized } from "../../../configure/_lib";
+import {
+  getCompanyId,
+  missingEnv,
+  noCompany,
+  unauthorized,
+} from "../../../configure/_lib";
 
 export async function PATCH(
   request: NextRequest,
@@ -29,7 +35,7 @@ export async function PATCH(
   const upstream = await fetch(`${apiUrl}/leads/${companyId}/${id}/status`, {
     method: "PATCH",
     headers: {
-      "X-API-KEY": apiKey,
+      ...backendAuthorizationHeaders(String(companyId)),
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ status: body.status }),
@@ -38,9 +44,16 @@ export async function PATCH(
 
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
-    console.error("[leads PATCH status] upstream error:", upstream?.status, detail);
+    console.error(
+      "[leads PATCH status] upstream error:",
+      upstream?.status,
+      detail,
+    );
     return Response.json(
-      { error: upstream?.status === 404 ? "Lead not found" : "Failed to update lead" },
+      {
+        error:
+          upstream?.status === 404 ? "Lead not found" : "Failed to update lead",
+      },
       { status: upstream?.status ?? 503 },
     );
   }
@@ -48,3 +61,4 @@ export async function PATCH(
   const data = await upstream.json();
   return Response.json(data);
 }
+

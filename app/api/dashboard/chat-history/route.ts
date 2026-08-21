@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../configure/_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function GET(request: NextRequest) {
   const chatId = request.nextUrl.searchParams.get("chat_id");
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   const upstream = await fetch(
     `${apiUrl}/chat/${companyId}/${encodeURIComponent(chatId)}/history`,
-    { headers: { "X-API-KEY": apiKey }, cache: "no-store" },
+    { headers: backendAuthorizationHeaders(String(companyId)), cache: "no-store" },
   ).catch(() => null);
 
   if (!upstream?.ok) {

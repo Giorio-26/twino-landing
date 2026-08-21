@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -34,7 +35,7 @@ export async function GET() {
     const upstream = await fetch(
       `${apiUrl}/company/${booking.company_id}/connect`,
       {
-        headers: { "X-API-KEY": apiKey },
+        headers: backendAuthorizationHeaders(String(booking.company_id)),
       },
     );
 
@@ -59,3 +60,4 @@ export async function GET() {
     return Response.json({ connected: false, error });
   }
 }
+

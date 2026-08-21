@@ -257,8 +257,8 @@ export default function ConversationsPage() {
     let ws: WebSocket | null = null;
     fetch("/api/dashboard/ws-info")
       .then((r) => r.json())
-      .then((json: { wsUrl: string }) => {
-        ws = new WebSocket(json.wsUrl);
+      .then((json: { wsUrl: string; wsToken: string }) => {
+        ws = new WebSocket(json.wsUrl, ["twino", json.wsToken]);
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data as string) as WsEvent;

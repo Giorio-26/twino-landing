@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 import { getCompanyId, missingEnv, noCompany, unauthorized } from "../_lib";
 
@@ -16,13 +17,19 @@ export async function GET() {
   if (!companyId) return noCompany();
 
   const upstream = await fetch(`${apiUrl}/company/${companyId}/properties`, {
-    headers: { "X-API-KEY": apiKey },
+    headers: backendAuthorizationHeaders(String(companyId)),
     cache: "no-store",
   }).catch(() => null);
 
   if (!upstream?.ok) {
-    console.error("[configure/properties GET] upstream error:", upstream?.status);
-    return Response.json({ error: "Failed to fetch properties" }, { status: upstream?.status ?? 503 });
+    console.error(
+      "[configure/properties GET] upstream error:",
+      upstream?.status,
+    );
+    return Response.json(
+      { error: "Failed to fetch properties" },
+      { status: upstream?.status ?? 503 },
+    );
   }
 
   const raw = await upstream.json();
@@ -48,14 +55,20 @@ export async function PUT(req: Request) {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      "X-API-KEY": apiKey,
+      ...backendAuthorizationHeaders(String(companyId)),
     },
     body: JSON.stringify(body),
   }).catch(() => null);
 
   if (!upstream?.ok) {
-    console.error("[configure/properties PUT] upstream error:", upstream?.status);
-    return Response.json({ error: "Failed to update properties" }, { status: upstream?.status ?? 503 });
+    console.error(
+      "[configure/properties PUT] upstream error:",
+      upstream?.status,
+    );
+    return Response.json(
+      { error: "Failed to update properties" },
+      { status: upstream?.status ?? 503 },
+    );
   }
 
   const raw = await upstream.json();
@@ -79,7 +92,7 @@ export async function POST(req: Request) {
 
   const upstream = await fetch(`${apiUrl}/company/${companyId}/properties`, {
     method: "POST",
-    headers: { "X-API-KEY": apiKey },
+    headers: backendAuthorizationHeaders(String(companyId)),
     body: form,
   }).catch(() => null);
 
@@ -87,11 +100,20 @@ export async function POST(req: Request) {
     let errorMsg = "Upload failed";
     try {
       const errBody = await upstream?.json();
-      errorMsg = errBody.detail ?? errBody.error ?? errBody.message ?? "Upload failed";
+      errorMsg =
+        errBody.detail ?? errBody.error ?? errBody.message ?? "Upload failed";
     } catch {}
-    console.error("[configure/properties POST] upstream error:", upstream?.status, errorMsg);
-    return Response.json({ error: errorMsg }, { status: upstream?.status ?? 503 });
+    console.error(
+      "[configure/properties POST] upstream error:",
+      upstream?.status,
+      errorMsg,
+    );
+    return Response.json(
+      { error: errorMsg },
+      { status: upstream?.status ?? 503 },
+    );
   }
 
   return Response.json({ ok: true });
 }
+
