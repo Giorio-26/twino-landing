@@ -1,13 +1,8 @@
-import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
-import { backendAuthorizationHeaders } from "@/lib/backend-auth";
+import { cookies } from "next/headers";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import {
-  getCompanyId,
-  missingEnv,
-  noCompany,
-  unauthorized,
-} from "../../configure/_lib";
+import { getCompanyId, missingEnv, noCompany, unauthorized } from "../../configure/_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function GET(
   _request: NextRequest,
@@ -29,26 +24,15 @@ export async function GET(
 
   const upstream = await fetch(
     `${apiUrl}/chat/${companyId}/${encodeURIComponent(chat_id)}/state`,
-    {
-      headers: backendAuthorizationHeaders(String(companyId)),
-      cache: "no-store",
-    },
+    { headers: backendAuthorizationHeaders(String(companyId)), cache: "no-store" },
   ).catch(() => null);
 
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
-    console.error(
-      "[chat-controls GET state] upstream error:",
-      upstream?.status,
-      detail,
-    );
-    return Response.json(
-      { error: "Failed to fetch state" },
-      { status: upstream?.status ?? 503 },
-    );
+    console.error("[chat-controls GET state] upstream error:", upstream?.status, detail);
+    return Response.json({ error: "Failed to fetch state" }, { status: upstream?.status ?? 503 });
   }
 
   const state = await upstream.json();
   return Response.json({ state });
 }
-
