@@ -1,13 +1,8 @@
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
-import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import {
-  getCompanyId,
-  missingEnv,
-  noCompany,
-  unauthorized,
-} from "../configure/_lib";
+import { getCompanyId, missingEnv, noCompany, unauthorized } from "../configure/_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
@@ -37,13 +32,9 @@ export async function GET(request: NextRequest) {
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
     console.error("[leads GET] upstream error:", upstream?.status, detail);
-    return Response.json(
-      { error: "Failed to fetch leads" },
-      { status: upstream?.status ?? 503 },
-    );
+    return Response.json({ error: "Failed to fetch leads" }, { status: upstream?.status ?? 503 });
   }
 
   const data = await upstream.json();
   return Response.json({ data, companyId });
 }
-
