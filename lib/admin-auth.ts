@@ -1,7 +1,7 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
-import { isTrustedAdminIdentity } from "@/lib/admin-authorization";
+import { getAdminAuthorizationDecision } from "@/lib/admin-authorization";
 import { getAuthenticatedUser } from "@/lib/supabase/server";
 
 export interface AdminAuthorization {
@@ -11,16 +11,14 @@ export interface AdminAuthorization {
 
 export async function getAdminAuthorization(): Promise<AdminAuthorization> {
   const { user } = await getAuthenticatedUser();
-  if (!user) {
-    return { authenticated: false, authorized: false };
-  }
+  const decision = getAdminAuthorizationDecision(
+    user,
+    process.env.ADMIN_SUPABASE_USER_IDS,
+  );
 
   return {
-    authenticated: true,
-    authorized: isTrustedAdminIdentity(
-      user,
-      process.env.ADMIN_SUPABASE_USER_IDS,
-    ),
+    authenticated: decision !== "unauthenticated",
+    authorized: decision === "authorized",
   };
 }
 
