@@ -1,9 +1,9 @@
-import type { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { updateSession } from "./lib/supabase/middleware";
 
-const intlMiddleware = createIntlMiddleware(routing);
+const intlMiddleware = createIntlMiddleware(routing);\n\nfunction isDisabledLiveEventPath(pathname: string): boolean {\n  return (\n    pathname === "/api/event" ||\n    pathname.startsWith("/api/event/") ||\n    pathname === "/api/admin/event-companies" ||\n    pathname.startsWith("/api/admin/event-companies/") ||\n    pathname === "/api/admin/generate-event-key" ||\n    pathname.startsWith("/api/admin/generate-event-key/") ||\n    /^\\/(?:[a-z]{2}\\/)?event(?:\\/|$)/.test(pathname) ||\n    /^\\/(?:[a-z]{2}\\/)?admin\\/event-keys(?:\\/|$)/.test(pathname)\n  );\n}
 
 // Only pay the getUser() network cost when Supabase cookies are present.
 // For unauthenticated visitors there is nothing to refresh.
@@ -28,7 +28,7 @@ function clearSupabaseCookies(
 // middleware to block forever — that would make Nginx return 502.
 const SESSION_TIMEOUT_MS = 8_000;
 
-export default async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {\n  if (isDisabledLiveEventPath(request.nextUrl.pathname)) {\n    return NextResponse.json({ error: "Not Found" }, { status: 404 });\n  }\n
   // i18n middleware is authoritative for routing / locale headers.
   const intlResponse = intlMiddleware(request);
 
