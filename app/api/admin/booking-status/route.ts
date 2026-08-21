@@ -1,10 +1,14 @@
 import type { NextRequest } from "next/server";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 const VALID_STATUSES = ["new", "reached", "deal"] as const;
 type BookingStatus = (typeof VALID_STATUSES)[number];
 
 export async function PATCH(request: NextRequest) {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   try {
     const body: { id: number; status: BookingStatus } = await request.json();
 

@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { createTransport } from "nodemailer";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 // XXXX-XXXX-XXXX-XXXX  (16 uppercase hex chars split into 4 groups)
@@ -22,6 +23,9 @@ function createMailTransporter() {
 }
 
 export async function PATCH(request: NextRequest) {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   try {
     const body: { bookingId: number; validityDays: number } = await request.json();
 
@@ -50,6 +54,9 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   try {
     const body: { bookingId: number; validityDays?: number } = await request.json();
 

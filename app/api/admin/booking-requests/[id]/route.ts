@@ -1,10 +1,14 @@
 import type { NextRequest } from "next/server";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   try {
     const { id } = await params;
     const bookingId = Number(id);

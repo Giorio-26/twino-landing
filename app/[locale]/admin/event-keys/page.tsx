@@ -1,7 +1,16 @@
+import AdminShell from "@/components/common/admin/shell";
+import { requireAdminPage } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 import EventKeysClient from "./client";
 
-export default async function EventKeysPage() {
+export default async function EventKeysPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  await requireAdminPage(locale);
+
   const supabase = createAdminClient();
 
   const apiKey = process.env.TWINO_API_KEY;
@@ -32,10 +41,12 @@ export default async function EventKeysPage() {
         : [];
 
   return (
-    <EventKeysClient
-      companies={companies}
-      initialKeys={existingKeys ?? []}
-      auditLogs={auditLogs ?? []}
-    />
+    <AdminShell locale={locale}>
+      <EventKeysClient
+        companies={companies}
+        initialKeys={existingKeys ?? []}
+        auditLogs={auditLogs ?? []}
+      />
+    </AdminShell>
   );
 }

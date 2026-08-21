@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { NextRequest } from "next/server";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 function generateKey(): string {
@@ -8,6 +9,9 @@ function generateKey(): string {
 }
 
 export async function POST(request: NextRequest) {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   try {
     const body: { role: "organizer" | "company"; companyId?: number; expiresInDays?: number } =
       await request.json();
@@ -75,6 +79,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const denial = await requireAdminApi();
+  if (denial) return denial;
+
   try {
     const body: { id?: number } = await request.json();
     if (!body.id) {
