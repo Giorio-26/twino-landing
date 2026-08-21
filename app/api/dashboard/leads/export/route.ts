@@ -1,12 +1,7 @@
 import { cookies } from "next/headers";
-import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import {
-  getCompanyId,
-  missingEnv,
-  noCompany,
-  unauthorized,
-} from "../../configure/_lib";
+import { getCompanyId, missingEnv, noCompany, unauthorized } from "../../configure/_lib";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -28,15 +23,8 @@ export async function GET() {
 
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
-    console.error(
-      "[leads export GET] upstream error:",
-      upstream?.status,
-      detail,
-    );
-    return Response.json(
-      { error: "Failed to export leads" },
-      { status: upstream?.status ?? 503 },
-    );
+    console.error("[leads export GET] upstream error:", upstream?.status, detail);
+    return Response.json({ error: "Failed to export leads" }, { status: upstream?.status ?? 503 });
   }
 
   const csv = await upstream.text();
@@ -47,4 +35,3 @@ export async function GET() {
     },
   });
 }
-
