@@ -1,13 +1,23 @@
+import "server-only";
+
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const SESSION_COOKIE = "twino_access_session";
 export const EVENT_SESSION_COOKIE = "twino_event_session";
 
-const secret = () =>
-  process.env.ACCESS_SESSION_SECRET ?? "dev-secret-change-me";
+export function getAccessSessionSecret(): string {
+  const value = process.env.ACCESS_SESSION_SECRET;
+  if (value) return value;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("ACCESS_SESSION_SECRET is not configured");
+  }
+  return "dev-secret-change-me";
+}
 
 function hmacSign(data: string): string {
-  return createHmac("sha256", secret()).update(data).digest("base64url");
+  return createHmac("sha256", getAccessSessionSecret())
+    .update(data)
+    .digest("base64url");
 }
 
 function hmacVerify(token: string): string | null {
@@ -79,3 +89,4 @@ export function verifyEventSession(token: string): EventSession | null {
     return null;
   }
 }
+
