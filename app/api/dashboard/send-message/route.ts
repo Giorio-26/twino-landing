@@ -1,7 +1,13 @@
-import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
+import type { NextRequest } from "next/server";
+import { backendAuthorizationHeaders } from "@/lib/backend-auth";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
-import { getCompanyId, missingEnv, noCompany, unauthorized } from "../configure/_lib";
+import {
+  getCompanyId,
+  missingEnv,
+  noCompany,
+  unauthorized,
+} from "../configure/_lib";
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
@@ -18,20 +24,34 @@ export async function POST(request: NextRequest) {
 
   const { chat_id, message } = await request.json();
   if (!chat_id || !message) {
-    return Response.json({ error: "Missing chat_id or message" }, { status: 400 });
+    return Response.json(
+      { error: "Missing chat_id or message" },
+      { status: 400 },
+    );
   }
 
   const upstream = await fetch(`${apiUrl}/chat`, {
     method: "POST",
-    headers: { "X-API-KEY": apiKey, "Content-Type": "application/json" },
+    headers: {
+      ...backendAuthorizationHeaders(String(companyId)),
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ company_id: String(companyId), chat_id, message }),
   }).catch(() => null);
 
   if (!upstream?.ok) {
     const detail = await upstream?.text().catch(() => "");
-    console.error("[send-message POST] upstream error:", upstream?.status, detail);
-    return Response.json({ error: "Failed to send message" }, { status: upstream?.status ?? 503 });
+    console.error(
+      "[send-message POST] upstream error:",
+      upstream?.status,
+      detail,
+    );
+    return Response.json(
+      { error: "Failed to send message" },
+      { status: upstream?.status ?? 503 },
+    );
   }
 
   return Response.json({ ok: true });
 }
+
