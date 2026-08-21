@@ -1,16 +1,19 @@
 import { createHmac } from "node:crypto";
-import { SESSION_COOKIE, signSession } from "@/lib/session";
-import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
+import {
+  getAccessSessionSecret,
+  SESSION_COOKIE,
+  signSession,
+} from "@/lib/session";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 function companyEmail(companyId: number | string): string {
   return `company-${companyId}@system.twino.app`;
 }
 
 function companyPassword(companyId: number | string): string {
-  const secret = process.env.ACCESS_SESSION_SECRET ?? "dev-secret-change-me";
-  return createHmac("sha256", secret)
+  return createHmac("sha256", getAccessSessionSecret())
     .update(`company-auth:${companyId}`)
     .digest("hex");
 }
@@ -96,3 +99,4 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Failed to process request" }, { status: 500 });
   }
 }
+

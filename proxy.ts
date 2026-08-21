@@ -1,9 +1,22 @@
-import type { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { updateSession } from "./lib/supabase/middleware";
 
 const intlMiddleware = createIntlMiddleware(routing);
+
+function isDisabledLiveEventPath(pathname: string): boolean {
+  return (
+    pathname === "/api/event" ||
+    pathname.startsWith("/api/event/") ||
+    pathname === "/api/admin/event-companies" ||
+    pathname.startsWith("/api/admin/event-companies/") ||
+    pathname === "/api/admin/generate-event-key" ||
+    pathname.startsWith("/api/admin/generate-event-key/") ||
+    /^\/(?:[a-z]{2}\/)?event(?:\/|$)/.test(pathname) ||
+    /^\/(?:[a-z]{2}\/)?admin\/event-keys(?:\/|$)/.test(pathname)
+  );
+}
 
 // Only pay the getUser() network cost when Supabase cookies are present.
 // For unauthenticated visitors there is nothing to refresh.
@@ -29,6 +42,10 @@ function clearSupabaseCookies(
 const SESSION_TIMEOUT_MS = 8_000;
 
 export default async function middleware(request: NextRequest) {
+  if (isDisabledLiveEventPath(request.nextUrl.pathname)) {
+    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  }
+
   // i18n middleware is authoritative for routing / locale headers.
   const intlResponse = intlMiddleware(request);
 
@@ -62,5 +79,11 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
+    "/api/event/:path*",
+    "/api/admin/event-companies/:path*",
+    "/api/admin/generate-event-key/:path*",
+  ],
 };
+

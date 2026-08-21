@@ -65,12 +65,6 @@ export default function AdminLayout({
             >
               Bookings
             </a>
-            <a
-              href="/en/admin/event-keys"
-              className="text-gray-300 hover:text-white"
-            >
-              Event Keys
-            </a>
           </nav>
         </div>
         <button
