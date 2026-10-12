@@ -7,7 +7,7 @@ import { useState } from "react";
 const routeTitles: Record<string, string> = {
   "/dashboard": "Overview",
   "/dashboard/configure": "Configure Twin",
-  "/dashboard/conversations": "Conversations",
+  "/dashboard/conversations": "Inbox",
   "/dashboard/leads": "Leads",
   "/dashboard/integration": "Integration",
   "/dashboard/settings": "Settings",

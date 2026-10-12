@@ -80,7 +80,7 @@ export default function PropertyMatchesPage() {
 
       <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-blue-950">
         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
-        <p className="text-xs leading-5">Automated match scoring, yield and payment-plan comparison are not available in the current backend. The units below are real inventory and are not ranked.</p>
+        <p className="text-xs leading-5">Showing live workspace inventory without automated ranking. Review buyer fit before adding a unit to a presentation.</p>
       </div>
 
       {failed ? (

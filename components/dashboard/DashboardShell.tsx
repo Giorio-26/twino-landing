@@ -14,7 +14,7 @@ const routeTitles: Record<string, string> = {
   "/dashboard/properties": "Properties",
   "/dashboard/settings": "Settings",
   "/dashboard/configure": "Configure Twin",
-  "/dashboard/conversations": "Conversations",
+  "/dashboard/conversations": "Inbox",
   "/dashboard/integration": "Integrations",
 };
 

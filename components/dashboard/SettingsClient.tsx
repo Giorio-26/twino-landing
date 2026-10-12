@@ -36,7 +36,7 @@ const setupSections = [
     rows: [
       ["Qualification rules", "Review configuration"],
       ["Human handoff rules", "Review configuration"],
-      ["Presentation defaults", "Not configured"],
+      ["Presentation defaults", "Setup required"],
     ],
   },
   {
@@ -45,8 +45,8 @@ const setupSections = [
     href: "/dashboard/integration",
     rows: [
       ["WhatsApp", "Review connection"],
-      ["Meta", "Not configured"],
-      ["CRM", "Not configured"],
+      ["Meta", "Setup required"],
+      ["CRM", "Setup required"],
     ],
   },
   {
@@ -55,7 +55,7 @@ const setupSections = [
     href: "/dashboard/properties",
     rows: [
       ["Data source", "Workspace inventory"],
-      ["Synchronization", "Not configured"],
+      ["Synchronization", "Setup required"],
     ],
   },
 ];
@@ -91,13 +91,13 @@ export default function SettingsClient({ initialCompany }: { initialCompany: Com
       <div className="border-dash-border border-b pb-6">
         <p className="font-medium text-dash-accent text-xs uppercase tracking-wider">System</p>
         <h2 className="mt-2 font-Helvetica-Neue text-2xl font-semibold tracking-tight text-dash-text">Settings</h2>
-        <p className="mt-2 max-w-2xl text-dash-text-secondary text-sm">Manage working workspace controls and see which parts of the sales-to-reservation flow still require setup.</p>
+        <p className="mt-2 max-w-2xl text-dash-text-secondary text-sm">Manage your company, Sales Twin, integrations, inventory and conversion settings.</p>
       </div>
 
       <section className="overflow-hidden rounded-xl border border-dash-border bg-white">
         <div className="flex items-start gap-3 border-dash-border border-b px-5 py-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-dash-accent-muted"><Building2 className="h-4 w-4 text-dash-accent" /></div>
-          <div><h3 className="font-semibold text-dash-text text-sm">Workspace company</h3><p className="mt-1 text-dash-text-muted text-xs">Saved through the existing company profile endpoint.</p></div>
+          <div><h3 className="font-semibold text-dash-text text-sm">Company profile</h3><p className="mt-1 text-dash-text-muted text-xs">Details used across your TwinO workspace.</p></div>
         </div>
         <div className="grid gap-5 p-5 sm:grid-cols-2">
           {[
@@ -134,7 +134,7 @@ export default function SettingsClient({ initialCompany }: { initialCompany: Com
           <section key={title} className="flex flex-col rounded-xl border border-dash-border bg-white p-5">
             <div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100"><Icon className="h-4 w-4 text-slate-600" /></div><h3 className="font-semibold text-dash-text text-sm">{title}</h3></div>
             <dl className="mt-5 flex-1 divide-y divide-dash-border">
-              {rows.map(([label, status]) => <div key={label} className="flex items-center justify-between gap-3 py-3 first:pt-0"><dt className="text-dash-text-secondary text-xs">{label}</dt><dd className={`text-right text-[11px] font-medium ${status === "Not configured" ? "text-dash-text-muted" : "text-dash-accent"}`}>{status}</dd></div>)}
+              {rows.map(([label, status]) => <div key={label} className="flex items-center justify-between gap-3 py-3 first:pt-0"><dt className="text-dash-text-secondary text-xs">{label}</dt><dd className={`text-right text-[11px] font-medium ${status === "Setup required" ? "text-dash-text-muted" : "text-dash-accent"}`}>{status}</dd></div>)}
             </dl>
             <Link href={href} className="mt-4 inline-flex items-center gap-1.5 border-dash-border border-t pt-4 font-semibold text-dash-accent text-xs no-underline">Open settings<ArrowRight className="h-3.5 w-3.5" /></Link>
           </section>
@@ -143,9 +143,9 @@ export default function SettingsClient({ initialCompany }: { initialCompany: Com
 
       <section className="grid overflow-hidden rounded-xl border border-dash-border bg-white sm:grid-cols-3">
         {[
-          { icon: Users, title: "Team", text: "Team management is not configured." },
-          { icon: Settings2, title: "Reservations", text: "Default amount, expiry and approval rules are not configured." },
-          { icon: CircleDollarSign, title: "Payments", text: "Payment provider not configured." },
+          { icon: Users, title: "Team", text: "Invite teammates and manage roles when team access is enabled." },
+          { icon: Settings2, title: "Reservations", text: "Set the default amount, expiry and approval rules." },
+          { icon: CircleDollarSign, title: "Payments", text: "Connect the provider used to verify reservation payments." },
         ].map(({ icon: Icon, title, text }, index) => (
           <div key={title} className={`p-5 ${index > 0 ? "border-dash-border border-t sm:border-t-0 sm:border-l" : ""}`}>
             <Icon className="h-4 w-4 text-dash-text-muted" />

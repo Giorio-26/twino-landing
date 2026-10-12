@@ -5,6 +5,7 @@ import {
   Bot,
   Building2,
   Check,
+  Clock3,
   FileCheck2,
   FileText,
   MessageCircle,
@@ -20,7 +21,7 @@ const copy = {
   en: {
     eyebrow: "AI sales infrastructure for residential developers",
     title: "Turn high-intent property inquiries into paid reservations.",
-    intro: "TwinO qualifies buyers, matches the right units, prepares personalized investment presentations, and keeps a human in control before reservation and payment.",
+    intro: "TwinO handles omnichannel property inquiries, qualifies each buyer, matches live inventory, prepares the presentation, manages follow-up, and keeps a human in control before reservation and payment.",
     demo: "Book a Demo",
     product: "See Product",
     problemEyebrow: "The conversion gap",
@@ -30,7 +31,7 @@ const copy = {
     flowTitle: "Every step moves the buyer closer to a decision.",
     previewEyebrow: "The operating layer",
     previewTitle: "A clear workspace for the moments that matter.",
-    previewBody: "See qualified intent, shortlist live inventory, prepare the buyer case, and keep approvals visible without replacing the CRM your team already uses.",
+    previewBody: "See every conversation, qualified intent, next action and human handoff; then shortlist live inventory without replacing the CRM your team already uses.",
     whyEyebrow: "Why TwinO",
     whyTitle: "Built around developer sales, not generic support.",
     reservationEyebrow: "Reservation layer",
@@ -40,7 +41,7 @@ const copy = {
   ka: {
     eyebrow: "AI გაყიდვების ინფრასტრუქტურა საცხოვრებელი დეველოპერებისთვის",
     title: "გადააქციეთ მაღალი ინტერესის მქონე მოთხოვნები გადახდილ რეზერვაციებად.",
-    intro: "TwinO აკვალიფიცირებს მყიდველებს, არჩევს შესაბამის ერთეულებს, ამზადებს პერსონალიზებულ საინვესტიციო პრეზენტაციებს და რეზერვაციამდე ინარჩუნებს ადამიანის კონტროლს.",
+    intro: "TwinO მართავს სხვადასხვა არხიდან შემოსულ მოთხოვნებს, აკვალიფიცირებს მყიდველებს, არჩევს რეალურ ინვენტარს, ამზადებს პრეზენტაციას, გეგმავს შემდგომ კონტაქტს და რეზერვაციამდე ინარჩუნებს ადამიანის კონტროლს.",
     demo: "დაჯავშნეთ დემო",
     product: "ნახეთ პროდუქტი",
     problemEyebrow: "კონვერსიის დანაკარგი",
@@ -50,7 +51,7 @@ const copy = {
     flowTitle: "ყოველი ნაბიჯი მყიდველს გადაწყვეტილებასთან აახლოებს.",
     previewEyebrow: "ოპერაციული ფენა",
     previewTitle: "მკაფიო სამუშაო სივრცე მნიშვნელოვანი მომენტებისთვის.",
-    previewBody: "იხილეთ კვალიფიცირებული ინტერესი, შეარჩიეთ რეალური ინვენტარი, მოამზადეთ შეთავაზება და აკონტროლეთ დამტკიცება არსებული CRM-ის ჩანაცვლების გარეშე.",
+    previewBody: "იხილეთ ყველა საუბარი, კვალიფიცირებული ინტერესი, შემდეგი მოქმედება და ადამიანზე გადაცემა; შემდეგ შეარჩიეთ რეალური ინვენტარი არსებული CRM-ის ჩანაცვლების გარეშე.",
     whyEyebrow: "რატომ TwinO",
     whyTitle: "შექმნილია დეველოპერის გაყიდვებისთვის და არა ზოგადი მხარდაჭერისთვის.",
     reservationEyebrow: "რეზერვაციის ფენა",
@@ -64,6 +65,7 @@ const steps = [
   { title: "Qualification", icon: Bot },
   { title: "Property match", icon: Building2 },
   { title: "Presentation", icon: FileText },
+  { title: "Follow-up", icon: Clock3 },
   { title: "Human approval", icon: UserCheck },
   { title: "Reservation", icon: FileCheck2 },
   { title: "Payment", icon: WalletCards },
@@ -108,7 +110,7 @@ export default function PivotLanding() {
         <div className="container">
           <p className="text-center font-semibold text-accent text-xs uppercase tracking-[0.16em]">{text.flowEyebrow}</p>
           <h2 className="mx-auto mt-4 max-w-2xl text-center font-Helvetica-Neue font-bold text-3xl text-primary tracking-[-0.025em] sm:text-4xl">{text.flowTitle}</h2>
-          <div className="mt-12 grid overflow-hidden rounded-2xl border border-black/8 bg-white sm:grid-cols-2 lg:grid-cols-7">
+          <div className="mt-12 grid overflow-hidden rounded-2xl border border-black/8 bg-white sm:grid-cols-2 lg:grid-cols-8">
             {steps.map(({ title, icon: Icon }, index) => (
               <div key={title} className="relative min-h-36 border-black/8 border-b p-5 last:border-b-0 sm:odd:border-r lg:border-r lg:border-b-0 lg:last:border-r-0">
                 <span className="text-black/30 text-[10px] font-semibold">0{index + 1}</span>
@@ -134,17 +136,17 @@ export default function PivotLanding() {
             <div className="grid min-h-96 lg:grid-cols-[190px_1fr_280px]">
               <div className="hidden border-black/8 border-r bg-slate-50 p-4 lg:block">
                 <div className="mb-7 h-5 w-20 rounded bg-black/10" />
-                {["Overview", "Leads", "Presentations", "Reservations", "Properties"].map((item, index) => <div key={item} className={`mb-2 rounded-lg px-3 py-2.5 text-xs font-medium ${index === 1 ? "bg-blue-50 text-accent" : "text-black/45"}`}>{item}</div>)}
+                {["Overview", "Inbox", "Leads", "Presentations", "Reservations", "Properties"].map((item, index) => <div key={item} className={`mb-2 rounded-lg px-3 py-2.5 text-xs font-medium ${index === 1 ? "bg-blue-50 text-accent" : "text-black/45"}`}>{item}</div>)}
               </div>
               <div className="p-5 sm:p-7">
                 <div className="flex items-start justify-between border-black/8 border-b pb-5"><div><p className="text-black/35 text-[10px] uppercase tracking-wider">Buyer profile</p><div className="mt-2 h-6 w-36 rounded bg-primary/10" /></div><span className="rounded-md bg-accent px-3 py-2 text-white text-[10px] font-semibold">Find matches</span></div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">{["Budget", "Intent", "Preferred location", "Timeline"].map((label) => <div key={label} className="rounded-lg border border-black/8 p-4"><p className="text-black/35 text-[10px]">{label}</p><div className="mt-3 h-2.5 w-2/3 rounded bg-black/10" /></div>)}</div>
-                <div className="mt-5 rounded-lg border border-black/8 p-4"><div className="flex items-center justify-between"><p className="font-semibold text-xs">Conversation context</p><span className="text-black/35 text-[10px]">Verified data only</span></div><div className="mt-4 h-2.5 w-full rounded bg-black/8" /><div className="mt-2 h-2.5 w-4/5 rounded bg-black/8" /></div>
+                <div className="mt-5 rounded-lg border border-black/8 p-4"><div className="flex items-center justify-between"><p className="font-semibold text-xs">Omnichannel conversation</p><span className="text-black/35 text-[10px]">Verified context</span></div><div className="mt-4 h-2.5 w-full rounded bg-black/8" /><div className="mt-2 h-2.5 w-4/5 rounded bg-black/8" /></div>
               </div>
               <div className="border-black/8 border-t bg-slate-50 p-5 lg:border-t-0 lg:border-l">
                 <p className="font-semibold text-xs">Qualification</p>
                 <div className="mt-4 rounded-lg border border-black/8 bg-white p-4"><p className="text-black/35 text-[10px]">Structured status</p><div className="mt-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-2.5 py-1 text-accent text-[10px] font-semibold"><span className="h-1.5 w-1.5 rounded-full bg-accent" />Ready for review</div></div>
-                <div className="mt-4 rounded-lg bg-primary p-4 text-white"><Target className="h-4 w-4 text-blue-400" /><p className="mt-5 font-semibold text-xs">Next action</p><p className="mt-2 text-white/55 text-[10px] leading-4">Review available inventory and prepare a focused shortlist.</p></div>
+                <div className="mt-4 rounded-lg bg-primary p-4 text-white"><Target className="h-4 w-4 text-blue-400" /><p className="mt-5 font-semibold text-xs">TwinO Next Action</p><p className="mt-2 text-white/55 text-[10px] leading-4">Review buyer context, then move the opportunity to the next supported step.</p></div>
               </div>
             </div>
           </div>
@@ -156,7 +158,7 @@ export default function PivotLanding() {
           <p className="font-semibold text-accent text-xs uppercase tracking-[0.16em]">{text.whyEyebrow}</p>
           <h2 className="mt-4 max-w-2xl font-Helvetica-Neue font-bold text-3xl text-primary tracking-[-0.025em] sm:text-4xl">{text.whyTitle}</h2>
           <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-black/8 bg-black/8 md:grid-cols-3">
-            {[{ icon: Bot, title: "24/7 qualification", body: "Respond instantly and turn natural conversations into structured buyer context." }, { icon: Sparkles, title: "Relevant unit matching", body: "Give the sales team real inventory and buyer needs in the same focused workspace." }, { icon: UserCheck, title: "Human-approved conversion", body: "Keep people in control before any presentation, reservation or payment progresses." }].map(({ icon: Icon, title, body }) => <div key={title} className="bg-white p-7"><div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50"><Icon className="h-4 w-4 text-accent" /></div><h3 className="mt-6 font-semibold text-primary">{title}</h3><p className="mt-3 text-secondary text-sm leading-6">{body}</p></div>)}
+            {[{ icon: MessageCircle, title: "Omnichannel qualification", body: "Respond across buyer channels and turn natural conversations into structured context." }, { icon: Sparkles, title: "Relevant unit matching", body: "Give the sales team live inventory and buyer needs in the same focused workspace." }, { icon: UserCheck, title: "Follow-up with human control", body: "Keep next actions visible and people in control before presentation, reservation or payment." }].map(({ icon: Icon, title, body }) => <div key={title} className="bg-white p-7"><div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50"><Icon className="h-4 w-4 text-accent" /></div><h3 className="mt-6 font-semibold text-primary">{title}</h3><p className="mt-3 text-secondary text-sm leading-6">{body}</p></div>)}
           </div>
         </div>
       </section>
@@ -182,10 +184,10 @@ function ProductPreview() {
     <div className="relative">
       <div className="absolute -inset-8 -z-10 rounded-full bg-blue-100/50 blur-3xl" />
       <div className="overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_28px_80px_rgba(16,24,40,0.12)]">
-        <div className="flex h-12 items-center justify-between border-black/8 border-b bg-slate-50 px-4"><span className="text-black/35 text-[10px] font-semibold uppercase tracking-wider">Sales workspace</span><span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 text-[10px] font-semibold">Live inventory</span></div>
+        <div className="flex h-12 items-center justify-between border-black/8 border-b bg-slate-50 px-4"><span className="text-black/35 text-[10px] font-semibold uppercase tracking-wider">Sales workspace</span><span className="rounded-full bg-blue-50 px-2.5 py-1 text-blue-700 text-[10px] font-semibold">Omnichannel inbox</span></div>
         <div className="p-5 sm:p-7">
-          <div className="flex items-start justify-between gap-5"><div><p className="text-black/35 text-[10px] uppercase tracking-wider">Needs attention</p><h3 className="mt-2 font-Helvetica-Neue font-semibold text-xl text-primary">Move qualified buyers forward</h3></div><div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50"><Bot className="h-4 w-4 text-accent" /></div></div>
-          <div className="mt-7 grid grid-cols-3 gap-3">{["Active leads", "Qualified", "Reservations"].map((label, index) => <div key={label} className="rounded-lg border border-black/8 p-3"><p className="text-black/35 text-[9px]">{label}</p><p className="mt-3 text-sm font-semibold text-primary">{index < 2 ? "Live" : "Setup"}</p></div>)}</div>
+          <div className="flex items-start justify-between gap-5"><div><p className="text-black/35 text-[10px] uppercase tracking-wider">Inbox</p><h3 className="mt-2 font-Helvetica-Neue font-semibold text-xl text-primary">Move every serious buyer forward</h3></div><div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50"><Bot className="h-4 w-4 text-accent" /></div></div>
+          <div className="mt-7 grid grid-cols-3 gap-3">{["Live conversations", "Qualified", "Follow-ups"].map((label, index) => <div key={label} className="rounded-lg border border-black/8 p-3"><p className="text-black/35 text-[9px]">{label}</p><p className="mt-3 text-sm font-semibold text-primary">{index < 2 ? "Live" : "Visible"}</p></div>)}</div>
           <div className="mt-5 overflow-hidden rounded-xl border border-black/8">
             <div className="grid grid-cols-[1fr_.8fr_auto] bg-slate-50 px-4 py-3 text-black/35 text-[9px] uppercase tracking-wider"><span>Buyer</span><span>Stage</span><span>Action</span></div>
             {["Qualification complete", "Inventory review", "Approval required"].map((stage, index) => <div key={stage} className="grid grid-cols-[1fr_.8fr_auto] items-center border-black/8 border-t px-4 py-3"><div className="flex items-center gap-2"><span className="h-7 w-7 rounded-full bg-slate-100" /><span className="h-2 w-14 rounded bg-black/10" /></div><span className="text-secondary text-[10px]">{stage}</span><span className={`rounded-md px-2 py-1 text-[9px] font-semibold ${index === 0 ? "bg-blue-50 text-accent" : "bg-slate-100 text-slate-500"}`}>{index === 0 ? "Open" : "Review"}</span></div>)}
