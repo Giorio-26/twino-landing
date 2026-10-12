@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "title": "TwinO — Autonomous Sales Infrastructure for Real Estate",
-    "description": "TwinO handles inbound Meta and WhatsApp leads 24/7. It qualifies buyers naturally, syncs with your CRM, and books viewings automatically."
+    "title": "TwinO — AI Sales Twin for Real Estate Developers",
+    "description": "TwinO moves high-intent property buyers from inquiry through qualification, unit matching, human approval and paid reservation."
   },
   "name": "TwinO",
   "header": {
@@ -96,8 +96,8 @@
     "a5": "Yes. We offer a 14-day free pilot where you can evaluate TwinO with your actual leads and property database before committing."
   },
   "bookDemo": {
-    "title": "Manage Leads with the New Operational Standard.",
-    "description": "Book a 15-minute online consultation to see how TwinO can recover your lost revenue.",
+    "title": "See the buyer-to-reservation workflow in action.",
+    "description": "Book a 15-minute walkthrough of TwinO for your residential sales team.",
     "waitlistText": "Real estate teams are waiting",
     "firstName": "First Name",
     "firstNamePlaceholder": "John",
@@ -179,7 +179,7 @@
   "footer": {
     "name": "TwinO",
     "logo": "TwinO",
-    "tagline": "Autonomous sales infrastructure for real estate",
+    "tagline": "AI sales infrastructure for real estate developers",
     "termsAndConditions": "Terms & Conditions",
     "privacyPolicy": "Privacy Policy",
     "phone": "+995 574 043 308",

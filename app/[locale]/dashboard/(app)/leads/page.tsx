@@ -2,7 +2,6 @@
 
 import {
   ArrowUpDown,
-  Calendar,
   ChevronDown,
   ChevronLeft,
   Check,
@@ -23,6 +22,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Link } from "@/i18n/navigation";
 
 interface Lead {
   id: number;
@@ -134,11 +134,6 @@ export default function LeadsPage() {
 
   const [exporting, setExporting] = useState(false);
 
-  // Bulk actions
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [bulkStatusOpen, setBulkStatusOpen] = useState(false);
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
-
   // Detail drawer
   const [drawerLead, setDrawerLead] = useState<Lead | null>(null);
 
@@ -182,47 +177,6 @@ export default function LeadsPage() {
     newCount: leads.filter((l) => l.status === "new").length,
     needsAttention: leads.filter((l) => l.status === "hot").length,
   };
-
-  const isAllSelected = leads.length > 0 && selectedIds.size === leads.length;
-  const isSomeSelected = selectedIds.size > 0 && selectedIds.size < leads.length;
-
-  function toggleSelectAll() {
-    setSelectedIds(isAllSelected ? new Set() : new Set(leads.map((l) => l.id)));
-  }
-
-  function toggleSelect(id: number) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  async function handleBulkStatus(status: Status) {
-    setBulkActionLoading(true);
-    try {
-      const res = await fetch("/api/dashboard/leads/bulk-status", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: Array.from(selectedIds), status }),
-      });
-      if (!res.ok) throw new Error();
-      const json = await res.json();
-      setLeads((prev) =>
-        prev.map((l) => {
-          const updated = json.data?.find((u: Lead) => u.id === l.id);
-          return updated ?? l;
-        }),
-      );
-      setSelectedIds(new Set());
-      setBulkStatusOpen(false);
-    } catch {
-      // keep dropdown open for retry
-    } finally {
-      setBulkActionLoading(false);
-    }
-  }
 
   async function handleInlineStatus(leadId: number, status: Status) {
     setInlineStatusUpdating(leadId);
@@ -285,13 +239,6 @@ export default function LeadsPage() {
             {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
             {exporting ? t("exporting") : t("export")}
           </button>
-          <a
-            href="/dashboard/leads/new"
-            className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 font-semibold text-white text-sm shadow-accent/25 shadow-md no-underline transition-all hover:bg-accent-hover hover:shadow-lg"
-          >
-            <User className="h-4 w-4" />
-            {t("addLead")}
-          </a>
         </div>
       </div>
 
@@ -306,55 +253,6 @@ export default function LeadsPage() {
 
       {/* Toolbar */}
       <div className="dash-animate-in" style={{ animationDelay: "0.15s" }}>
-        {/* Bulk action bar */}
-        {selectedIds.size > 0 && (
-          <div className="dash-card mb-3 flex flex-wrap items-center justify-between gap-3 border-dash-accent/20 border bg-dash-accent-muted/40 p-3">
-            <div className="flex items-center gap-3">
-              <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-dash-accent px-1.5 font-bold text-[11px] text-white">
-                {selectedIds.size}
-              </span>
-              <span className="font-medium text-dash-text text-sm">{t("selectedCount", { count: selectedIds.size })}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setBulkStatusOpen(!bulkStatusOpen)}
-                  disabled={bulkActionLoading}
-                  className="flex items-center gap-1.5 rounded-lg bg-dash-accent px-3 py-1.5 font-medium text-white text-xs disabled:opacity-50"
-                >
-                  {bulkActionLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
-                  {t("changeStatus")}
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-                {bulkStatusOpen && (
-                  <div className="dash-animate-scale absolute right-0 z-30 mt-1 w-48 rounded-xl border border-dash-border bg-dash-surface p-1 shadow-lg">
-                    {STATUSES.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => handleBulkStatus(s)}
-                        disabled={bulkActionLoading}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-dash-surface-hover"
-                      >
-                        <span className={`h-2 w-2 rounded-full ${statusColors[s].dot}`} />
-                        <span className={`font-medium ${statusColors[s].text}`}>{STATUS_FILTER_LABELS[s]}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedIds(new Set())}
-                className="rounded-lg px-3 py-1.5 font-medium text-dash-text-muted text-xs hover:bg-dash-surface-hover"
-              >
-                {t("clearSelection")}
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Search + filter bar */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
@@ -443,17 +341,6 @@ export default function LeadsPage() {
               <thead>
                 <tr className="border-dash-border border-b bg-dash-surface-secondary/30">
                   <th className="px-4 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={isAllSelected}
-                      ref={(el) => {
-                        if (el) el.indeterminate = isSomeSelected;
-                      }}
-                      onChange={toggleSelectAll}
-                      className="h-4 w-4 rounded border-dash-border accent-dash-accent"
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left">
                     <SortHeader active={sortBy === "created_at"} dir={sortDir} onSort={() => toggleSort("created_at")}>
                       {t("columns.lead")}
                     </SortHeader>
@@ -483,10 +370,7 @@ export default function LeadsPage() {
                       {t("columns.lastActivity")}
                     </SortHeader>
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">
-                    {t("columns.owner")}
-                  </th>
-                  <th className="px-4 py-3" />
+                  <th className="px-4 py-3 text-left font-medium text-dash-text-muted text-xs uppercase tracking-wider">Next action</th>
                 </tr>
               </thead>
               <tbody>
@@ -499,18 +383,8 @@ export default function LeadsPage() {
                     <tr
                       key={lead.id}
                       onClick={() => setDrawerLead(lead)}
-                      className={`cursor-pointer border-dash-border border-b transition-colors ${
-                        selectedIds.has(lead.id) ? "bg-dash-accent-muted/10" : "hover:bg-dash-surface-hover"
-                      }`}
+                      className="cursor-pointer border-dash-border border-b transition-colors hover:bg-dash-surface-hover"
                     >
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(lead.id)}
-                          onChange={() => toggleSelect(lead.id)}
-                          className="h-4 w-4 rounded border-dash-border accent-dash-accent"
-                        />
-                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div
@@ -571,8 +445,12 @@ export default function LeadsPage() {
                         </button>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-dash-text-muted text-xs">{timeAgo(lead.updated_at)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-dash-text-muted text-sm">—</td>
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()} />
+                      <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <Link href={`/dashboard/leads/${lead.id}`} className="inline-flex items-center gap-1.5 font-semibold text-dash-accent text-xs no-underline">
+                          Open buyer
+                          <ExternalLink className="h-3 w-3" />
+                        </Link>
+                      </td>
                     </tr>
                   );
                 })}
@@ -840,7 +718,7 @@ function LeadDrawer({
                   <li className="flex items-center gap-1.5 pt-1.5 text-xs font-medium text-dash-success">
                     <Check className="h-3.5 w-3.5" />
                     {lead.status === "qualified" || lead.status === "deal"
-                      ? "Recommended: follow up within 15 minutes"
+                      ? "Recommended: review the buyer and prepare a relevant shortlist"
                       : "Twin is still collecting qualification details"}
                   </li>
                 </ul>
@@ -975,13 +853,13 @@ function LeadDrawer({
               <ExternalLink className="h-3.5 w-3.5" />
               WhatsApp
             </a>
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 text-sm font-semibold text-dash-text-secondary hover:bg-dash-surface-hover"
+            <Link
+              href={`/dashboard/leads/${lead.id}`}
+              className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 text-sm font-semibold text-dash-text-secondary no-underline hover:bg-dash-surface-hover"
             >
-              <Calendar className="h-3.5 w-3.5" />
-              Schedule
-            </button>
+              <ExternalLink className="h-3.5 w-3.5" />
+              Open buyer
+            </Link>
           </div>
         </div>
       </div>

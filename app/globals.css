@@ -382,6 +382,13 @@
   color: rgba(255, 255, 255, 0.15);
 }
 
+@media (max-width: 420px) {
+  .book-demo-datepicker .react-datepicker__day-name,
+  .book-demo-datepicker .react-datepicker__day {
+    width: 1.85rem;
+  }
+}
+
 /* ─── Book Demo page: react-datepicker light override ──────────────────────── */
 .book-demo-datepicker-light .react-datepicker {
   background: #ffffff;

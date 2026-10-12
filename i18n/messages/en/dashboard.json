@@ -156,11 +156,16 @@
     "sections": {
       "workspace": "Workspace",
       "configuration": "Configuration",
-      "account": "Account"
+      "account": "Account",
+      "sales": "Sales",
+      "inventory": "Inventory",
+      "system": "System"
     },
     "nav": {
       "overview": "Overview",
       "leads": "Leads",
+      "presentations": "Presentations",
+      "reservations": "Reservations",
       "conversations": "Conversations",
       "properties": "Properties",
       "configureTwin": "Configure Twin",
@@ -305,7 +310,7 @@
   },
   "properties": {
     "pageTitle": "Properties",
-    "pageSubtitle": "Properties your Twin can recommend to buyers.",
+    "pageSubtitle": "Manage the live inventory your sales team can shortlist for buyers.",
     "addProperty": "Add Property",
     "searchPlaceholder": "Search properties...",
     "all": "All",
