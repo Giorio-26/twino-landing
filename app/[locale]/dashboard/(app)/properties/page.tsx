@@ -170,6 +170,9 @@ export default function PropertiesPage() {
       {/* Header */}
       <div className="dash-animate-in flex flex-wrap items-start justify-between gap-4">
         <div>
+          <p className="mb-2 font-semibold text-[11px] uppercase tracking-[0.16em] text-dash-accent">
+            Inventory
+          </p>
           <h2 className="font-Helvetica-Neue font-bold text-2xl text-dash-text">
             {t("pageTitle")}
           </h2>

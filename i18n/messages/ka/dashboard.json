@@ -156,11 +156,16 @@
     "sections": {
       "workspace": "სამუშაო სივრცე",
       "configuration": "კონფიგურაცია",
-      "account": "ანგარიში"
+      "account": "ანგარიში",
+      "sales": "გაყიდვები",
+      "inventory": "ინვენტარი",
+      "system": "სისტემა"
     },
     "nav": {
       "overview": "მიმოხილვა",
       "leads": "ლიდები",
+      "presentations": "პრეზენტაციები",
+      "reservations": "რეზერვაციები",
       "conversations": "საუბრები",
       "properties": "ობიექტები",
       "configureTwin": "აგენტის მოწყობა",
@@ -305,7 +310,7 @@
   },
   "properties": {
     "pageTitle": "ობიექტები",
-    "pageSubtitle": "ობიექტები, რომლებსაც თქვენი აგენტი ყიდულებს ურჩევს.",
+    "pageSubtitle": "მართეთ რეალური ინვენტარი, რომელსაც გაყიდვების გუნდი მყიდველებს შესთავაზებს.",
     "addProperty": "ობიექტის დამატება",
     "searchPlaceholder": "ობიექტების ძიება...",
     "all": "ყველა",
