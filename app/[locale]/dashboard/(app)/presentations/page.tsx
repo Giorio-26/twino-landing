@@ -33,12 +33,12 @@ export default async function PresentationsPage({
       <section className="grid overflow-hidden rounded-xl border border-dash-border bg-white lg:grid-cols-[1.15fr_.85fr]">
         <div className="flex min-h-96 flex-col items-center justify-center px-8 py-16 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-dash-accent-muted"><FileText className="h-5 w-5 text-dash-accent" /></div>
-          <h3 className="mt-5 font-semibold text-dash-text">{hasSelection ? "Buyer and unit selected" : "Presentation workflow not configured"}</h3>
-          <p className="mt-2 max-w-md text-dash-text-muted text-sm leading-6">{hasSelection ? "The real workspace selection was carried into this step. Draft persistence, approval and sending are not implemented in the current backend." : "Presentation persistence and sending are not implemented in the current backend. Start from a real buyer and inventory shortlist when this capability is connected."}</p>
+          <h3 className="mt-5 font-semibold text-dash-text">{hasSelection ? "Shortlist ready for presentation" : "No presentations yet"}</h3>
+          <p className="mt-2 max-w-md text-dash-text-muted text-sm leading-6">{hasSelection ? "Your buyer and selected unit are ready. Presentation creation and approval need to be enabled before this can be sent." : "Choose a buyer and shortlist a live unit to prepare a focused, human-approved presentation."}</p>
           <Link href="/dashboard/leads" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-dash-accent px-4 py-2.5 font-semibold text-white text-sm no-underline">{hasSelection ? "Change selection" : "Choose a buyer"}<ArrowRight className="h-4 w-4" /></Link>
         </div>
         <div className="border-dash-border border-t bg-slate-50 p-6 lg:border-t-0 lg:border-l">
-          <p className="text-dash-text-muted text-xs uppercase tracking-wider">Planned document structure</p>
+          <div className="flex items-center justify-between gap-3"><p className="text-dash-text-muted text-xs uppercase tracking-wider">Presentation outline</p><span className="rounded-full bg-slate-200 px-2 py-1 text-[9px] font-semibold uppercase tracking-wide text-slate-600">Setup required</span></div>
           <div className="mt-5 space-y-3">
             {["Buyer-specific summary", "Selected units and images", "Pricing and available payment plan", "Verified investment logic", "Project context and sales contact"].map((item) => (
               <div key={item} className="flex items-center gap-3 rounded-lg border border-dash-border bg-white px-4 py-3 text-dash-text-secondary text-sm"><span className="h-1.5 w-1.5 rounded-full bg-dash-accent" />{item}</div>

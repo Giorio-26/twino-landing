@@ -14,13 +14,14 @@ import {
   Phone,
   Search,
   Send,
-  StickyNote,
   User,
   X,
   Zap,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "@/i18n/navigation";
 
 interface Lead {
   id: number;
@@ -113,6 +114,8 @@ function isKnown(value: string | null): boolean {
 
 export default function ConversationsPage() {
   const t = useTranslations("dashboard.conversations");
+  const searchParams = useSearchParams();
+  const requestedChat = searchParams.get("chat");
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadsLoading, setLeadsLoading] = useState(true);
@@ -123,6 +126,7 @@ export default function ConversationsPage() {
   const [messagesLoading, setMessagesLoading] = useState(false);
 
   const [search, setSearch] = useState("");
+  const [wsStatus, setWsStatus] = useState<"connecting" | "live" | "unavailable">("connecting");
 
   const [lastMessages, setLastMessages] = useState<Record<string, string>>({});
   const [typingChats, setTypingChats] = useState<Set<string>>(new Set());
@@ -134,12 +138,6 @@ export default function ConversationsPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [actionPending, setActionPending] = useState(false);
-
-  // Right panel actions
-  const [noteText, setNoteText] = useState("");
-  const [notePending, setNotePending] = useState(false);
-  const [notes, setNotes] = useState<string[]>([]);
-  const [assignmentPending, setAssignmentPending] = useState(false);
 
   const selectedRef = useRef<Lead | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -179,55 +177,23 @@ export default function ConversationsPage() {
     setActionPending(false);
   }
 
-  async function handleAssign() {
-    if (!selected || assignmentPending) return;
-    setAssignmentPending(true);
-    await fetch(`/api/dashboard/leads/${selected.id}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "call_in" }),
-    }).catch(() => null);
-    setTakeoverChats((prev) => new Set([...prev, selected.chat_id]));
-    setAssignmentPending(false);
-  }
-
   async function handleMarkQualified() {
     if (!selected || actionPending) return;
     setActionPending(true);
-    await fetch(`/api/dashboard/leads/${selected.id}/status`, {
+    const response = await fetch(`/api/dashboard/leads/${selected.id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "qualified" }),
     }).catch(() => null);
-    setActionPending(false);
-  }
-
-  async function handleAddNote() {
-    if (!selected || !noteText.trim() || notePending) return;
-    const text = noteText.trim();
-    setNoteText("");
-    setNotePending(true);
-    setNotes((prev) => [text, ...prev]);
-    await fetch(`/api/dashboard/leads/${selected.id}/notes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    }).catch(() => null);
-    setNotePending(false);
-  }
-
-  async function handleCloseLead() {
-    if (!selected || actionPending) return;
-    setActionPending(true);
-    await fetch(`/api/dashboard/chat-controls/${encodeURIComponent(selected.chat_id)}/close`, {
-      method: "POST",
-    }).catch(() => null);
-    setClosedChats((prev) => new Set([...prev, selected.chat_id]));
+    if (response?.ok) {
+      setLeads((prev) => prev.map((lead) => lead.id === selected.id ? { ...lead, status: "qualified" } : lead));
+      setSelected((prev) => prev ? { ...prev, status: "qualified" } : prev);
+    }
     setActionPending(false);
   }
 
   async function sendMessage() {
-    if (!input.trim() || !selected || sending) return;
+    if (!input.trim() || !selected || sending || !takeoverChats.has(selected.chat_id)) return;
     const text = input.trim();
     setInput("");
     setSending(true);
@@ -246,11 +212,13 @@ export default function ConversationsPage() {
       .then((r) => r.json())
       .then((json) => {
         if (json.error) throw new Error(json.error);
-        setLeads(json.data ?? []);
+        const rows: Lead[] = json.data ?? [];
+        setLeads(rows);
+        if (requestedChat) setSelected(rows.find((lead) => lead.chat_id === requestedChat) ?? null);
       })
       .catch((e: Error) => setLeadsError(e.message))
       .finally(() => setLeadsLoading(false));
-  }, []);
+  }, [requestedChat]);
 
   // WebSocket for live updates
   useEffect(() => {
@@ -259,6 +227,7 @@ export default function ConversationsPage() {
       .then((r) => r.json())
       .then((json: { wsUrl: string; wsToken: string }) => {
         ws = new WebSocket(json.wsUrl, ["twino", json.wsToken]);
+        ws.onopen = () => setWsStatus("live");
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data as string) as WsEvent;
@@ -317,10 +286,19 @@ export default function ConversationsPage() {
             }
           } catch {}
         };
-        ws.onerror = (e) => console.error("[WS] connection error", json.wsUrl, e);
-        ws.onclose = (e) => console.warn("[WS] closed", e.code, e.reason);
+        ws.onerror = (e) => {
+          setWsStatus("unavailable");
+          console.error("[WS] connection error", json.wsUrl, e);
+        };
+        ws.onclose = (e) => {
+          setWsStatus("unavailable");
+          console.warn("[WS] closed", e.code, e.reason);
+        };
       })
-      .catch(() => console.error("[WS] failed to get ws-info"));
+      .catch(() => {
+        setWsStatus("unavailable");
+        console.error("[WS] failed to get ws-info");
+      });
     return () => ws?.close();
   }, []);
 
@@ -380,19 +358,18 @@ export default function ConversationsPage() {
     return true;
   });
 
-  // Recommended next action from qualification context
+  // State-derived guidance only; no inferred due dates or unsupported automation.
   function nextActionFor(lead: Lead): string {
-    if (closedChats.has(lead.chat_id)) return "Closed — no action needed";
-    if (lead.status === "deal") return "Closed — deal handed to sales";
-    if (isKnown(lead.budget) && isKnown(lead.location) && isKnown(lead.intent)) return "Fully qualified — book a viewing";
-    if (lead.lead_score >= 7) return "High-intent lead — respond within 15 min";
-    if (isKnown(lead.intent) && !isKnown(lead.budget)) return "Ask about budget and timeline";
-    if (!isKnown(lead.intent)) return "Ask what property type they are looking for";
-    return "Continue qualification — the Twin is collecting details";
+    if (closedChats.has(lead.chat_id) || lead.status === "deal") return "No immediate action — this opportunity is closed.";
+    if (takeoverChats.has(lead.chat_id)) return "Human review is in progress. Continue from the conversation when ready.";
+    if (escalations[lead.chat_id] || lead.status === "hot") return "Human review is required before TwinO continues.";
+    if (lead.status === "qualified" && !isKnown(lead.selected_property)) return "Qualification is complete. Review matching inventory.";
+    if (lead.status === "qualified") return "Review the buyer and selected property before preparing a presentation.";
+    return "Continue qualification. TwinO is collecting the remaining buyer context.";
   }
 
   return (
-    <div className="flex h-[calc(100vh-5rem)] w-full gap-0 overflow-hidden rounded-2xl border border-dash-border bg-dash-surface">
+    <div className="flex h-[calc(100vh-8.5rem)] min-h-[620px] w-full gap-0 overflow-hidden rounded-2xl border border-dash-border bg-dash-surface shadow-sm">
       {/* ============ LEFT: Conversation list ============ */}
       <div className="flex w-80 shrink-0 flex-col border-dash-border border-r">
         <div className="border-dash-border border-b p-4">
@@ -410,9 +387,9 @@ export default function ConversationsPage() {
             <span className="text-dash-text-muted text-[10px] font-medium uppercase tracking-wider">
               {leadsLoading ? "…" : `${filtered.length} conversations`}
             </span>
-            <span className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-dash-success">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-dash-success" />
-              Live
+            <span className={`flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider ${wsStatus === "live" ? "text-dash-success" : "text-dash-text-muted"}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${wsStatus === "live" ? "animate-pulse bg-dash-success" : "bg-dash-text-muted"}`} />
+              {wsStatus === "live" ? "Live" : wsStatus === "connecting" ? "Connecting" : "Refresh for live updates"}
             </span>
           </div>
         </div>
@@ -741,12 +718,13 @@ export default function ConversationsPage() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   placeholder={takeoverChats.has(selected.chat_id) ? "Type as Sales Agent…" : "Take over to reply…"}
-                  className="flex-1 rounded-xl border border-dash-border bg-dash-bg px-4 py-3 text-dash-text text-sm placeholder-dash-text-muted focus:border-dash-accent/40 focus:outline-none"
+                  disabled={!takeoverChats.has(selected.chat_id) || blockedChats.has(selected.chat_id) || closedChats.has(selected.chat_id)}
+                  className="flex-1 rounded-xl border border-dash-border bg-dash-bg px-4 py-3 text-dash-text text-sm placeholder-dash-text-muted focus:border-dash-accent/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                 />
                 <button
                   type="button"
                   onClick={sendMessage}
-                  disabled={!input.trim() || sending}
+                  disabled={!input.trim() || sending || !takeoverChats.has(selected.chat_id) || blockedChats.has(selected.chat_id) || closedChats.has(selected.chat_id)}
                   className="flex h-11 w-11 items-center justify-center rounded-xl bg-dash-accent text-white transition-colors hover:bg-dash-accent-hover disabled:opacity-50"
                 >
                   {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -787,7 +765,7 @@ export default function ConversationsPage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs text-dash-text-muted">
                   <Circle className="h-1.5 w-1.5 shrink-0 fill-current" />
-                  Conversation opened · WhatsApp
+                  Conversation opened · {guessChannel(selected.chat_id)}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-dash-text-muted">
                   <Circle className="h-1.5 w-1.5 shrink-0 fill-dash-accent text-dash-accent" />
@@ -805,12 +783,6 @@ export default function ConversationsPage() {
                     Intent identified: {selected.intent}
                   </div>
                 )}
-                {notes.map((n, i) => (
-                  <div key={i} className="flex items-center gap-2 rounded-lg bg-amber-500/10 px-2 py-1.5 text-xs text-amber-700">
-                    <StickyNote className="h-3 w-3 shrink-0" />
-                    {n}
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -850,17 +822,20 @@ export default function ConversationsPage() {
               </div>
             )}
 
-            {/* Action buttons */}
+            <div className="rounded-xl border border-dash-border bg-dash-surface-secondary/60 p-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-dash-text-muted">Follow-up</p>
+              <p className="mt-1 text-xs leading-relaxed text-dash-text-secondary">No scheduled follow-up is available for this buyer yet.</p>
+            </div>
+
+            {/* Supported actions */}
             <div className="space-y-2">
-              <button
-                type="button"
-                onClick={handleAssign}
-                disabled={assignmentPending}
+              <Link
+                href={`/dashboard/leads/${selected.id}`}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-dash-accent py-2.5 text-xs font-semibold text-white hover:bg-dash-accent-hover disabled:opacity-50"
               >
-                {assignmentPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <User className="h-3.5 w-3.5" />}
-                {t("panel.assignToSales")}
-              </button>
+                <User className="h-3.5 w-3.5" />
+                Open buyer workspace
+              </Link>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -875,35 +850,13 @@ export default function ConversationsPage() {
                   )}
                   {t("panel.markQualified")}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleCloseLead}
-                  disabled={actionPending}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-dash-border py-2.5 text-xs font-semibold text-dash-text-secondary hover:bg-dash-surface-hover disabled:opacity-50"
+                <Link
+                  href={`/dashboard/leads/${selected.id}/matches`}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-dash-border py-2.5 text-xs font-semibold text-dash-text-secondary no-underline hover:bg-dash-surface-hover"
                 >
-                  <X className="h-3.5 w-3.5" />
-                  {t("panel.closeLead")}
-                </button>
-              </div>
-
-              {/* Add note */}
-              <div className="flex items-start gap-2">
-                <input
-                  type="text"
-                  value={noteText}
-                  onChange={(e) => setNoteText(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
-                  placeholder={t("panel.notePlaceholder")}
-                  className="flex-1 rounded-xl border border-dash-border bg-dash-bg px-3 py-2 text-xs text-dash-text placeholder-dash-text-muted focus:border-dash-accent/40 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddNote}
-                  disabled={!noteText.trim() || notePending}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-dash-border text-dash-text-muted transition-colors hover:bg-dash-surface-hover hover:text-dash-text disabled:opacity-50"
-                >
-                  {notePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <StickyNote className="h-4 w-4" />}
-                </button>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                  Find matches
+                </Link>
               </div>
             </div>
 
@@ -916,15 +869,17 @@ export default function ConversationsPage() {
                 <Phone className="h-3.5 w-3.5" />
                 Call
               </a>
-              <a
-                href={`https://wa.me/${selected.chat_id.split("@")[0]}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 text-xs font-semibold text-dash-text-secondary hover:bg-dash-surface-hover"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Open in WhatsApp
-              </a>
+              {guessChannel(selected.chat_id) === "WhatsApp" && (
+                <a
+                  href={`https://wa.me/${selected.chat_id.split("@")[0]}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-dash-border py-2.5 text-xs font-semibold text-dash-text-secondary hover:bg-dash-surface-hover"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Open in WhatsApp
+                </a>
+              )}
               <button
                 type="button"
                 onClick={handleBlock}

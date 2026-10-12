@@ -7,6 +7,7 @@ import {
   ChevronRight,
   FileText,
   LogOut,
+  MessagesSquare,
   Settings,
   TicketCheck,
   Users,
@@ -31,6 +32,7 @@ export default function Sidebar() {
 
   const navItems: NavItem[] = [
     { label: t("nav.overview"), href: "/dashboard", icon: BarChart3, section: "overview" },
+    { label: t("nav.inbox"), href: "/dashboard/conversations", icon: MessagesSquare, section: "sales" },
     { label: t("nav.leads"), href: "/dashboard/leads", icon: Users, section: "sales" },
     { label: t("nav.presentations"), href: "/dashboard/presentations", icon: FileText, section: "sales" },
     { label: t("nav.reservations"), href: "/dashboard/reservations", icon: TicketCheck, section: "sales" },

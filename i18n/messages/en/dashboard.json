@@ -163,6 +163,7 @@
     },
     "nav": {
       "overview": "Overview",
+      "inbox": "Inbox",
       "leads": "Leads",
       "presentations": "Presentations",
       "reservations": "Reservations",
@@ -276,8 +277,8 @@
     "error": "Could not load leads. Please try again."
   },
   "conversations": {
-    "pageTitle": "Conversations",
-    "pageSubtitle": "Your AI-powered sales inbox.",
+    "pageTitle": "Inbox",
+    "pageSubtitle": "Every buyer conversation, qualification signal and human handoff in one place.",
     "searchPlaceholder": "Search conversations...",
     "noConversation": "Select a conversation to start",
     "noConversationDesc": "Choose a lead from the list to view the full conversation and qualification context.",
@@ -287,7 +288,7 @@
       "agent": "Sales Agent"
     },
     "panel": {
-      "title": "Lead Context",
+      "title": "Buyer Intelligence",
       "score": "Lead Score",
       "budget": "Budget",
       "property": "Property",
@@ -295,7 +296,7 @@
       "timeline": "Timeline",
       "location": "Location",
       "status": "Status",
-      "nextAction": "Recommended Next Action",
+      "nextAction": "TwinO Next Action",
       "assignToSales": "Assign to Sales",
       "markQualified": "Mark Qualified",
       "addNote": "Add Note",

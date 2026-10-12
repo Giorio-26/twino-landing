@@ -21,12 +21,12 @@
 /* Dashboard Light Theme — matches landing page */
 .dashboard-theme {
   --dash-bg: #ffffff;
-  --dash-bg-subtle: #f8fafb;
+  --dash-bg-subtle: #f7f7f4;
   --dash-surface: #ffffff;
-  --dash-surface-secondary: #f1f5f9;
-  --dash-surface-hover: #f1f5f9;
+  --dash-surface-secondary: #f2f3f1;
+  --dash-surface-hover: #f2f3f1;
   --dash-surface-active: #e2e8f0;
-  --dash-border: rgba(0, 0, 0, 0.06);
+  --dash-border: rgba(15, 23, 42, 0.08);
   --dash-border-strong: rgba(0, 0, 0, 0.1);
   --dash-text: #000000;
   --dash-text-secondary: #363c44;
